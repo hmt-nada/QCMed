@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css"/>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Oleo+Script:wght@400;700&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">    
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:ital,wght@0,200..1000;1,200..1000&family=Oleo+Script:wght@400;700&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">
+<script src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js"></script>
+  
+    <!------------------------------------l'image de favicon ----------------------------------------------->
+
+<link rel="icon" type="image/png" href="logo/favicon-96x96.png" sizes="96x96" />
+<link rel="icon" type="image/svg+xml" href="logo/favicon.svg" />
+<link rel="shortcut icon" href="logo/favicon.ico" />
+<link rel="apple-touch-icon" sizes="180x180" href="logo/apple-touch-icon.png" />
+<meta name="apple-mobile-web-app-title" content="QCMed" />
+<link rel="manifest" href="logo/site.webmanifest" />
+
+<!----------------------------------------------------------------------------------------------------->
+    <title>Récupération - QCMed</title>
+
+</head>
+<body class="body3">
+     
+    <div class="header">
+          <div >
+               <div class="bordure">
+                <p class="expression5"id="inscrivez">Récupérer Mon Mot De Passe</p>
+               </div>
+               <div class="header">
+               <img class="vector" src="images/vector.svg"  />
+               <img  class="image3" src="logo/brain-name.png"/>
+</div>
+
+<div id="boite" class="new0">
+
+<p class="alert" id="alert"aria-live="assertive" >Veuillez entrer votre E-mail</p> 
+<p class="alert1" id="alert1"aria-live="assertive" >Veuillez entrer le code</p>  
+<p class="alert2" id="alert2"aria-live="assertive">Un code a été envoyé à votre adresse e-mail</p>
+<p class="alert2" id="alert3"aria-live="assertive">Un nouveau code a été renvoyé</p>
+<p class="alert2" id="alert4"aria-live="assertive">La confirmation est correcte</p>
+<p class="alert2" id="alert5"aria-live="assertive">La confirmation est fausse</p>
+
+    <div id="titrenormal">
+          <label class="title16">Addresse</label>
+          <label class="title17">E-</label> 
+           <label class="title017">mail</label><br> 
+    </div>
+
+    <div id="mailinvalide"  style =" display: none" >
+
+       <label class="title616"   >E-</label>
+       <label class="title617">mail</label>
+       <label class="title6017">invalide</label><br>
+    </div>
+    <div id="mailincorrect"style=" display: none"><label class="changtitremailinv3">E-mail incorrect</label><br></div>
+           <input id="mailvalide" class="input9 title"/>
+
+
+<button id="envoyer-code" class="btn-simple"type="button">Envoyer le code</button>
+
+<div id="partie2" style="display:none">
+
+<p class="title00">Entrer Le Code Envoyé Par E_mail</p>
+<p class="count" id="compteur">01:30</p>
+<input id="champ1" maxlength="1" class="carre1 code-input" />
+<input id="champ2" maxlength="1"class="carre2 code-input" />
+<input id="champ3" maxlength="1"class="carre3 code-input" />
+<input id="champ4" maxlength="1"class="carre4 code-input" />
+<input id="champ5" maxlength="1"class="carre5 code-input" />
+<input id="champ6" maxlength="1"class="carre6 code-input" />
+
+<a href="#" id="renvoyer" class="instruction00">Renvoyer le code</a>
+<button id="valider-code" class="c-button btn c-button--gooey"> Valider
+  <div class="c-button__blobs">
+  <div></div>
+  <div></div>
+  <div></div>
+  </div>
+</button>
+<svg xmlns="http://www.w3.org/2000/svg" version="1.1" style="display: block; height: 0; width: 0;">
+  <defs>
+    <filter id="goo">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="10" result="blur"></feGaussianBlur>
+      <feColorMatrix in="blur" mode="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 18 -7" result="goo"></feColorMatrix>
+      <feBlend in="SourceGraphic" in2="goo"></feBlend>
+    </filter>
+  </defs>
+</svg>
+
+
+</div>
+</div>
+          </div>
+ <script src="script/recuperation.js"></script>      
+</body>
+</html>

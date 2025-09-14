@@ -1,0 +1,41 @@
+[
+  {
+    "faculte":"skikda",
+    "module":"module4",
+    "cours":"cours1",
+    "question": "Quelle est la capitale de la France ?",
+    "options": ["Paris", "Lyon", "Marseille", "Bordeaux"],
+    "correct": [0],
+    "image":null
+    
+  },
+  {
+    "faculte":"alger",
+    "module":"module1",
+    "cours":"cours3",
+     "question": "Lesquels sont des fruits ?",
+    "options": ["Pomme", "Carotte", "Banane"],
+    "correct": [0, 2],
+    "image":"chimie3.svg"
+  },
+  {
+     "faculte":"annaba",
+    "module":"module3",
+    "cours":"cours4",
+    "question": "Le cœur est un :",
+    "options": ["rien", "Os"],
+    "correct": [],
+    "image":null
+   
+  },
+    {
+    "faculte":"annaba",
+    "module":"module4",
+    "cours":"cours1",
+    "question": "La couleur du ciel :",
+    "options": ["bleu", "rose"],
+    "correct": [0],
+    "image":null
+   
+  }
+]

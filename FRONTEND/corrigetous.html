@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Oleo+Script:wght@400;700&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:ital,wght@0,200..1000;1,200..1000&family=Oleo+Script:wght@400;700&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">
+    <script src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js"></script>
+    <link rel="stylesheet" href="style.css"/>
+    <!------------------------------------l'image de favicon ----------------------------------------------->
+
+<link rel="icon" type="image/png" href="logo/favicon-96x96.png" sizes="96x96" />
+<link rel="icon" type="image/svg+xml" href="logo/favicon.svg" />
+<link rel="shortcut icon" href="logo/favicon.ico" />
+<link rel="apple-touch-icon" sizes="180x180" href="logo/apple-touch-icon.png" />
+<meta name="apple-mobile-web-app-title" content="QCMed" />
+<link rel="manifest" href="logo/site.webmanifest" />
+
+<!----------------------------------------------------------------------------------------------------->
+    <title>Correction Qcm - QCMed</title>
+
+</head>
+<body >
+   <a href="noteqcm.html"><svg class="closesvg" xmlns="http://www.w3.org/2000/svg" width="70" height="70" viewBox="0 0 24 24"><path fill="#00053e" d="m12 13.4l-2.9 2.9q-.275.275-.7.275t-.7-.275t-.275-.7t.275-.7l2.9-2.9l-2.9-2.875q-.275-.275-.275-.7t.275-.7t.7-.275t.7.275l2.9 2.9l2.875-2.9q.275-.275.7-.275t.7.275q.3.3.3.713t-.3.687L13.375 12l2.9 2.9q.275.275.275.7t-.275.7q-.3.3-.712.3t-.688-.3z"/></svg></a> 
+<p class="titrecorrection"style="margin-left:260px">Correction détaillée – QCM complet</p>    
+<div id="barrcorrection" class="correction-container"></div>
+
+    <div id="correction-container" class="questions">
+
+   <div>
+  <!-- Image de la question -->
+  <img id="qcm-img" class="img-qcm" style="display:none; cursor:pointer;" src="">
+  
+  <!-- Icône zoom -->
+  <svg id="zoom" class="posimg" style="display:none; cursor:pointer;" xmlns="http://www.w3.org/2000/svg" width="24" height="24" 
+       viewBox="0 0 24 24" style="cursor:pointer;">
+    <path fill="black" d="M6.4 19H8q.425 0 .713.288T9 20t-.288.713T8 21H4q-.425 0-.712-.288T3 20v-4q0-.425.288-.712T4 15t.713.288T5 16v1.6l2.4-2.4q.275-.275.7-.275t.7.275t.275.7t-.275.7zm11.2 0l-2.4-2.4q-.275-.275-.275-.7t.275-.7t.7-.275t.7.275l2.4 2.4V16q0-.425.288-.712T20 15t.713.288T21 16v4q0 .425-.288.713T20 21h-4q-.425 0-.712-.288T15 20t.288-.712T16 19zM5 6.4V8q0 .425-.288.713T4 9t-.712-.288T3 8V4q0-.425.288-.712T4 3h4q.425 0 .713.288T9 4t-.288.713T8 5H6.4l2.4 2.4q.275.275.275.7t-.275.7t-.7.275t-.7-.275zm14 0l-2.4 2.4q-.275.275-.7.275t-.7-.275t-.275-.7t.275-.7L17.6 5H16q-.425 0-.712-.287T15 4t.288-.712T16 3h4q.425 0 .713.288T21 4v4q0 .425-.288.713T20 9t-.712-.288T19 8z"/>
+  </svg>
+</div>
+
+<!-- Overlay -->
+<div id="img-overlay">
+  <!-- Image zoomée -->
+  <img id="zoomed-img" src="">
+  <!-- Icône fermer -->
+  <svg id="zoom2" xmlns="http://www.w3.org/2000/svg" width="32" height="32" 
+       viewBox="0 0 24 24" style="cursor:pointer; position:absolute; top:20px; right:20px;">
+    <path fill="white" d="M18.3 5.71L12 12.01l-6.3-6.3L4.29 7.11 10.59 13.4l-6.3 6.3 1.41 1.41L12 14.81l6.3 6.3 1.41-1.41-6.3-6.3 6.3-6.3z"/>
+  </svg>
+</div>
+
+  <div id="question" class="question">
+
+<p class="questioncontent" id="texte-question">la question</p>
+</div>
+<div class="responsebox">
+ <!--remove class eachresponse et ajouter eachresponse2-->
+ 
+<div  class="eachresponse" >
+  
+<svg id="A" xmlns="http://www.w3.org/2000/svg" width="35" height="35" viewBox="0 0 24 24"><path fill="#161D6F" d="M12 2a10 10 0 0 1 10 10a10 10 0 0 1-10 10A10 10 0 0 1 2 12A10 10 0 0 1 12 2m-1 5a2 2 0 0 0-2 2v8h2v-4h2v4h2V9a2 2 0 0 0-2-2zm0 2h2v2h-2z"/></svg>
+<p class="ajust0">reponse1</p>
+</div>
+ <!--remove class eachresponse et ajouter eachresponse2-->
+ 
+<div class="eachresponse">
+<svg id="B" xmlns="http://www.w3.org/2000/svg" width="35" height="35" viewBox="0 0 24 24"><path fill="#161D6F" d="M12 2a10 10 0 0 1 10 10a10 10 0 0 1-10 10A10 10 0 0 1 2 12A10 10 0 0 1 12 2m3 8.5V9a2 2 0 0 0-2-2H9v10h4a2 2 0 0 0 2-2v-1.5c0-.8-.7-1.5-1.5-1.5c.8 0 1.5-.7 1.5-1.5M13 15h-2v-2h2zm0-4h-2V9h2z"/></svg>
+<p class="ajust0">reponse2</p>
+</div>
+ <!--remove class eachresponse et ajouter eachresponse2-->
+ 
+<div  class="eachresponse " >
+<svg id="C" xmlns="http://www.w3.org/2000/svg" width="35" height="35" viewBox="0 0 24 24"><path fill="#161D6F" d="M12 2a10 10 0 0 1 10 10a10 10 0 0 1-10 10A10 10 0 0 1 2 12A10 10 0 0 1 12 2m-1 5a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h2a2 2 0 0 0 2-2v-1h-2v1h-2V9h2v1h2V9a2 2 0 0 0-2-2z"/></svg>
+<p class="ajust0">reponse3</p>
+</div>
+ <!--remove class eachresponse et ajouter eachresponse2-->
+ 
+<div class="eachresponse" >
+<svg id="D" xmlns="http://www.w3.org/2000/svg" width="35" height="35" viewBox="0 0 24 24"><path fill="#161D6F" d="M12 2a10 10 0 0 1 10 10a10 10 0 0 1-10 10A10 10 0 0 1 2 12A10 10 0 0 1 12 2M9 7v10h4a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2zm2 2h2v6h-2z"/></svg>
+<p class="ajust0">reponse4</p>
+</div>
+ <!--remove class eachresponse et ajouter eachresponse2-->
+ 
+<div class="eachresponse"  >
+<svg id="E" xmlns="http://www.w3.org/2000/svg" width="35" height="35" viewBox="0 0 24 24"><path fill="#161D6F" d="M12 2a10 10 0 0 1 10 10a10 10 0 0 1-10 10A10 10 0 0 1 2 12A10 10 0 0 1 12 2M9 7v10h6v-2h-4v-2h4v-2h-4V9h4V7z"/></svg>
+<p class="ajust0">reponse5</p>
+</div>
+</div>
+
+</div>
+<div class="posbtn">
+   <button id="prev" class="prev"><svg  xmlns="http://www.w3.org/2000/svg" width="70" height="70" viewBox="0 0 24 24"><path fill="currentColor" d="M9 19v-2H5.675q-.5 0-.7-.45t.125-.8l6.15-6.9q.3-.35.75-.35t.75.35l6.15 6.9q.325.35.125.8t-.7.45H15v2q0 .425-.288.713T14 20h-4q-.425 0-.712-.288T9 19m3-13l-5.025 5.675q-.15.15-.35.238t-.4.087q-.65 0-.912-.575t.162-1.075l5.775-6.5q.3-.35.75-.35t.75.35l5.775 6.5q.425.5.163 1.075t-.913.575q-.2 0-.4-.075t-.35-.25z"/></svg></button>
+   <button id="next" class="next"><svg  xmlns="http://www.w3.org/2000/svg" width="70" height="70" viewBox="0 0 24 24"><path fill="currentColor" d="M9 19v-2H5.675q-.5 0-.7-.45t.125-.8l6.15-6.9q.3-.35.75-.35t.75.35l6.15 6.9q.325.35.125.8t-.7.45H15v2q0 .425-.288.713T14 20h-4q-.425 0-.712-.288T9 19m3-13l-5.025 5.675q-.15.15-.35.238t-.4.087q-.65 0-.912-.575t.162-1.075l5.775-6.5q.3-.35.75-.35t.75.35l5.775 6.5q.425.5.163 1.075t-.913.575q-.2 0-.4-.075t-.35-.25z"/></svg></button>
+</div>
+
+ <script src="script/corrigetous.js"></script>   
+</body>
+</html>

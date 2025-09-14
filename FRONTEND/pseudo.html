@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css"/>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Oleo+Script:wght@400;700&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">    
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:ital,wght@0,200..1000;1,200..1000&family=Oleo+Script:wght@400;700&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">
+<script src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js"></script>
+
+   <!------------------------------------l'image de favicon ----------------------------------------------->
+
+<link rel="icon" type="image/png" href="logo/favicon-96x96.png" sizes="96x96" />
+<link rel="icon" type="image/svg+xml" href="logo/favicon.svg" />
+<link rel="shortcut icon" href="logo/favicon.ico" />
+<link rel="apple-touch-icon" sizes="180x180" href="logo/apple-touch-icon.png" />
+<meta name="apple-mobile-web-app-title" content="QCMed" />
+<link rel="manifest" href="logo/site.webmanifest" />
+
+<!----------------------------------------------------------------------------------------------------->
+    <title>Inscription - QCMed</title>
+
+</head>
+<body class="body3">
+   
+    <div class="header">
+          <div >
+               <div class="bordure">
+                <p class="expression4" id="inscrivez">Créer Mon Compte</p>
+               </div>
+               <div class="header">
+               <img class="vector" src="images/vector.svg"  />
+               <img  class="image3" src="logo/brain-name.png"/>
+            </div>
+    </div>
+          <div class="pseudo">
+            <p class="alert" id="alert"aria-live="assertive" >Veuillez entrer votre pseudo</p>
+            <p class="alert_erreur" id="alert_erreur"aria-live="assertive" >Inscription effectuée </p>
+            <img class="user0"id="user" src="images/user.svg"/>
+ <img class="plus" id="plus" alt="Choisir un avatar" role="button" tabindex="0" src="images/plus.svg"/>
+ 
+
+            <label class="title15">Pseudo</label><br>
+            <input class="input8 nonvide" id="nom"    />
+
+
+            <button onclick="this.disabled=true" id="boutton" class="c-button btn4  c-button--gooey"> Sauvegarder
+  <div class="c-button__blobs">
+  <div></div>
+  <div></div>
+  <div></div>
+  </div>
+</button>
+<svg xmlns="http://www.w3.org/2000/svg" version="1.1" style="display: block; height: 0; width: 0;">
+  <defs>
+    <filter id="goo">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="10" result="blur"></feGaussianBlur>
+      <feColorMatrix in="blur" mode="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 18 -7" result="goo"></feColorMatrix>
+      <feBlend in="SourceGraphic" in2="goo"></feBlend>
+    </filter>
+  </defs>
+</svg>
+           
+
+<div class="palette "  id="palette">
+  <div class="avatars">
+<img id="y1" class="pdp" src="images/Y1.svg" />
+<img id="y2" class="pdp" src="images/Y2.svg" />
+<img  id="y3" class="pdp"src="images/Y3.svg" />
+<img  id="y4" class="pdp"src="images/Y4.svg" />
+</div>
+<div class="avatars">
+<img  id="x1" class="pdp"src="images/X1.svg" />
+<img  id="x2"class="pdp"src="images/X2.svg" />
+<img  id="x3"class="pdp"src="images/X3.svg" />
+<img  id="x4"class="pdp"src="images/X4.svg" />
+</div>
+</div>
+</div>
+
+   <script src="script/pseudo.js"></script>
+</body>
+</html>

@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+     <link rel="stylesheet" href="style.css"/>
+    <!------------------------------------l'image de favicon ----------------------------------------------->
+
+<link rel="icon" type="image/png" href="logo/favicon-96x96.png" sizes="96x96" />
+<link rel="icon" type="image/svg+xml" href="logo/favicon.svg" />
+<link rel="shortcut icon" href="logo/favicon.ico" />
+<link rel="apple-touch-icon" sizes="180x180" href="logo/apple-touch-icon.png" />
+<meta name="apple-mobile-web-app-title" content="QCMed" />
+<link rel="manifest" href="logo/site.webmanifest" />
+
+<!----------------------------------------------------------------------------------------------------->
+    <title>QCM - QCMed</title>
+
+</head>
+<body class="body-qcm" >
+
+   <div id="intro-animation">
+  <div id="message">
+    <div id="chiffre"></div>
+    <div id="texte"></div>
+  </div>
+</div>    
+
+<div class="header">
+  <!--  QCM commencera ici -->
+<img class="logo2" src="logo/brain-cercle.png"/>
+
+<div class="quitter texte-anim2">
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 512 512"><path fill="currentColor" d="M469.3 469.3H42.7V42.7H256L298.7 0h-256C19.1 0 0 19.1 0 42.7v426.7C0 492.9 19.1 512 42.7 512h426.7c23.6 0 42.7-19.1 42.7-42.7V320l-42.7 42.7v106.6zm-384-42.6C149.1 255.7 234.7 256 362.7 256v85.3L512 192L362.7 42.7V128C85.3 128 85.1 341.1 85.3 426.7"/></svg>
+<a  class="nonlien"id="quitterlien"><p class="ajustquitter">QUITTER</p></a>
+
+</div>
+
+</div>
+
+<div class="coursename">
+<p class="nomcours" id="texte-cours">NOM DU COURS</p>
+<p class="numquestion" id="numero-question"></p>
+
+
+</div>
+<!--time------------------------->
+<svg id="horloge" class="horlog" xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 36 36"><path fill="#ffcc4d" d="M20 6.042c0 1.112-.903 2.014-2 2.014s-2-.902-2-2.014V2.014C16 .901 16.903 0 18 0s2 .901 2 2.014z"/><path fill="#ffac33" d="M9.18 36c-.224 0-.452-.052-.666-.159a1.52 1.52 0 0 1-.667-2.027l8.94-18.127c.252-.512.768-.835 1.333-.835s1.081.323 1.333.835l8.941 18.127a1.52 1.52 0 0 1-.666 2.027a1.48 1.48 0 0 1-1.999-.676L18.121 19.74l-7.607 15.425A1.49 1.49 0 0 1 9.18 36"/><path fill="#58595b" d="M18.121 20.392a1 1 0 0 1-.702-.295L3.512 5.998c-.388-.394-.388-1.031 0-1.424s1.017-.393 1.404 0L18.121 17.96L31.324 4.573a.985.985 0 0 1 1.405 0a1.017 1.017 0 0 1 0 1.424l-13.905 14.1a1 1 0 0 1-.703.295"/><path fill="#536eff" d="M34.015 19.385c0 8.898-7.115 16.111-15.894 16.111c-8.777 0-15.893-7.213-15.893-16.111c0-8.9 7.116-16.113 15.893-16.113c8.778-.001 15.894 7.213 15.894 16.113"/><path fill="#e6e7e8" d="M30.041 19.385c0 6.674-5.335 12.084-11.92 12.084c-6.583 0-11.919-5.41-11.919-12.084C6.202 12.71 11.538 7.3 18.121 7.3c6.585-.001 11.92 5.41 11.92 12.085"/><path fill="#ffcc4d" d="M30.04 1.257a5.9 5.9 0 0 0-4.214 1.77l8.429 8.544A6.06 6.06 0 0 0 36 7.299c0-3.336-2.669-6.042-5.96-6.042m-24.08 0a5.9 5.9 0 0 1 4.214 1.77l-8.429 8.544A6.06 6.06 0 0 1 0 7.299c0-3.336 2.668-6.042 5.96-6.042"/><path fill="#414042" d="M23 20h-5a1 1 0 0 1-1-1v-9a1 1 0 0 1 2 0v8h4a1 1 0 1 1 0 2"/></svg>
+
+<p class="count2" id="compteur"></p>
+<p class="alert_erreur poserror" id="alert_erreur"aria-live="assertive" >Merci, votre signalement a été envoyé !</p>
+            
+<div class="buttfaute" id="btnfaute">
+  <button class="button">
+    <span class="shadow"></span>
+    <span class="edge"></span>
+    <div class="front">
+      <span style="font-family: 'Poppins',sans-serif;">SIGNALER UNE FAUTE DANS LA QUESTION</span>
+    </div>
+  </button>
+</div>
+
+<div id="reportModal" class="modal">
+  <div class="modal-content">
+    <span id="closeModal" class="close">&times;</span>
+    <h2 style="margin-left:95px;color:#021145;font-weight: bolder;font-size:20px"><b>Déclarer une faute</b></h2><br>
+
+    <label style="color:#0a2477"><b>Type d'erreur :</b></label>
+    <div class="error-types">
+      <label><input type="checkbox" value="Mauvaise réponse indiquée"> Mauvaise réponse indiquée</label><br>
+      <label><input type="checkbox" value="Plusieurs réponses justes non prises en compte"> Plusieurs réponses justes non prises en compte</label><br>
+      <label><input type="checkbox" value="Erreur dans l'énoncé"> Erreur dans l'énoncé</label><br>
+      <label><input type="checkbox" value="Autre"> Autre</label>
+    </div>
+
+    <label style="color:#0a2477" for="extraMsg"><b>Message facultatif :</b></label>
+    <textarea id="extraMsg" placeholder="Ajoutez des détails..."></textarea>
+
+    <button id="sendReportBtn">Envoyer</button>
+  </div>
+</div>
+
+<!--image de la question -->
+<div>
+  <!-- Image de la question -->
+  <img id="qcm-img" class="img-qcm" style="display:none; cursor:pointer;" src="">
+  
+  <!-- Icône zoom -->
+  <svg id="zoom"style="display:none; cursor:pointer;" xmlns="http://www.w3.org/2000/svg" width="24" height="24" 
+       viewBox="0 0 24 24" style="cursor:pointer;">
+    <path fill="black" d="M6.4 19H8q.425 0 .713.288T9 20t-.288.713T8 21H4q-.425 0-.712-.288T3 20v-4q0-.425.288-.712T4 15t.713.288T5 16v1.6l2.4-2.4q.275-.275.7-.275t.7.275t.275.7t-.275.7zm11.2 0l-2.4-2.4q-.275-.275-.275-.7t.275-.7t.7-.275t.7.275l2.4 2.4V16q0-.425.288-.712T20 15t.713.288T21 16v4q0 .425-.288.713T20 21h-4q-.425 0-.712-.288T15 20t.288-.712T16 19zM5 6.4V8q0 .425-.288.713T4 9t-.712-.288T3 8V4q0-.425.288-.712T4 3h4q.425 0 .713.288T9 4t-.288.713T8 5H6.4l2.4 2.4q.275.275.275.7t-.275.7t-.7.275t-.7-.275zm14 0l-2.4 2.4q-.275.275-.7.275t-.7-.275t-.275-.7t.275-.7L17.6 5H16q-.425 0-.712-.287T15 4t.288-.712T16 3h4q.425 0 .713.288T21 4v4q0 .425-.288.713T20 9t-.712-.288T19 8z"/>
+  </svg>
+</div>
+
+<!-- Overlay -->
+<div id="img-overlay">
+  <!-- Image zoomée -->
+  <img id="zoomed-img" src="">
+  <!-- Icône fermer -->
+  <svg id="zoom2" xmlns="http://www.w3.org/2000/svg" width="32" height="32" 
+       viewBox="0 0 24 24" style="cursor:pointer; position:absolute; top:20px; right:20px;">
+    <path fill="white" d="M18.3 5.71L12 12.01l-6.3-6.3L4.29 7.11 10.59 13.4l-6.3 6.3 1.41 1.41L12 14.81l6.3 6.3 1.41-1.41-6.3-6.3 6.3-6.3z"/>
+  </svg>
+</div>
+<!--remove class question et ajouter question2-->
+
+<div id="question" class="question">
+
+<p class="questioncontent" id="texte-question">la question</p>
+</div>
+<div class="responsebox">
+ <!--remove class eachresponse et ajouter eachresponse2-->
+ 
+<div  class="eachresponse" >
+  
+<svg id="A" xmlns="http://www.w3.org/2000/svg" width="35" height="35" viewBox="0 0 24 24"><path fill="#161D6F" d="M12 2a10 10 0 0 1 10 10a10 10 0 0 1-10 10A10 10 0 0 1 2 12A10 10 0 0 1 12 2m-1 5a2 2 0 0 0-2 2v8h2v-4h2v4h2V9a2 2 0 0 0-2-2zm0 2h2v2h-2z"/></svg>
+<p class="ajust0">reponse1</p>
+</div>
+ <!--remove class eachresponse et ajouter eachresponse2-->
+ 
+<div class="eachresponse">
+<svg id="B" xmlns="http://www.w3.org/2000/svg" width="35" height="35" viewBox="0 0 24 24"><path fill="#161D6F" d="M12 2a10 10 0 0 1 10 10a10 10 0 0 1-10 10A10 10 0 0 1 2 12A10 10 0 0 1 12 2m3 8.5V9a2 2 0 0 0-2-2H9v10h4a2 2 0 0 0 2-2v-1.5c0-.8-.7-1.5-1.5-1.5c.8 0 1.5-.7 1.5-1.5M13 15h-2v-2h2zm0-4h-2V9h2z"/></svg>
+<p class="ajust0">reponse2</p>
+</div>
+ <!--remove class eachresponse et ajouter eachresponse2-->
+ 
+<div  class="eachresponse" >
+<svg id="C" xmlns="http://www.w3.org/2000/svg" width="35" height="35" viewBox="0 0 24 24"><path fill="#161D6F" d="M12 2a10 10 0 0 1 10 10a10 10 0 0 1-10 10A10 10 0 0 1 2 12A10 10 0 0 1 12 2m-1 5a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h2a2 2 0 0 0 2-2v-1h-2v1h-2V9h2v1h2V9a2 2 0 0 0-2-2z"/></svg>
+<p class="ajust0">reponse3</p>
+</div>
+ <!--remove class eachresponse et ajouter eachresponse2-->
+ 
+<div class="eachresponse" >
+<svg id="D" xmlns="http://www.w3.org/2000/svg" width="35" height="35" viewBox="0 0 24 24"><path fill="#161D6F" d="M12 2a10 10 0 0 1 10 10a10 10 0 0 1-10 10A10 10 0 0 1 2 12A10 10 0 0 1 12 2M9 7v10h4a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2zm2 2h2v6h-2z"/></svg>
+<p class="ajust0">reponse4</p>
+</div>
+ <!--remove class eachresponse et ajouter eachresponse2-->
+ 
+<div class="eachresponse"  >
+<svg id="E" xmlns="http://www.w3.org/2000/svg" width="35" height="35" viewBox="0 0 24 24"><path fill="#161D6F" d="M12 2a10 10 0 0 1 10 10a10 10 0 0 1-10 10A10 10 0 0 1 2 12A10 10 0 0 1 12 2M9 7v10h6v-2h-4v-2h4v-2h-4V9h4V7z"/></svg>
+<p class="ajust0">reponse5</p>
+</div>
+</div>
+
+ <!--remove class buttsuivant et ajouter buttsuivant2-->
+ 
+<div id="btnsuivant" class="buttsuivant">
+<button class="button">
+  <span class="shadow"></span>
+  <span class="edge"></span>
+  <div class="front">
+    <span style="font-family: 'Poppins',sans-serif;">SUIVANT</span>
+  </div>
+</button>
+</div>
+
+<div id="btnenvoyer"class="buttsoumettre">
+<button class="button">
+  <span class="shadow"></span>
+  <span class="edge"></span>
+  <div class="front">
+    <span style="font-family: 'Poppins',sans-serif;">SOUMETTRE</span>   
+  </div>
+</button>
+</div>
+
+
+
+<div class="buttprecedent" id="btnprec">
+<button class="button">
+  <span class="shadow"></span>
+  <span class="edge"></span>
+  <div class="front">
+    <span style="font-family: 'Poppins',sans-serif;">PRÉCÉDENT</span>
+  </div>
+</button>
+</div>
+<!--sans timer-->
+<p id="expresscorr" class="ordre" style="display:none">Vous pouvez encore modifier vos réponses tant que vous n’avez pas affiché la correction</p> 
+<p id="repfigcorr" class="ordre2" style="display:none">Les réponses sont figées.</p> 
+
+<!--remove class buttcorrection et ajouter buttcorrection2-->
+<div class="buttcorrection" id="btncorr">
+<button class="button">
+  <span class="shadow"></span>
+  <span class="edge"></span>
+  <div class="front">
+    <span style="font-family: 'Poppins',sans-serif;">AFFICHER LA CORRECTION</span>
+  </div>
+</button>
+</div>
+
+<p id="expressval"class="ordre3"style="display:none">Vous pouvez changer vos réponses à tout moment, jusqu’à validation ou fin du temps.</p> 
+
+<!--remove class buttcorrection et ajouter buttcorrection2-->
+<div id="btnvalider" class="buttval">
+<button class="button">
+  <span class="shadow"></span>
+  <span class="edge"></span>
+  <div class="front">
+    <span style="font-family: 'Poppins',sans-serif;">Valider</span>
+  </div>
+</button>
+</div>
+
+<!-- Popup -->
+ <!-- confirmation de finir le qcm -->
+<div id="popup-confirmation" class="popup">
+  <div class="popup-content">
+    <h3>Finir le QCM ?</h3>
+    <p>Es-tu sûr(e) de vouloir terminer et envoyer tes réponses ?</p>
+    <button id="confirmerSoumission">Oui, terminer</button>
+    <button id="annulerSoumission">Annuler</button>
+  </div>
+</div>
+
+<!-- Popup -->
+ <!-- confirmation de finir le qcm -->
+<div id="popup-quitter" class="popup">
+  <div class="popup-content">
+    <h3>Voulez-vous vraiment quitter le QCM ?</h3>
+<p>Si vous quittez maintenant, toutes vos réponses en cours seront perdues et ne pourront pas être enregistrées.</p>
+<button id="confirmerSoumission2">Oui, quitter le QCM</button>
+<button id="annulerSoumission2">Continuer le QCM</button>
+  </div>
+</div>
+
+ <script>
+(function(){
+  const temps = Number(localStorage.getItem("selectedTime") || 0);
+  const src = temps > 0 ? "script/qcm.js" : "script/qcm-Notimer.js";
+  const s = document.createElement("script");
+  s.src = src;
+  s.onload = () => {
+    console.log("Fichier JS chargé :", src);
+    // démarrer l'intro quand le DOM est prêt
+    function start() {
+      if (typeof window.lancerIntro === "function") {
+        console.log("Appel de lancerIntro()");
+        window.lancerIntro();
+      } else {
+        console.error("lancerIntro n’est pas défini dans", src);
+      }
+    }
+    if (document.readyState === "loading") {
+      document.addEventListener("DOMContentLoaded", start);
+    } else start();
+  };
+  s.onerror = (e)=> console.error("Erreur chargement script", e);
+  document.head.appendChild(s);
+})();
+ </script>   
+</body>
+</html>
