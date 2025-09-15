@@ -245,53 +245,76 @@ search.addEventListener('input', updateActiveState);
 
 //afficher le pseudo et avatar 
 window.addEventListener("DOMContentLoaded", () => {
-  fetch("/api/utilisateur", {
-    method: "GET",
-    credentials: "include"
-  })
-  .then(response => {
-    if (!response.ok) {  // ← gère 401/500/etc
-      throw new Error("Non authentifié");
-    }
-    return response.json();
-  })
-  .then(result => {
-    if (result.success) {
-      const user = result.utilisateur;
 
-      if (!user.annee_validated) {
-        window.location.href = "check-validation.html";  
-        return; // Important sinon le reste s’exécute
-      }
 
-      document.getElementById("avatar").src = user.avatar;
-      document.getElementById("pseudo").textContent = user.pseudo;
-      document.getElementById("pseudo2").textContent = user.pseudo;
+   fetch("/api/utilisateur", {
+  method: "GET",
+  credentials: "include" // 👈 envoie le cookie de session
+})
+      .then(response => response.json())
+      .then(result => {
+        if (result.success) {
+          
+          const user = result.utilisateur;
+          //année non validée 
+          if(!user.annee_validated){
+            window.location.href = "check-validation.html";  
+          }
+          //récupérer l'annee de letudiant
+          const annee=user.annee;
 
-      afficherModules(user.annee);
-      activerRecherche();
-
+          document.getElementById("avatar").src = user.avatar;
+          document.getElementById("pseudo").textContent = user.pseudo;
+          document.getElementById("pseudo2").textContent = user.pseudo;
+          //affichage des modules selon l'année 
+            afficherModules(annee);
+            //activer la recherche 
+             activerRecherche() ;
+             // Une fois prêt → cacher le loader et montrer la page
       document.getElementById("loader").style.display = "none";
       document.getElementById("content").style.display = "block";
-      setTimeout(() => titre.classList.add('slide-in'), 100);
+       setTimeout(() => {
+    titre.classList.add('slide-in');
+  }, 100); // 100ms suffit
+             // Vérifier si l'URL contient ?emailChanged=true
+  const urlParams = new URLSearchParams(window.location.search);
+  if (urlParams.get('emailChanged') === 'true') {
+    const alertBox = document.createElement('div');
+    alertBox.innerText = "Votre adresse e-mail a bien été changée !";
+    alertBox.style.position = "fixed";
+    alertBox.style.top = "0";
+    alertBox.style.left = "50%";
+    alertBox.style.transform = "translateX(-50%)";
+    alertBox.style.backgroundColor = "#28a745";
+    alertBox.style.color = "white";
+    alertBox.style.padding = "15px 25px";
+    alertBox.style.fontSize = "18px";
+    alertBox.style.fontWeight = "bold";
+    alertBox.style.borderRadius = "0 0 8px 8px";
+    alertBox.style.zIndex = "1000";
+    alertBox.style.boxShadow = "0 2px 6px rgba(0,0,0,0.2)";
+    document.body.appendChild(alertBox);
 
-    } else {
-      console.warn("Utilisateur non récupéré:", result.message);
-      document.getElementById("pseudo").textContent = "Inconnu";
-      document.getElementById("pseudo2").textContent = "Inconnu";
-      document.getElementById("loader").style.display = "none";
+    // Masquer après 5 secondes
+    setTimeout(() => {
+      alertBox.remove();
+      // Supprimer le paramètre URL pour ne plus afficher l'alerte au reload
+      window.history.replaceState({}, document.title, "/");
+    }, 5000);
+  }
+        } else {
+          document.getElementById("pseudo").textContent = "Inconnu";
+          document.getElementById("pseudo2").textContent = "Inconnu";
+        }
+      })
+      .catch(err => {
+        console.error("Erreur récupération utilisateur :", err);
+        document.getElementById("pseudo").textContent = "Erreur";
+        document.getElementById("pseudo2").textContent = "Erreur";
+         document.getElementById("loader").style.display = "none";
       document.getElementById("content").style.display = "block";
-    }
-  })
-  .catch(err => {
-    console.error("Erreur récupération utilisateur :", err);
-    document.getElementById("pseudo").textContent = "Erreur";
-    document.getElementById("pseudo2").textContent = "Erreur";
-    document.getElementById("loader").style.display = "none";
-    document.getElementById("content").style.display = "block";
+      });
   });
-});
-
 function choisirmodule(moduleId, moduleNom){
   const data = { module: moduleId };
   console.log("DATA ENVOYÉ :", data); 
