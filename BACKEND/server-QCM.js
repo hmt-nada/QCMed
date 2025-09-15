@@ -14,18 +14,18 @@ const SQLiteStore = require("connect-sqlite3")(session);
 
 
 
+const isProduction = process.env.NODE_ENV === "production";
 
-// Configuration de la session pour les etudiants(stocker les infos du qcm )
 app.use(session({
   secret: "monSecretUltraSecurise",
   resave: false,
   saveUninitialized: false,
-  store: new SQLiteStore({ db: "sessions.sqlite" }), // simple, sans dossier spécial
+  store: new SQLiteStore({ db: "sessions.sqlite" }),
   cookie: {
-    maxAge:10 * 365 * 24 * 60 * 60 * 1000, // 10 ans 
+    maxAge: 10 * 365 * 24 * 60 * 60 * 1000,
     httpOnly: true,
-    secure: false,     // 🚨 important en local (HTTP)
-    sameSite: "lax"    // marche bien en dev
+    secure: isProduction,  // true en prod HTTPS, false en dev
+    sameSite: "lax"
   }
 }));
 
@@ -118,8 +118,9 @@ db.run(insertToken, [email, token, expiration], (err) => {
     console.error("Erreur insertion token :", err.message);
     return res.status(500).json({ success: false, message: "Erreur token." });
   }
-
-  const lien = `http://localhost:3000/api/confirmation/${token}`;
+const baseUrl = process.env.BASE_URL || 'http://localhost:3000';
+const lien = `${baseUrl}/api/confirmation/${token}`;
+  
   envoyerEmailConfirmation(email, lien)
     .then(() => {
       console.log("Utilisateur mis à jour avec pseudo/avat pour email :", email);
@@ -188,8 +189,9 @@ app.post("/api/resend-confirmation", (req, res) => {
         console.error("Erreur mise à jour resend :", err.message);
         return res.status(500).json({ success: false, message: "Erreur serveur." });
       }
-
-      const lien = `http://localhost:3000/api/confirmation/${newToken}`;
+const baseUrl = process.env.BASE_URL || 'http://localhost:3000';
+const lien = `${baseUrl}/api/confirmation/${newToken}`;
+    
       envoyerEmailConfirmation(email, lien)
         .then(() => {
           return res.json({ success: true, message: "Email de confirmation renvoyé." });
@@ -618,8 +620,10 @@ app.post('/api/change-mail', async (req, res) => {
           console.error("🔥 Erreur insert token:", err2);
           return res.status(500).json({ error: 'Erreur serveur.' });
         }
+const baseUrl = process.env.BASE_URL || 'http://localhost:3000';
+const lien = `${baseUrl}/api/confirmationnewmail/${token}`;
 
-        const lien = `http://localhost:3000/api/confirmationnewmail/${token}`;
+       
         console.log("📧 Envoi email de confirmation à", newemail, "→ lien:", lien);
 
         try {
@@ -1180,6 +1184,7 @@ app.get('*', (req, res) => {
 });
 
 const PORT = process.env.PORT || 3000;
+
 app.listen(PORT, () => {
   console.log(`🚀 Serveur lancé sur le port ${PORT}`);
 });
