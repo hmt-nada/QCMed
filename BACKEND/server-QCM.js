@@ -1164,9 +1164,22 @@ app.get("/stats/questions-par-cours", (req, res) => {
   });
 });
 
-//couter sur le port3000
-const PORT = process.env.PORT || 3000;
+const frontend = path.join(__dirname, '../FRONTEND');
 
+// Servir les fichiers statiques
+app.use(express.static(frontend));
+
+// Route racine
+app.get('/', (req, res) => {
+  res.sendFile(path.join(frontend, 'ouverture2.html'));
+});
+
+// Fallback SPA (pour toutes les autres routes)
+app.get('*', (req, res) => {
+  res.sendFile(path.join(frontend, 'ouverture2.html'));
+});
+
+const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-  console.log(`Serveur lancé sur le port ${PORT}`);
+  console.log(`🚀 Serveur lancé sur le port ${PORT}`);
 });

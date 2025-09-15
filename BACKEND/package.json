@@ -1,12 +1,11 @@
 {
   "name": "backend",
   "version": "1.0.0",
-  "main": "index.js",
+  "main": "server-QCM.js",
   "scripts": {
-  "start": "node server-QCM.js",
-  "test": "echo \"Error: no test specified\" && exit 1"
-},
-
+    "start": "node server-QCM.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
   "author": "",
   "license": "ISC",
   "description": "",
@@ -14,7 +13,7 @@
     "bcrypt": "^6.0.0",
     "connect-sqlite3": "^0.9.16",
     "cors": "^2.8.5",
-    "express": "^5.1.0",
+    "express": "^4.21.2",
     "express-session": "^1.18.2",
     "node-cron": "^4.2.1",
     "nodemailer": "^7.0.5",
