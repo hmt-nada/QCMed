@@ -37,7 +37,10 @@ const path = require('path');
 app.use(express.static(path.join(__dirname, "../frontend")));
 //autoriser l'accès aux images 
 app.use("/images", express.static(path.join(__dirname, "../frontend/images")));
-app.use(cors());
+app.use(cors({
+  origin: "https://qcmed-1x7m.onrender.com", // ton vrai domaine FRONT Render
+  credentials: true   // ✅ permet d’envoyer les cookies
+}));
 app.use(express.json());
 
 
