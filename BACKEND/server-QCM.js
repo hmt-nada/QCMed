@@ -25,22 +25,25 @@ app.use(session({
     maxAge: 10 * 365 * 24 * 60 * 60 * 1000,
     httpOnly: true,
     secure: isProduction,  // true en prod HTTPS, false en dev
-    sameSite: "none"
+    sameSite: "lax"
   }
 }));
 
 
 
 const codesTemp = {}; // Stock temporaire en mémoire
+
 const path = require('path');
 // Servir les fichiers frontend
 app.use(express.static(path.join(__dirname, "../frontend")));
 //autoriser l'accès aux images 
 app.use("/images", express.static(path.join(__dirname, "../frontend/images")));
+
 app.use(cors({
-  origin: "https://qcmed-1x7m.onrender.com", // ton vrai domaine FRONT Render
-  credentials: true   // ✅ permet d’envoyer les cookies
+  origin: "https://qcmed-1x7m.onrender.com", 
+  credentials: true
 }));
+
 app.use(express.json());
 
 
