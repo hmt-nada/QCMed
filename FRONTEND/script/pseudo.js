@@ -125,7 +125,7 @@ setTimeout(() => {
 }else {
      const user=document.getElementById('user');
      const currentavtr=user.getAttribute("src");
-     const rememberMe = rememberCheckbox.checked;
+    
 
   const data ={
     pseudo:nom.value.trim(),
@@ -165,20 +165,4 @@ fetch("/api/pseudo",{
 
   } 
 });
-const rememberCheckbox = document.getElementById("rememberMe");
 
-// Sauvegarder l'état du checkbox dans localStorage
-rememberCheckbox.addEventListener("change", () => {
-  if (rememberCheckbox.checked) {
-    localStorage.setItem("rememberMe", "true");
-  } else {
-    localStorage.removeItem("rememberMe");
-  }
-});
-
-// Au chargement, restaurer l'état
-window.addEventListener("DOMContentLoaded", () => {
-  if (localStorage.getItem("rememberMe") === "true") {
-    rememberCheckbox.checked = true;
-  }
-});
