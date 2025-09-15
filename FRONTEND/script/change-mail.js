@@ -301,7 +301,10 @@ window.addEventListener("DOMContentLoaded", () => {
 
 
 
-    fetch(`/api/utilisateur`)
+    fetch("/api/utilisateur", {
+  method: "GET",
+  credentials: "include" // 👈 envoie le cookie de session
+})
       .then(response => response.json())
       .then(result => {
         if (result.success) {

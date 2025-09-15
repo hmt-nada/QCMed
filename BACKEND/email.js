@@ -240,8 +240,8 @@ async function envoyerEmailValidation(email, id, anneeActuelle, anneeSuivante, t
   const today = new Date();
   const annee = today.getFullYear();
 
-  const lienRester = `http://localhost:3000/validation-annee.html?id=${id}&token=${token}&choix=reste`;
-  const lienPasser = `http://localhost:3000/validation-annee.html?id=${id}&token=${token}&choix=passe`;
+  const lienRester = `/validation-annee.html?id=${id}&token=${token}&choix=reste`;
+  const lienPasser = `/validation-annee.html?id=${id}&token=${token}&choix=passe`;
 
   const transporter = nodemailer.createTransport({
     service: 'gmail',

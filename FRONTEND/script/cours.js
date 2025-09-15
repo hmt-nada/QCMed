@@ -201,7 +201,10 @@ window.addEventListener('load', () => {
 // Récupération utilisateur et affichage des cours
 // =======================
 window.addEventListener("DOMContentLoaded", () => {
-  fetch("/api/utilisateur")
+  fetch("/api/utilisateur", {
+  method: "GET",
+  credentials: "include" // 👈 envoie le cookie de session
+})
     .then(res => res.json())
     .then(result => {
       if(result.success){
