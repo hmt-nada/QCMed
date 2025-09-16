@@ -27,16 +27,17 @@ redisClient.on("error", (err) => console.error("Redis Client Error", err));
 // Middleware session
 app.use(session({
   store: new RedisStore({ client: redisClient }),
-  secret: process.env.SESSION_SECRET,
+  secret: process.env.SESSION_SECRET || "hamitouchenada",
   resave: false,
   saveUninitialized: false,
   cookie: {
-    secure: process.env.NODE_ENV === "production",
     httpOnly: true,
-    sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
-    maxAge: 10 * 365 * 24 * 60 * 60 * 1000
+    secure: true,           // car Render utilise HTTPS
+    sameSite: "none",       // obligatoire pour partager le cookie
+    maxAge: 24 * 60 * 60 * 1000
   }
 }));
+
 
 
 const codesTemp = {}; // Stock temporaire en mémoire
