@@ -231,7 +231,7 @@ app.post('/api/envoyer-code', (req, res) => {
   const expiration = new Date(Date.now() + 90_000).toISOString(); // Format ISO pour SQLite
 
 
-  db.get("SELECT * FROM verifications_email WHERE email = ? AND email_active = 1", [email], (err, user) => {
+  db.get("SELECT * FROM utilisateurs WHERE email = ? AND email_active = 1", [email], (err, user) => {
     if (err || !user) return res.status(404).json({ error: 'Utilisateur introuvable' });
 
     // Stocker le code et son expiration dans la base de données
