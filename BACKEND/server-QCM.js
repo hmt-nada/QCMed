@@ -76,12 +76,12 @@ app.post('/api/inscription', async (req, res) => {
   const hashedPassword = await bcrypt.hash(password, 10);
    const token = generateToken();
     const insertQuery = `
-      INSERT INTO utilisateurs (nom, prenom, faculte, annee, email, mot_de_passe, email_active, email_disconnect, annee_validated, token_validation)
+      INSERT INTO utilisateurs (nom, prenom, faculte, annee, email, mot_de_passe, email_active, email_disconnect, annee_validated, token_validation, validation_envoyee)
       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `;
 
 
-    db.run(insertQuery, [nom, prenom, faculte, annee, email, hashedPassword, 0, 0, 1, token], function (err) {
+    db.run(insertQuery, [nom, prenom, faculte, annee, email, hashedPassword, 0, 0, 1, token, 0], function (err) {
       if (err) {
         console.error("Erreur insertion :", err.message);
         return res.status(500).json({ success: false, message: "Erreur lors de l'enregistrement." });
@@ -344,7 +344,7 @@ app.get('/api/confirmation/:token', (req, res) => {
       // Supprimer le token
       db.run(`DELETE FROM verifications_email WHERE token = ?`, [token], () => {
          // 🔹 Récupérer les infos de l’utilisateur pour la session
-        const getUser = `SELECT id, email, pseudo, avatar, annee, annee_validated 
+        const getUser = `SELECT id, email, pseudo, avatar, annee, annee_validated, validation_envoyee
                          FROM utilisateurs WHERE email = ?`;
         db.get(getUser, [row.email], (err, user) => {
           if (err || !user) {
@@ -428,7 +428,8 @@ app.get('/api/utilisateur', (req, res) => {
     pseudo: req.session.user.pseudo,
     avatar: req.session.user.avatar,
     annee: req.session.user.annee,
-    annee_validated: req.session.user.annee_validated
+    annee_validated: req.session.user.annee_validated,
+    validation_envoyee: req.session.user.validation_envoyee
   }});
 });
 
@@ -551,6 +552,7 @@ app.post("/api/new-password", async (req, res) => {
           req.session.user = {
             id: user.id,
             annee_validated: user.annee_validated,
+            validation_envoyee: user.validation_envoyee,
             email: user.email,
             pseudo: user.pseudo,
             avatar: user.avatar,
@@ -698,6 +700,7 @@ app.post("/api/connexion", (req, res) => {
     req.session.user = {
       id: user.id,
       annee_validated: user.annee_validated,
+      validation_envoyee: user.validation_envoyee,
       email: user.email,
       pseudo: user.pseudo,
       avatar: user.avatar,
@@ -1047,7 +1050,7 @@ cron.schedule('5 20 6 9 *', async () => {
       const token = generateToken();
 
       db.run(
-        "UPDATE utilisateurs SET token_validation = ?, annee_validated = 0 WHERE id = ?",
+        "UPDATE utilisateurs SET token_validation = ?, annee_validated = 0, validation_envoyee = 1 WHERE id = ?",
         [token, u.id],
         (err) => {
           if (err) {
@@ -1099,6 +1102,7 @@ app.post("/api/choix-annee", (req, res) => {
           email: user.email,
           annee_validated: 1,
           annee: nouvelleAnnee,
+          validation_envoyee: user.validation_envoyee,
           id: user.id,          
           pseudo: user.pseudo,
           avatar: user.avatar,

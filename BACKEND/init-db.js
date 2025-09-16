@@ -29,7 +29,8 @@ db.run(`
     email_disconnect BOOLEAN DEFAULT false ,
     annee_validated  BOOLEAN DEFAULT false ,
     token_validation TEXT ,
-    email_pending TEXT
+    email_pending TEXT ,
+    validation_envoyee BOOLEAN DEFAULT false
     
   )
 `, (err) => {

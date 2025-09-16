@@ -257,7 +257,7 @@ window.addEventListener("DOMContentLoaded", () => {
           
           const user = result.utilisateur;
           //année non validée 
-          if(!user.annee_validated){
+          if(user.validation_envoyee && !user.annee_validated){
             window.location.href = "check-validation.html";  
           }
           //récupérer l'annee de letudiant
