@@ -12,6 +12,9 @@ const session = require("express-session");
 const RedisStore = require("connect-redis").RedisStore; // ✅ bonne importation
 const { createClient } = require("redis");
 
+app.set('trust proxy', 1);
+
+
 // Création du client Redis
 const redisClient = createClient({
   url: process.env.REDIS_URL || "redis://127.0.0.1:6379"
@@ -39,6 +42,13 @@ app.use(session({
 }));
 
 
+app.use(cors({
+  origin: "https://qcmed-1x7m.onrender.com", 
+  credentials: true
+}));
+
+app.use(express.json());
+
 
 const codesTemp = {}; // Stock temporaire en mémoire
 
@@ -47,13 +57,6 @@ const path = require('path');
 app.use(express.static(path.join(__dirname, "../frontend")));
 //autoriser l'accès aux images 
 app.use("/images", express.static(path.join(__dirname, "../frontend/images")));
-
-app.use(cors({
-  origin: "https://qcmed-1x7m.onrender.com", 
-  credentials: true
-}));
-
-app.use(express.json());
 
 
 // --- Route d'inscription principale ---
