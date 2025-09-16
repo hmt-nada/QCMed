@@ -971,6 +971,9 @@ margin-left:50px;
 .organisation2 p{  
     margin: 10px 130px 50px 30px;   
 }
+.organisation2{
+margin-left:260px;
+}
 .organisation2 p:active{
   transform:scaleX(0.96);
 }
@@ -1042,7 +1045,7 @@ left: 0px;
 
 .icones svg{
    display: inline-block; 
-   margin: 0px 40px 40px 20px; 
+   margin: 0px 280px 50px 20px; 
 }
 
 .icone1,.icone1-2,.icone2,.icone2-2,.icone3,.icone3-2 ,.icone0,.icone4,.icone5,.icone6{
@@ -1146,7 +1149,7 @@ right:-4px;
 .icone6{
   margin-top:500px; 
 }
-.text div{
+.text{
     position:absolute;
     right: 200px;    
 }

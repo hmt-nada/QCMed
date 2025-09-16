@@ -267,9 +267,9 @@ window.addEventListener("DOMContentLoaded", () => {
           document.getElementById("pseudo").textContent = user.pseudo;
           document.getElementById("pseudo2").textContent = user.pseudo;
           //affichage des modules selon l'année 
-            afficherModules(annee);
+          afficherModules(annee);
             //activer la recherche 
-             activerRecherche() ;
+          activerRecherche() ;
              // Une fois prêt → cacher le loader et montrer la page
       document.getElementById("loader").style.display = "none";
       document.getElementById("content").style.display = "block";
