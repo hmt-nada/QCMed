@@ -973,6 +973,7 @@ margin-left:50px;
 }
 .organisation2{
 margin-left:260px;
+position:absolute;
 }
 .organisation2 p:active{
   transform:scaleX(0.96);
