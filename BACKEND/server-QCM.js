@@ -8,28 +8,34 @@ const { envoyerEmailConfirmation, envoyerEmailConfirmationcode, envoyerEmailsign
 const cron = require("node-cron");
 const crypto = require("crypto");
 //session exppress
-
 const session = require("express-session");
-const SQLiteStore = require("connect-sqlite3")(session);
+const RedisStore = require("connect-redis").RedisStore; // ✅ bonne importation
+const { createClient } = require("redis");
 
+// Création du client Redis
+const redisClient = createClient({
+  url: process.env.REDIS_URL || "redis://127.0.0.1:6379"
+});
 
+redisClient.on("error", (err) => console.error("Redis Client Error", err));
 
-const isProduction = process.env.NODE_ENV === "production";
+(async () => {
+  await redisClient.connect();
+  console.log("✅ Connecté à Redis");
+})();
 
+// Middleware session
 app.use(session({
-  secret: "monSecretUltraSecurise",
+  store: new RedisStore({ client: redisClient }), // ✅ marche en v9
+  secret: process.env.SESSION_SECRET || "tonSuperSecret",
   resave: false,
   saveUninitialized: false,
-  store: new SQLiteStore({ db: "sessions.sqlite" }),
   cookie: {
-    maxAge: 10 * 365 * 24 * 60 * 60 * 1000,
+    secure: process.env.NODE_ENV === "production", // true si HTTPS
     httpOnly: true,
-    secure: isProduction,  // true en prod HTTPS, false en dev
-    sameSite: "lax"
+    maxAge: 10 * 365 * 24 * 60 * 60 * 1000
   }
 }));
-
-
 
 const codesTemp = {}; // Stock temporaire en mémoire
 

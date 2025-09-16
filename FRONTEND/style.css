@@ -1042,7 +1042,7 @@ left: 0px;
 
 .icones svg{
    display: inline-block; 
-    margin: 0px 40px 40px 20px; 
+   margin: 0px 40px 40px 20px; 
 }
 
 .icone1,.icone1-2,.icone2,.icone2-2,.icone3,.icone3-2 ,.icone0,.icone4,.icone5,.icone6{
@@ -1713,6 +1713,7 @@ height:70px;
 margin-top:-8px;
 margin-left:-8px;
 }
+
 .chapeau2{
    padding: 0;
     position: absolute; /* ou fixed si tu veux qu'elle reste en haut au scroll */
