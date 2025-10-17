@@ -358,6 +358,7 @@ if (faculte.value === "") {
     annee.style.borderColor = "red";
     erreur = true;
   }
+  
 if (erreur) {
     event.preventDefault();
     errorSound.currentTime = 0; // remet au début si on reclique rapidement

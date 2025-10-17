@@ -21,8 +21,7 @@ const {
 const app = express();
 app.set("trust proxy", 1);
 
-(async () => {
-  // 🔹 Création du client Redis (Upstash)
+
   const redisClient = createClient({
     url:
       process.env.REDIS_URL ||
@@ -32,35 +31,24 @@ app.set("trust proxy", 1);
 
   redisClient.on("error", (err) => console.error("❌ Redis error:", err));
 
-  try {
-    await redisClient.connect();
-    console.log("✅ Connecté à Redis !");
-  } catch (err) {
-    console.error("❌ Erreur lors de la connexion Redis :", err);
-  }
+  redisClient.connect()
+  .then(() => console.log("✅ Connecté à Redis !"))
+  .catch((err) => console.error("❌ Erreur Redis :", err));
 
-  // 🔹 Création du store
-  const redisStore = new RedisStore({
-    client: redisClient,
-    prefix: "qcmed_sess:",
-  });
-
-  // 🔹 Middleware session
   app.use(
-    session({
-      store: redisStore,
-      secret: process.env.SESSION_SECRET || "hamitouchenada",
-      resave: false,
-      saveUninitialized: false,
-      cookie: {
-        secure: true, // HTTPS obligatoire (Render)
-        httpOnly: true,
-        sameSite: "none",
-        maxAge: 24 * 60 * 60 * 1000, // 1 jour
-      },
-    })
-  );
-});
+  session({
+    store: new RedisStore({ client: redisClient }),
+    secret: process.env.SESSION_SECRET || "hamitouchenada",
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+      secure: process.env.NODE_ENV === "production", // HTTPS seulement
+      httpOnly: true,
+      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+      maxAge: 24 * 60 * 60 * 1000, // 24h
+    },
+  })
+);
 
 app.use(cors({
   origin: "https://qcmed-1x7m.onrender.com", 
@@ -97,7 +85,7 @@ app.post('/api/inscription', async (req, res) => {
    const token = generateToken();
     const insertQuery = `
       INSERT INTO utilisateurs (nom, prenom, faculte, annee, email, mot_de_passe, email_active, email_disconnect, annee_validated, token_validation, validation_envoyee)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `;
 
 
