@@ -16,23 +16,39 @@ const cron = require("node-cron");
 const crypto = require("crypto");
 //session exppress
 const session = require("express-session");
-const RedisStore = require("connect-redis").RedisStore; // ✅ bonne importation
+
+
+const { default: RedisStore } = require("connect-redis"); // ✅ bonne importation
 const { createClient } = require("redis");
 
 app.set('trust proxy', 1);
 
 
 // Création du client Redis
+// Création du client Redis avec TLS (pour Upstash)
 const redisClient = createClient({
-  url: process.env.REDIS_URL || "redis://127.0.0.1:6379"
+  url: process.env.REDIS_URL || "redis://127.0.0.1:6379",
+  socket: {
+    tls: process.env.REDIS_URL ? true : false, // 🔒 TLS activé uniquement en prod
+    rejectUnauthorized: false
+  }
 });
 
-redisClient.on("error", (err) => console.error("Redis Client Error", err));
+redisClient.on("error", (err) => {
+  console.error("❌ Redis Client Error:", err.message);
+});
 
+// Connexion
 (async () => {
-  await redisClient.connect();
-  console.log("✅ Connecté à Redis");
+  try {
+    await redisClient.connect();
+    console.log("✅ Connecté à Redis !");
+  } catch (err) {
+    console.error("❌ Erreur lors de la connexion Redis :", err);
+  }
 })();
+
+
 
 // Middleware session
 app.use(session({
