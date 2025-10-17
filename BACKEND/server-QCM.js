@@ -1,69 +1,66 @@
 const express = require("express");
 const cors = require("cors");
-
-
+const session = require("express-session");
+const { RedisStore } = require("connect-redis");
+const { createClient } = require("redis");
 const db = require("./db");
-
-
-
-
-
-const app = express();
-const bcrypt = require('bcrypt');
-const nodemailer = require('nodemailer');
-const { envoyerEmailConfirmation, envoyerEmailConfirmationcode, envoyerEmailsignalemet, envoyerEmailMerciUtilisateur, envoyerEmailValidation, envoyerEmailConfirmationNouvelle, envoyermailcontact } = require("./email");
+const bcrypt = require("bcrypt");
+const nodemailer = require("nodemailer");
 const cron = require("node-cron");
 const crypto = require("crypto");
-//session exppress
-const session = require("express-session");
+const {
+  envoyerEmailConfirmation,
+  envoyerEmailConfirmationcode,
+  envoyerEmailsignalemet,
+  envoyerEmailMerciUtilisateur,
+  envoyerEmailValidation,
+  envoyerEmailConfirmationNouvelle,
+  envoyermailcontact
+} = require("./email");
 
+const app = express();
+app.set("trust proxy", 1);
 
-const RedisStore = require("connect-redis").default;  // ✅ bonne importation
-const { createClient } = require("redis");
-
-app.set('trust proxy', 1);
-
-
-// Création du client Redis
-// Création du client Redis avec TLS (pour Upstash)
-const redisClient = createClient({
-  url: process.env.REDIS_URL || "redis://127.0.0.1:6379",
-  socket: {
-    tls: process.env.REDIS_URL ? true : false, // 🔒 TLS activé uniquement en prod
-    rejectUnauthorized: false
-  }
-});
-
-redisClient.on("error", (err) => {
-  console.error("❌ Redis Client Error:", err.message);
-});
-
-// Connexion
 (async () => {
+  // 🔹 Création du client Redis (Upstash)
+  const redisClient = createClient({
+    url:
+      process.env.REDIS_URL ||
+      "rediss://default:ASxkAAIncDJkOGVmZTI4YzE4MDE0MGNkYTdkN2U1ZWNhNWQzZTNiMHAyMTEzNjQ@trusty-koala-11364.upstash.io:6379",
+    socket: { tls: true, rejectUnauthorized: false },
+  });
+
+  redisClient.on("error", (err) => console.error("❌ Redis error:", err));
+
   try {
     await redisClient.connect();
     console.log("✅ Connecté à Redis !");
   } catch (err) {
     console.error("❌ Erreur lors de la connexion Redis :", err);
   }
-})();
 
+  // 🔹 Création du store
+  const redisStore = new RedisStore({
+    client: redisClient,
+    prefix: "qcmed_sess:",
+  });
 
-
-// Middleware session
-app.use(session({
-  store: new RedisStore({ client: redisClient }),
-  secret: process.env.SESSION_SECRET || "hamitouchenada",
-  resave: false,
-  saveUninitialized: false,
-  cookie: {
-    httpOnly: true,
-    secure: true,
-    sameSite: "none",
-    maxAge: 24 * 60 * 60 * 1000
-  }
-}));
-
+  // 🔹 Middleware session
+  app.use(
+    session({
+      store: redisStore,
+      secret: process.env.SESSION_SECRET || "hamitouchenada",
+      resave: false,
+      saveUninitialized: false,
+      cookie: {
+        secure: true, // HTTPS obligatoire (Render)
+        httpOnly: true,
+        sameSite: "none",
+        maxAge: 24 * 60 * 60 * 1000, // 1 jour
+      },
+    })
+  );
+});
 
 app.use(cors({
   origin: "https://qcmed-1x7m.onrender.com", 
