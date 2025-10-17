@@ -1,6 +1,13 @@
 const express = require("express");
 const cors = require("cors");
-const db = require("./test-db"); // Base de données SQLite
+
+
+const db = require("./db");
+
+
+
+
+
 const app = express();
 const bcrypt = require('bcrypt');
 const nodemailer = require('nodemailer');
