@@ -18,7 +18,7 @@ const crypto = require("crypto");
 const session = require("express-session");
 
 
-const { default: RedisStore } = require("connect-redis"); // ✅ bonne importation
+const RedisStore = require("connect-redis").default;  // ✅ bonne importation
 const { createClient } = require("redis");
 
 app.set('trust proxy', 1);
@@ -58,8 +58,8 @@ app.use(session({
   saveUninitialized: false,
   cookie: {
     httpOnly: true,
-    secure: true,           // car Render utilise HTTPS
-    sameSite: "none",       // obligatoire pour partager le cookie
+    secure: true,
+    sameSite: "none",
     maxAge: 24 * 60 * 60 * 1000
   }
 }));
