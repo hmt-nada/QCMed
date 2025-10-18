@@ -8,6 +8,8 @@ const bcrypt = require("bcrypt");
 const nodemailer = require("nodemailer");
 const cron = require("node-cron");
 const crypto = require("crypto");
+const bodyParser = require('body-parser');
+
 const {
   envoyerEmailConfirmation,
   envoyerEmailConfirmationcode,
@@ -688,6 +690,9 @@ app.post("/api/connexion", (req, res) => {
       return res.status(401).json({ error: "Mot de passe incorrect" });
     }
 
+// Définir rôle
+    const role = (email === ADMIN_EMAIL) ? "admin" : "user";
+
     // ✅ Mettre à jour email_disconnect = false
     db.run("UPDATE utilisateurs SET email_disconnect = ? WHERE email = ?", [false, email], (err) => {
   if (err) {
@@ -712,12 +717,13 @@ app.post("/api/connexion", (req, res) => {
       email: user.email,
       pseudo: user.pseudo,
       avatar: user.avatar,
+      role:role,
       annee: user.annee
     };
 
     console.log(`✅ Utilisateur ${email} connecté (email_disconnect = false)`);
 
-    // 🔥 Répondre uniquement ici, après avoir mis la session
+    //Répondre uniquement ici, après avoir mis la session
     return res.status(200).json({
       success: true,
       message: "Connexion réussie",
@@ -1212,6 +1218,54 @@ app.get('/', (req, res) => {
 app.get('*', (req, res) => {
   res.sendFile(path.join(frontend, 'ouverture2.html'));
 });
+
+
+//************************************************************************************************* */
+
+
+//connexion admin 
+
+// Middleware
+//const ADMIN_EMAIL = "on_hamitouche@esi.dz";  // email de l’admin
+
+
+
+
+
+// Route pour récupérer toutes les questions
+// 🔹 Route pour renvoyer toutes les questions
+app.get('/api/adminquestions', (req, res) => {
+  const sql = `SELECT id, faculte, module, cours, question, options, correct, image FROM questions`;
+  db.all(sql, [], (err, rows) => {
+    if (err) {
+      console.error("Erreur SQL:", err.message);
+      return res.status(500).json({ success: false, error: err.message });
+    }
+
+    // Normaliser les noms et parser options/correct si ce sont des JSON strings
+    const questions = rows.map(r => {
+      let options = [];
+      let correct = [];
+      try { options = r.options ? JSON.parse(r.options) : []; } catch (e) { options = (r.options ? [r.options] : []); }
+      try { correct = r.correct ? JSON.parse(r.correct) : []; } catch (e) { correct = (r.correct ? [r.correct] : []); }
+
+      return {
+        id: r.id,
+        faculte: r.faculte,
+        module: r.module,
+        cours: r.cours,
+        question: r.question,
+        options: options,    // tableau
+        correct: correct,    // tableau
+        image: r.image
+      };
+    });
+
+    res.json({ success: true, questions });
+  });
+});
+
+
 
 const PORT = process.env.PORT || 3000;
 

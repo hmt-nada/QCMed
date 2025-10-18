@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Liste des Questions</title>
+  <style>
+    body { font-family: Arial; margin: 20px; background: #f0f0f0; }
+    table { width: 100%; border-collapse: collapse; background: white; }
+    th, td { border: 1px solid #ccc; padding: 8px; vertical-align: top; }
+    th { background: #007bff; color: white; }
+    pre { white-space: pre-wrap; word-wrap: break-word; }
+  </style>
+</head>
+<body>
+  <h1>📘 Liste complète des questions</h1>
+  <table id="table-questions">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Faculté</th>
+        <th>Module</th>
+        <th>Cours</th>
+        <th>Question</th>
+        <th>Options</th>
+        <th>Réponses correctes</th>
+        <th>Image</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+  <script>
+   fetch('/api/questions')
+  .then(r => {
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    return r.json();
+  })
+  .then(data => {
+    console.log("data:", data);
+    if (!data.success || !Array.isArray(data.questions)) {
+      throw new Error('Format inattendu');
+    }
+    const tbody = document.querySelector('#table-questions tbody');
+    tbody.innerHTML = '';
+    data.questions.forEach(q => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td>${q.id}</td>
+        <td>${q.faculte || ''}</td>
+        <td>${q.module || ''}</td>
+        <td>${q.cours || ''}</td>
+        <td>${q.question || ''}</td>
+        <td><pre>${(q.options||[]).join('\n')}</pre></td>
+        <td><pre>${(q.correct||[]).join(', ')}</pre></td>
+        <td>${q.image ? '<img src="' + q.image + '" width="80">' : '—'}</td>
+      `;
+      tbody.appendChild(tr);
+    });
+  })
+  .catch(err => {
+    console.error(err);
+    alert('Erreur: ' + err.message);
+  });
+  </script>
+</body>
+</html>

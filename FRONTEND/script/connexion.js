@@ -189,10 +189,19 @@ void document.getElementById('alert_erreur').offsetWidth; // forcer le recalcul 
        document.getElementById('alert_erreur').classList.add("visible");
 
   // Cacher l'alerte après 3 secondes
-  setTimeout(() => {
-    document.getElementById('alert_erreur').classList.remove("visible");
-     window.location.href = "accueil.html";
-  }, 2000);
+  // Cacher l'alerte après 2-3 secondes
+setTimeout(() => {
+  document.getElementById('alert_erreur').classList.remove("visible");
+
+  // ✅ Redirection selon rôle
+  if (data.utilisateur.role === "admin") {
+    window.location.href = "panel.html";
+  } else {
+    window.location.href = "accueil.html";     // page user normale
+  }
+
+}, 2000);
+
      
      
     }
