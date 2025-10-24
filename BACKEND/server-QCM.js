@@ -10,6 +10,21 @@ const cron = require("node-cron");
 const crypto = require("crypto");
 const bodyParser = require('body-parser');
 
+// db.js
+const { Pool } = require("pg");
+
+const pool = new Pool({
+  connectionString: process.env.BASE_URL,
+  ssl: { rejectUnauthorized: false },
+});
+
+pool.connect()
+  .then(() => console.log("✅ Connecté à la base Neon PostgreSQL"))
+  .catch(err => console.error("❌ Erreur de connexion à Neon :", err));
+
+module.exports = pool;
+
+
 const {
   envoyerEmailConfirmation,
   envoyerEmailConfirmationcode,
@@ -73,41 +88,44 @@ app.use("/images", express.static(path.join(__dirname, "../frontend/images")));
 app.post('/api/inscription', async (req, res) => {
   const { nom, prenom, faculte, annee, email, password } = req.body;
 
-  const checkQuery = "SELECT * FROM utilisateurs WHERE email = ?";
-  db.get(checkQuery, [email], async (err, row) => {
-    if (err) {
-      console.error("Erreur vérification email :", err.message);
-      return res.status(500).json({ success: false, message: "Erreur serveur" });
-    }
-    if (row) {
+  try {
+    // Vérifier si l'email existe déjà
+    const checkQuery = "SELECT * FROM utilisateurs WHERE email = $1";
+    const checkResult = await db.query(checkQuery, [email]);
+
+    if (checkResult.rows.length > 0) {
       return res.json({ success: false, message: "Email déjà utilisé." });
     }
-    try{
-  const hashedPassword = await bcrypt.hash(password, 10);
-   const token = generateToken();
+
+    // Hachage du mot de passe
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const token = generateToken();
+
+    // Insertion du nouvel utilisateur
     const insertQuery = `
-      INSERT INTO utilisateurs (nom, prenom, faculte, annee, email, mot_de_passe, email_active, email_disconnect, annee_validated, token_validation, validation_envoyee)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      INSERT INTO utilisateurs 
+      (nom, prenom, faculte, annee, email, mot_de_passe, email_active, email_disconnect, annee_validated, token_validation, validation_envoyee)
+      VALUES ($1, $2, $3, $4, $5, $6, false, false, true, $7, false)
+      RETURNING id;
     `;
 
+    const insertResult = await db.query(insertQuery, [
+      nom,
+      prenom,
+      faculte,
+      annee,
+      email,
+      hashedPassword,
+      token
+    ]);
 
-    db.run(insertQuery, [nom, prenom, faculte, annee, email, hashedPassword, 0, 0, 1, token, 0], function (err) {
-      if (err) {
-        console.error("Erreur insertion :", err.message);
-        return res.status(500).json({ success: false, message: "Erreur lors de l'enregistrement." });
-      }
-      console.log("Utilisateur ajouté avec ID :", this.lastID);
-      return res.json({ success: true, message: `Bienvenue ${nom}, inscription réussie !` });
-    });
+    console.log("✅ Utilisateur ajouté avec ID :", insertResult.rows[0].id);
+    return res.json({ success: true, message: `Bienvenue ${nom}, inscription réussie !` });
 
-
-
-    
-  }catch (hashError) {
-      console.error("Erreur de hachage :", hashError.message);
-      return res.status(500).json({ success: false, message: "Erreur lors du hachage du mot de passe." });
-    }
-  });
+  } catch (error) {
+    console.error("❌ Erreur durant l'inscription :", error.message);
+    return res.status(500).json({ success: false, message: "Erreur lors de l'inscription." });
+  }
 });
 
 
@@ -115,153 +133,145 @@ app.post('/api/inscription', async (req, res) => {
 
 
 // --- Route pour pseudo et avatar ---
-app.post('/api/pseudo', (req, res) => {
-  const { pseudo, avatar,email } = req.body;
-  console.log("Reçu pour pseudo :", pseudo, avatar, email); 
-const updateQuery = `
-    UPDATE utilisateurs
-    SET pseudo = ?, avatar = ?
-    WHERE email = ?
-  `;
-  
+app.post('/api/pseudo', async (req, res) => {
+  const { pseudo, avatar, email } = req.body;
+  console.log("Reçu pour pseudo :", pseudo, avatar, email);
 
-  db.run(updateQuery, [pseudo, avatar, email], function (err) {
-    if (err) {
-      console.error("Erreur mise à jour :", err.message);
-      return res.status(500).json({ success: false, message: "Erreur lors de la mise à jour." });
-    }
+  try {
+    // 🔹 1. Mettre à jour pseudo et avatar
+    const updateQuery = `
+      UPDATE utilisateurs
+      SET pseudo = $1, avatar = $2
+      WHERE email = $3
+      RETURNING id
+    `;
 
-    if (this.changes === 0) {
+    const result = await db.query(updateQuery, [pseudo, avatar, email]);
+
+    if (result.rowCount === 0) {
       return res.json({ success: false, message: "Utilisateur non trouvé." });
     }
 
-const expiration = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(); // 24 heures
-const token = require('crypto').randomBytes(32).toString('hex');
-const insertToken = `
-  INSERT INTO verifications_email (email, token, expire)
-  VALUES (?, ?, ?)
-`;
-db.run(insertToken, [email, token, expiration], (err) => {
-  if (err) {
-    console.error("Erreur insertion token :", err.message);
-    return res.status(500).json({ success: false, message: "Erreur token." });
-  }
-const baseUrl = process.env.BASE_URL || 'http://localhost:3000';
-const lien = `${baseUrl}/api/confirmation/${token}`;
-  
-  envoyerEmailConfirmation(email, lien)
-    .then(() => {
-      console.log("Utilisateur mis à jour avec pseudo/avat pour email :", email);
-     
-       return res.json({ success: true, message: "Email envoyé. Veuillez vérifier votre boîte mail." });
-       
-    })
-    .catch((err) => {
-      console.error("Erreur envoi email :", err.message);
-     return res.status(500).json({ success: false, message: "Erreur envoi email." });
+    // 🔹 2. Créer le token de vérification email
+    const expiration = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24h
+    const token = require('crypto').randomBytes(32).toString('hex');
+
+    const insertToken = `
+      INSERT INTO verifications_email (email, token, expire)
+      VALUES ($1, $2, $3)
+    `;
+    await db.query(insertToken, [email, token, expiration]);
+
+    // 🔹 3. Générer le lien et envoyer l'email
+    const baseUrl = process.env.BASE_URL || 'http://localhost:3000';
+    const lien = `${baseUrl}/api/confirmation/${token}`;
+
+    await envoyerEmailConfirmation(email, lien);
+
+    console.log("✅ Utilisateur mis à jour avec pseudo/avatar :", email);
+    return res.json({
+      success: true,
+      message: "Email envoyé. Veuillez vérifier votre boîte mail."
     });
+
+  } catch (err) {
+    console.error("❌ Erreur dans /api/pseudo :", err.message);
+    return res.status(500).json({ success: false, message: "Erreur serveur." });
+  }
 });
 
- });
-});
 
-//renvoyer un email 
-app.post("/api/resend-confirmation", (req, res) => {
+// --- Renvoyer un email de confirmation ---
+app.post("/api/resend-confirmation", async (req, res) => {
   const { email } = req.body;
 
-  // On récupère l’entrée du token existant
-  const selectQuery = `
-    SELECT token, expire, resend_count, last_resend 
-    FROM verifications_email 
-    WHERE email = ?
-  `;
+  try {
+    // 🔹 1. Récupérer le token existant
+    const selectQuery = `
+      SELECT token, expire, resend_count, last_resend 
+      FROM verifications_email 
+      WHERE email = $1
+    `;
+    const result = await db.query(selectQuery, [email]);
 
-  db.get(selectQuery, [email], (err, row) => {
-    if (err) {
-      console.error("Erreur récupération token :", err.message);
-      return res.status(500).json({ success: false, message: "Erreur serveur." });
-    }
-
-    if (!row) {
+    if (result.rowCount === 0) {
       return res.json({ success: false, message: "Aucun token trouvé pour cet email." });
     }
 
-    // Vérification du nombre de tentatives
+    const row = result.rows[0];
+
+    // 🔹 2. Vérifier le nombre de tentatives
     if (row.resend_count >= 3) {
       return res.json({ success: false, message: "Nombre maximum de renvois atteint." });
     }
 
-    // Vérification du délai (5 minutes = 300000 ms)
+    // 🔹 3. Vérifier le délai de 5 minutes
     const now = Date.now();
-    if (row.last_resend && now - row.last_resend < 5 * 60 * 1000) {
-      const restant = Math.ceil((5 * 60 * 1000 - (now - row.last_resend)) / 1000);
-      return res.json({ 
-        success: false, 
-        message: `Veuillez attendre ${restant} secondes avant de renvoyer l'email.` 
+    if (row.last_resend && now - Number(row.last_resend) < 5 * 60 * 1000) {
+      const restant = Math.ceil((5 * 60 * 1000 - (now - Number(row.last_resend))) / 1000);
+      return res.json({
+        success: false,
+        message: `Veuillez attendre ${restant} secondes avant de renvoyer l'email.`,
       });
     }
 
-    // Générer un nouveau token (optionnel, tu peux réutiliser l'ancien)
+    // 🔹 4. Générer un nouveau token (optionnel mais propre)
     const newToken = require("crypto").randomBytes(32).toString("hex");
-    const newExpire = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
+    const newExpire = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24h
 
-    // Mise à jour du token, du compteur et du dernier envoi
+    // 🔹 5. Mettre à jour le token, le compteur et la date d’envoi
     const updateQuery = `
       UPDATE verifications_email
-      SET token = ?, expire = ?, resend_count = resend_count + 1, last_resend = ?
-      WHERE email = ?
+      SET token = $1, expire = $2, resend_count = resend_count + 1, last_resend = $3
+      WHERE email = $4
     `;
+    await db.query(updateQuery, [newToken, newExpire, now, email]);
 
-    db.run(updateQuery, [newToken, newExpire, now, email], function (err) {
-      if (err) {
-        console.error("Erreur mise à jour resend :", err.message);
-        return res.status(500).json({ success: false, message: "Erreur serveur." });
-      }
-const baseUrl = process.env.BASE_URL || 'http://localhost:3000';
-const lien = `${baseUrl}/api/confirmation/${newToken}`;
-    
-      envoyerEmailConfirmation(email, lien)
-        .then(() => {
-          return res.json({ success: true, message: "Email de confirmation renvoyé." });
-        })
-        .catch((err) => {
-          console.error("Erreur envoi email :", err.message);
-          return res.status(500).json({ success: false, message: "Erreur lors de l'envoi." });
-        });
-    });
-  });
+    // 🔹 6. Envoyer le mail
+    const baseUrl = process.env.BASE_URL || "http://localhost:3000";
+    const lien = `${baseUrl}/api/confirmation/${newToken}`;
+
+    await envoyerEmailConfirmation(email, lien);
+
+    return res.json({ success: true, message: "Email de confirmation renvoyé." });
+
+  } catch (err) {
+    console.error("❌ Erreur dans /api/resend-confirmation :", err.message);
+    return res.status(500).json({ success: false, message: "Erreur serveur." });
+  }
 });
 
 //recuperation du compte avec code
 
 app.post('/api/envoyer-code', (req, res) => {
-  
   const { email } = req.body;
-  const code = Math.floor(100000 + Math.random() * 900000).toString(); // génère 6 chiffres
-  const expiration = new Date(Date.now() + 90_000).toISOString(); // Format ISO pour SQLite
-
+  const code = Math.floor(100000 + Math.random() * 900000).toString();
+  const expiration = new Date(Date.now() + 90_000).toISOString();
 
   db.get("SELECT * FROM utilisateurs WHERE email = ? AND email_active = 1", [email], (err, user) => {
-    if (err || !user) return res.status(404).json({ error: 'Utilisateur introuvable' });
+    if (err) return res.status(500).json({ error: "Erreur serveur" });
+    if (!user) return res.status(404).json({ error: "Utilisateur introuvable" });
 
-    // Stocker le code et son expiration dans la base de données
-    db.run("UPDATE verifications_email SET code = ?, codeExpiration = ? WHERE email = ?",
-      [code, expiration, email],
-      (err) => {
-        if (err) {
-          console.error("Erreur lors de la mise à jour du code :", err.message);
-          return res.status(500).json({ error: "Erreur serveur" });
-        }
-    envoyerEmailConfirmationcode(email, code)
-    
-     .then(() => {
-       return res.json({ success: true, message: "Email envoyé" });
-       
-    })
-    .catch((err) => {
-      console.error("Erreur envoi email :", err.message);
-     return res.status(500).json({ success: false, message: "Erreur envoi email." });
-    });
+    // Vérifie si une entrée existe déjà dans verifications_email
+    db.get("SELECT * FROM verifications_email WHERE email = ?", [email], (err, existing) => {
+      if (err) return res.status(500).json({ error: "Erreur serveur" });
+
+      const query = existing
+        ? "UPDATE verifications_email SET code = ?, codeExpiration = ? WHERE email = ?"
+        : "INSERT INTO verifications_email (email, code, codeExpiration) VALUES (?, ?, ?)";
+
+      const params = existing ? [code, expiration, email] : [email, code, expiration];
+
+      db.run(query, params, (err) => {
+        if (err) return res.status(500).json({ error: "Erreur serveur" });
+
+        envoyerEmailConfirmationcode(email, code)
+          .then(() => res.json({ success: true, message: "Email envoyé avec succès." }))
+          .catch((err) => {
+            console.error("Erreur envoi email :", err.message);
+            res.status(500).json({ success: false, message: "Erreur lors de l'envoi du code." });
+          });
+      });
     });
   });
 });
@@ -271,161 +281,193 @@ app.post('/api/envoyer-code', (req, res) => {
 app.post('/api/verifier-code', (req, res) => {
   const { email, code } = req.body;
 
-  // 1. Vérifier si l'utilisateur existe
   db.get("SELECT * FROM verifications_email WHERE email = ?", [email], (err, user) => {
-    if (err) {
-      console.error("Erreur base de données :", err.message);
-      return res.status(500).json({ success: false, message: "Erreur serveur." });
-    }
+    if (err) return res.status(500).json({ success: false, message: "Erreur serveur." });
+    if (!user) return res.status(404).json({ success: false, message: "Utilisateur introuvable." });
 
-    if (!user) {
-      return res.status(404).json({ success: false, message: "Utilisateur introuvable." });
-    }
-
-    // 2. Vérifier si le code est correct
     if (user.code !== code) {
       return res.json({ success: false, message: "Code incorrect." });
     }
 
-    // 3. Vérifier si le code a expiré
     const expirationDate = new Date(user.codeExpiration);
     const maintenant = new Date();
 
     if (maintenant > expirationDate) {
-      // Supprimer les champs `code` et `codeExpiration` de l'utilisateur
-  db.run("UPDATE verifications_email SET code = NULL, codeExpiration = NULL WHERE email = ?", [email], (err) => {
-    if (err) {
-      console.error("Erreur lors de la suppression du code expiré :", err.message);
-    }
-  });
+      db.run("UPDATE verifications_email SET code = NULL, codeExpiration = NULL WHERE email = ?", [email]);
       return res.json({ success: false, message: "Code expiré." });
     }
 
-    // ✅ 4. Code valide
+    // ✅ Supprimer le code après succès
+    db.run("UPDATE verifications_email SET code = NULL, codeExpiration = NULL WHERE email = ?", [email]);
     return res.json({ success: true, message: "Code valide." });
   });
 });
 
 
 
+
 //renvoyer le code 
-app.post('/api/renvoyer-code', (req, res) => {
+// --- Route : renvoyer le code (adaptée à PostgreSQL / Neon) ---
+app.post('/api/renvoyer-code', async (req, res) => {
   const { email } = req.body;
+
+  // Vérification basique
+  if (!email) {
+    return res.status(400).json({ success: false, message: "Email requis." });
+  }
 
   const code = Math.floor(100000 + Math.random() * 900000).toString();
   const expiration = new Date(Date.now() + 90_000).toISOString();
 
-  db.run("UPDATE verifications_email SET code = ?, codeExpiration = ? WHERE email = ?",
-    [code, expiration, email],
-    (err) => {
-      if (err) {
-        console.error("Erreur mise à jour du code :", err.message);
-        return res.status(500).json({ error: "Erreur serveur" });
-      }
+  try {
+    // Mise à jour dans PostgreSQL
+    const updateQuery = `
+      UPDATE verifications_email
+      SET code = $1, codeExpiration = $2
+      WHERE email = $3
+      RETURNING email;
+    `;
 
-  envoyerEmailConfirmationcode(email, code)
-  .then(() => {
+    const result = await pool.query(updateQuery, [code, expiration, email]);
+
+    if (result.rowCount === 0) {
+      return res.status(404).json({ success: false, message: "Aucun utilisateur trouvé avec cet email." });
+    }
+
+    // Envoi de l'email de confirmation avec le code
+    await envoyerEmailConfirmationcode(email, code);
     res.json({ success: true, message: "Code renvoyé avec succès." });
-  })
-  .catch(() => {
-    res.status(500).json({ success: false, message: "Erreur envoi du code." });
+
+  } catch (err) {
+    console.error("Erreur renvoi du code :", err.message);
+    res.status(500).json({ success: false, message: "Erreur serveur." });
+  }
 });
-});
-});
+
 
 
 
 //confirmation que l'email est active 
 
-app.get('/api/confirmation/:token', (req, res) => {
+// --- Route : confirmation que l'email est active (version PostgreSQL / Neon) ---
+app.get('/api/confirmation/:token', async (req, res) => {
   const token = req.params.token;
 
-  const query = `SELECT email FROM verifications_email WHERE token = ?`;
-  db.get(query, [token], (err, row) => {
-    if (err || !row) {
+  try {
+    // 1️⃣ Vérifier le token dans la table verifications_email
+    const query = `SELECT email FROM verifications_email WHERE token = $1`;
+    const { rows } = await pool.query(query, [token]);
+
+    if (rows.length === 0) {
       return res.status(400).send("Lien invalide ou expiré.");
     }
 
-    // Mise à jour
-    const update = `UPDATE utilisateurs SET email_active = 1 WHERE email = ?`;
-    db.run(update, [row.email], (err) => {
-      if (err) return res.status(500).send("Erreur activation compte.");
+    const email = rows[0].email;
 
-      // Supprimer le token
-      db.run(`DELETE FROM verifications_email WHERE token = ?`, [token], () => {
-         // 🔹 Récupérer les infos de l’utilisateur pour la session
-        const getUser = `SELECT id, email, pseudo, avatar, annee, annee_validated, validation_envoyee
-                         FROM utilisateurs WHERE email = ?`;
-        db.get(getUser, [row.email], (err, user) => {
-          if (err || !user) {
-            return res.status(500).send("Impossible de charger l'utilisateur.");
-          }
+    // 2️⃣ Activer l'email dans la table utilisateurs
+    const update = `UPDATE utilisateurs SET email_active = 1 WHERE email = $1`;
+    await pool.query(update, [email]);
 
-          // 🔹 Créer la session utilisateur
-          req.session.user = {
-            id: user.id,
-            annee_validated: user.annee_validated,
-            email: user.email,
-            pseudo: user.pseudo,
-            avatar: user.avatar,
-            annee: user.annee
-          };
-          console.log(req.session.user);
-// Donner une durée de vie spéciale (30 jours) à cette session
-//autoriser la connexion directe pendant 30 jours
-     
+    // 3️⃣ Supprimer le token
+    await pool.query(`DELETE FROM verifications_email WHERE token = $1`, [token]);
 
-      res.redirect(`/emailactive.html?email=${encodeURIComponent(row.email)}`);
+    // 4️⃣ Récupérer les infos utilisateur
+    const getUser = `
+      SELECT id, email, pseudo, avatar, annee, annee_validated, validation_envoyee
+      FROM utilisateurs
+      WHERE email = $1
+    `;
+    const userResult = await pool.query(getUser, [email]);
 
-      });
-    });
-     });
-  });
+    if (userResult.rows.length === 0) {
+      return res.status(500).send("Impossible de charger l'utilisateur.");
+    }
+
+    const user = userResult.rows[0];
+
+    // 5️⃣ Créer la session utilisateur
+    req.session.user = {
+      id: user.id,
+      annee_validated: user.annee_validated,
+      email: user.email,
+      pseudo: user.pseudo,
+      avatar: user.avatar,
+      annee: user.annee,
+    };
+
+    console.log("✅ Session créée :", req.session.user);
+
+    // 6️⃣ Rediriger vers ta page frontend
+    res.redirect(`/emailactive.html?email=${encodeURIComponent(email)}`);
+
+  } catch (err) {
+    console.error("❌ Erreur confirmation :", err.message);
+    res.status(500).send("Erreur serveur lors de l'activation du compte.");
+  }
 });
 
-app.get('/api/confirmationnewmail/:token', (req, res) => {
+
+// --- Route : confirmation du nouvel email (version PostgreSQL / Neon) ---
+app.get('/api/confirmationnewmail/:token', async (req, res) => {
   const token = req.params.token;
 
-  const query = `SELECT email FROM verifications_email WHERE token = ?`;
-  db.get(query, [token], (err, row) => {
-    if (err || !row) return res.status(400).send("Lien invalide ou expiré.");
+  try {
+    // 1️⃣ Vérifier le token
+    const query = `SELECT email FROM verifications_email WHERE token = $1`;
+    const { rows } = await pool.query(query, [token]);
 
-    // 🔹 Récupérer le nouvel email stocké dans email_pending
-    const newEmail = row.email;
+    if (rows.length === 0) {
+      return res.status(400).send("Lien invalide ou expiré.");
+    }
 
-    const update = `UPDATE utilisateurs 
-                    SET email = ?, email_pending = NULL 
-                    WHERE email_pending = ?`;
-    db.run(update, [newEmail, newEmail], (err) => {
-      if (err) return res.status(500).send("Erreur activation compte.");
+    const newEmail = rows[0].email;
 
-      // Supprimer le token
-      db.run(`DELETE FROM verifications_email WHERE token = ?`, [token], (err) => {
-        if (err) console.error("Erreur suppression token :", err);
+    // 2️⃣ Mettre à jour l'adresse email définitive
+    const update = `
+      UPDATE utilisateurs
+      SET email = $1, email_pending = NULL
+      WHERE email_pending = $2
+    `;
+    await pool.query(update, [newEmail, newEmail]);
 
-        // 🔹 Optionnel : récupérer les infos pour la session
-        const getUser = `SELECT id, email, pseudo, avatar, annee, annee_validated 
-                         FROM utilisateurs WHERE email = ?`;
-        db.get(getUser, [newEmail], (err, user) => {
-          if (err || !user) return res.status(500).send("Impossible de charger l'utilisateur.");
+    // 3️⃣ Supprimer le token
+    await pool.query(`DELETE FROM verifications_email WHERE token = $1`, [token]);
 
-          req.session.user = {
-            id: user.id,
-            annee_validated: user.annee_validated,
-            email: user.email,
-            pseudo: user.pseudo,
-            avatar: user.avatar,
-            annee: user.annee
-          };
-// 🔹 Debug session
-          console.log("✅ Session utilisateur mise à jour :", req.session.user);
-          // 🔹 Rediriger vers page front-end confirmation
-          res.redirect('/accueil.html?emailChanged=true');
-        });
-      });
-    });
-  });
-});   
+    // 4️⃣ Récupérer les infos utilisateur
+    const getUser = `
+      SELECT id, email, pseudo, avatar, annee, annee_validated
+      FROM utilisateurs
+      WHERE email = $1
+    `;
+    const userResult = await pool.query(getUser, [newEmail]);
+
+    if (userResult.rows.length === 0) {
+      return res.status(500).send("Impossible de charger l'utilisateur.");
+    }
+
+    const user = userResult.rows[0];
+
+    // 5️⃣ Mettre à jour la session
+    req.session.user = {
+      id: user.id,
+      annee_validated: user.annee_validated,
+      email: user.email,
+      pseudo: user.pseudo,
+      avatar: user.avatar,
+      annee: user.annee,
+    };
+
+    console.log("✅ Session utilisateur mise à jour :", req.session.user);
+
+    // 6️⃣ Rediriger vers ta page de confirmation
+    res.redirect('/accueil.html?emailChanged=true');
+
+  } catch (err) {
+    console.error("❌ Erreur confirmation nouvel email :", err.message);
+    res.status(500).send("Erreur serveur lors de la confirmation du nouvel email.");
+  }
+});
+
 
 //recuperation du photo et avatar t année 
 app.get('/api/utilisateur', (req, res) => {
