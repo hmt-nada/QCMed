@@ -10,20 +10,6 @@ const cron = require("node-cron");
 const crypto = require("crypto");
 const bodyParser = require('body-parser');
 
-// db.js
-const { Pool } = require("pg");
-
-const pool = new Pool({
-  connectionString: process.env.BASE_URL,
-  ssl: { rejectUnauthorized: false },
-});
-
-pool.connect()
-  .then(() => console.log("✅ Connecté à la base Neon PostgreSQL"))
-  .catch(err => console.error("❌ Erreur de connexion à Neon :", err));
-
-module.exports = pool;
-
 
 const {
   envoyerEmailConfirmation,
@@ -328,7 +314,7 @@ app.post('/api/renvoyer-code', async (req, res) => {
       RETURNING email;
     `;
 
-    const result = await pool.query(updateQuery, [code, expiration, email]);
+    const result = await db.query(updateQuery, [code, expiration, email]);
 
     if (result.rowCount === 0) {
       return res.status(404).json({ success: false, message: "Aucun utilisateur trouvé avec cet email." });
@@ -356,7 +342,7 @@ app.get('/api/confirmation/:token', async (req, res) => {
   try {
     // 1️⃣ Vérifier le token dans la table verifications_email
     const query = `SELECT email FROM verifications_email WHERE token = $1`;
-    const { rows } = await pool.query(query, [token]);
+    const { rows } = await db.query(query, [token]);
 
     if (rows.length === 0) {
       return res.status(400).send("Lien invalide ou expiré.");
@@ -366,10 +352,10 @@ app.get('/api/confirmation/:token', async (req, res) => {
 
     // 2️⃣ Activer l'email dans la table utilisateurs
     const update = `UPDATE utilisateurs SET email_active = 1 WHERE email = $1`;
-    await pool.query(update, [email]);
+    await db.query(update, [email]);
 
     // 3️⃣ Supprimer le token
-    await pool.query(`DELETE FROM verifications_email WHERE token = $1`, [token]);
+    await db.query(`DELETE FROM verifications_email WHERE token = $1`, [token]);
 
     // 4️⃣ Récupérer les infos utilisateur
     const getUser = `
@@ -377,7 +363,7 @@ app.get('/api/confirmation/:token', async (req, res) => {
       FROM utilisateurs
       WHERE email = $1
     `;
-    const userResult = await pool.query(getUser, [email]);
+    const userResult = await db.query(getUser, [email]);
 
     if (userResult.rows.length === 0) {
       return res.status(500).send("Impossible de charger l'utilisateur.");
@@ -414,7 +400,7 @@ app.get('/api/confirmationnewmail/:token', async (req, res) => {
   try {
     // 1️⃣ Vérifier le token
     const query = `SELECT email FROM verifications_email WHERE token = $1`;
-    const { rows } = await pool.query(query, [token]);
+    const { rows } = await db.query(query, [token]);
 
     if (rows.length === 0) {
       return res.status(400).send("Lien invalide ou expiré.");
@@ -428,10 +414,10 @@ app.get('/api/confirmationnewmail/:token', async (req, res) => {
       SET email = $1, email_pending = NULL
       WHERE email_pending = $2
     `;
-    await pool.query(update, [newEmail, newEmail]);
+    await db.query(update, [newEmail, newEmail]);
 
     // 3️⃣ Supprimer le token
-    await pool.query(`DELETE FROM verifications_email WHERE token = $1`, [token]);
+    await db.query(`DELETE FROM verifications_email WHERE token = $1`, [token]);
 
     // 4️⃣ Récupérer les infos utilisateur
     const getUser = `
@@ -439,7 +425,7 @@ app.get('/api/confirmationnewmail/:token', async (req, res) => {
       FROM utilisateurs
       WHERE email = $1
     `;
-    const userResult = await pool.query(getUser, [newEmail]);
+    const userResult = await db.query(getUser, [newEmail]);
 
     if (userResult.rows.length === 0) {
       return res.status(500).send("Impossible de charger l'utilisateur.");
