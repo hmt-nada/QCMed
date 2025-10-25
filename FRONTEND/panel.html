@@ -10,13 +10,16 @@
     th { background: #007bff; color: white; }
     td[contenteditable="true"] { background: #ffffe0; }
     button { margin: 2px; cursor: pointer; }
-    #add-question-btn { margin: 10px 0; padding: 8px 12px; font-size: 16px; }
+    #add-question-btn, #save-all-btn { margin: 10px 5px; padding: 8px 12px; font-size: 16px; }
     img { max-width: 80px; }
     pre { white-space: pre-wrap; word-wrap: break-word; margin: 0; }
   </style>
 </head>
 <body>
   <h1>📘 Panel Admin - Gestion des Questions</h1>
+
+  <button id="add-question-btn">➕ Ajouter Question</button>
+  <button id="save-all-btn">💾 Sauvegarder tout</button>
 
   <table id="table-questions">
     <thead>
@@ -34,8 +37,6 @@
     </thead>
     <tbody></tbody>
   </table>
-
-  <button id="add-question-btn">➕ Ajouter Question</button>
 
 <script>
 const tbody = document.querySelector('#table-questions tbody');
@@ -59,6 +60,7 @@ function renderQuestions(questions) {
   tbody.innerHTML = '';
   questions.forEach(q => {
     const tr = document.createElement('tr');
+    tr.dataset.id = q.id; // ID pour la sauvegarde
     tr.innerHTML = `
       <td>${q.id}</td>
       <td contenteditable="true" data-field="faculte">${q.faculte || ''}</td>
@@ -68,39 +70,9 @@ function renderQuestions(questions) {
       <td contenteditable="true" data-field="options">${JSON.stringify(q.options || [])}</td>
       <td contenteditable="true" data-field="correct">${JSON.stringify(q.correct || [])}</td>
       <td contenteditable="true" data-field="image">${q.image || ''}</td>
-      <td>
-        <button class="save-btn">💾 Sauvegarder</button>
-        <button class="delete-btn">❌ Supprimer</button>
-      </td>
+      <td><button class="delete-btn">❌ Supprimer</button></td>
     `;
     tbody.appendChild(tr);
-
-    // 🔹 Sauvegarder
-    tr.querySelector('.save-btn').onclick = async () => {
-      const updated = {};
-      tr.querySelectorAll('[data-field]').forEach(td => {
-        const field = td.dataset.field;
-        let value = td.innerText;
-        if (field === 'options' || field === 'correct') {
-          try { value = JSON.parse(value); } catch { value = []; }
-        }
-        updated[field] = value;
-      });
-      try {
-        const res = await fetch(`/api/adminquestions/${q.id}`, {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(updated)
-        });
-        const result = await res.json();
-        if (!result.success) throw new Error(result.error || "Erreur serveur");
-        alert('✅ Question sauvegardée');
-        loadQuestions();
-      } catch (err) {
-        console.error("❌ Save error:", err);
-        alert("Erreur sauvegarde : " + err.message);
-      }
-    };
 
     // 🔹 Supprimer
     tr.querySelector('.delete-btn').onclick = async () => {
@@ -119,28 +91,55 @@ function renderQuestions(questions) {
 }
 
 // 🔹 Ajouter une nouvelle question
-document.getElementById('add-question-btn').onclick = async () => {
-  const newQ = {
-    faculte: 'Nouvelle faculté',
-    module: 'Nouveau module',
-    cours: 'Nouveau cours',
-    question: 'Nouvelle question',
-    options: ['Option1','Option2'],
-    correct: ['Option1'],
-    image: ''
-  };
+document.getElementById('add-question-btn').onclick = () => {
+  const tr = document.createElement('tr');
+  tr.dataset.id = ''; // nouvelle question sans ID
+  tr.innerHTML = `
+    <td>—</td>
+    <td contenteditable="true" data-field="faculte">Nouvelle faculté</td>
+    <td contenteditable="true" data-field="module">Nouveau module</td>
+    <td contenteditable="true" data-field="cours">Nouveau cours</td>
+    <td contenteditable="true" data-field="question">Nouvelle question</td>
+    <td contenteditable="true" data-field="options">["Option1","Option2"]</td>
+    <td contenteditable="true" data-field="correct">["Option1"]</td>
+    <td contenteditable="true" data-field="image"></td>
+    <td><button class="delete-btn">❌ Supprimer</button></td>
+  `;
+  tbody.appendChild(tr);
+
+  tr.querySelector('.delete-btn').onclick = () => tr.remove();
+};
+
+// 🔹 Sauvegarder tout
+document.getElementById('save-all-btn').onclick = async () => {
+  const rows = Array.from(tbody.querySelectorAll('tr'));
+  const updates = rows.map(tr => {
+    const id = tr.dataset.id;
+    const data = {};
+    tr.querySelectorAll('[data-field]').forEach(td => {
+      const field = td.dataset.field;
+      let value = td.innerText;
+      if (field === 'options' || field === 'correct') {
+        try { value = JSON.parse(value); } catch { value = []; }
+      }
+      data[field] = value;
+    });
+    return { id, ...data };
+  });
+
   try {
-    const res = await fetch('/api/adminquestions', {
+    const res = await fetch('/api/adminquestions/saveall', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(newQ)
+      body: JSON.stringify({ updates })
     });
-    const data = await res.json();
-    if (!data.success) throw new Error(data.error || "Erreur serveur");
+    const result = await res.json();
+    if (!result.success) throw new Error(result.error || "Erreur serveur");
+    alert('✅ Toutes les modifications ont été sauvegardées');
     loadQuestions();
   } catch (err) {
-    console.error("❌ Add error:", err);
-    alert("Erreur ajout : " + err.message);
+    console.error("❌ Save all error:", err);
+    alert("Erreur sauvegarde : " + err.message);
   }
 };
 

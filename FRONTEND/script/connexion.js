@@ -103,6 +103,26 @@ eyeopen1.addEventListener('click' ,() => {
   
 
 
+function showAdminModal(onChoice) {
+  const modal = document.getElementById('adminModal');
+  const closeBtn = modal.querySelector('.close-btn');
+  const adminBtn = modal.querySelector('#admin-btn');
+  const userBtn = modal.querySelector('#user-btn');
+
+  modal.style.display = 'flex';
+
+  // Fermeture
+  closeBtn.onclick = () => modal.style.display = 'none';
+  window.onclick = (e) => { if(e.target == modal) modal.style.display = 'none'; }
+
+  // Choix Admin
+  adminBtn.onclick = () => { modal.style.display = 'none'; onChoice('admin'); }
+  userBtn.onclick = () => { modal.style.display = 'none'; onChoice('user'); }
+}
+
+
+    
+  
 
   //verification finale du boutton -----------------------------
 const boutton=document.getElementById('boutton');
@@ -195,7 +215,11 @@ setTimeout(() => {
 
   // ✅ Redirection selon rôle
   if (data.utilisateur.role === "admin") {
-    window.location.href = "panel.html";
+    showAdminModal(choice => {
+        if (choice === 'admin') window.location.href = "panel.html";
+        else window.location.href = "accueil.html";
+      });
+    
   } else {
     window.location.href = "accueil.html";     // page user normale
   }
