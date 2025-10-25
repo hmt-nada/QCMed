@@ -1438,10 +1438,14 @@ app.get('*', (req, res) => {
 // 🔹 Route pour renvoyer toutes les questions
 app.get('/api/adminquestions', async (req, res) => {
   try {
-    const sql = `SELECT id, faculte, module, cours, question, options, correct, image FROM questions`;
+    // 🔹 Vérifier que l'utilisateur est connecté et admin
+    
+
+    // 🔹 Récupérer toutes les questions de la table
+    const sql = "SELECT * FROM questions ORDER BY id ASC";
     const result = await db.query(sql);
 
-    // Normaliser et parser options/correct si JSON
+    // 🔹 Normaliser et parser options/correct si JSON
     const questions = result.rows.map(r => {
       let options = [];
       let correct = [];
@@ -1460,12 +1464,15 @@ app.get('/api/adminquestions', async (req, res) => {
       };
     });
 
+    // 🔹 Retour JSON complet
     res.json({ success: true, questions });
+
   } catch (err) {
     console.error("Erreur SQL /adminquestions :", err);
     res.status(500).json({ success: false, error: err.message });
   }
 });
+
 
 
 
