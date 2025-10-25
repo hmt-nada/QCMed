@@ -1410,14 +1410,25 @@ app.get("/stats/questions-par-cours", async (req, res) => {
 // Middleware
 // Route pour récupérer toutes les questions
 // 🔹 Route pour renvoyer toutes les questions
+// 🔹 Route pour renvoyer toutes les questions (Neon PostgreSQL)
 app.get('/api/adminquestions', async (req, res) => {
   try {
-    console.log("✅ Route /api/adminquestions appelée par admin", req.session.user.email);
+    if (!req.session.user) {
+      return res.status(401).json({ success: false, error: "Utilisateur non connecté" });
+    }
 
-    const sql = "SELECT * FROM questions ORDER BY id ASC";
-    const result = await db.query(sql); // PostgreSQL avec pool.query
+    console.log("✅ Route /api/adminquestions appelée par :", req.session.user.email);
 
-    // Normaliser options/correct
+    // ⚡ Requête PostgreSQL
+    const sql = `
+      SELECT id, faculte, module, cours, question, options, correct, image
+      FROM questions
+      ORDER BY id ASC
+    `;
+
+    const result = await db.query(sql); // db = pool Neon / pg.Pool
+
+    // ⚙️ Normalisation options / correct
     const questions = result.rows.map(r => {
       let options = [];
       let correct = [];
@@ -1426,13 +1437,13 @@ app.get('/api/adminquestions', async (req, res) => {
 
       return {
         id: r.id,
-        faculte: r.faculte,
-        module: r.module,
-        cours: r.cours,
-        question: r.question,
+        faculte: r.faculte || "",
+        module: r.module || "",
+        cours: r.cours || "",
+        question: r.question || "",
         options,
         correct,
-        image: r.image
+        image: r.image || ""
       };
     });
 
@@ -1509,7 +1520,40 @@ app.delete('/api/adminquestions/:id', async (req, res) => {
     res.status(500).json({ success: false, error: err.message });
   }
 });
+app.post('/api/save-questions', (req, res) => {
+  const questions = req.body.questions; // tableau envoyé par le frontend
+  if (!Array.isArray(questions)) {
+    return res.status(400).json({ success: false, message: "Format invalide" });
+  }
 
+  // Exemple avec SQLite
+  const stmt = db.prepare(`
+    INSERT OR REPLACE INTO questions (id, faculte, module, cours, question, options, correct, image)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+  `);
+
+  try {
+    db.serialize(() => {
+      questions.forEach(q => {
+        stmt.run(
+          q.id,
+          q.faculte || '',
+          q.module || '',
+          q.cours || '',
+          q.question || '',
+          JSON.stringify(q.options || []),
+          JSON.stringify(q.correct || []),
+          q.image || ''
+        );
+      });
+    });
+    stmt.finalize();
+    res.json({ success: true, message: "Questions sauvegardées" });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ success: false, message: "Erreur serveur" });
+  }
+});
 //************************************************************************************************* */
 
 
