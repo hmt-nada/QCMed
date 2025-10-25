@@ -6,8 +6,6 @@ async function envoyerEmailConfirmation(email, lien) {
 
   const msg = {
    
-
- 
     from: 'QCMed <qcmed.2025@gmail.com>',
     to: email,
     subject: ' Confirmez votre inscription à QCMed ',
@@ -58,19 +56,7 @@ try {
 }
 
 async function envoyerEmailConfirmationcode(email, code) {
-  const transporter = nodemailer.createTransport({
-    service: 'gmail',
-    auth: {
-      user: "qcmed.2025@gmail.com",
-      pass: "xhvs ezbq mxze qqxd"
-    },
-    tls: {
-    rejectUnauthorized: false
-  },
-  secure:true
-  });
-
-  await transporter.sendMail({
+  const msg={
     from: 'QCMed <qcmed.2025@gmail.com>',
     to: email,
     subject: 'Votre code de vérification QCMed',
@@ -112,23 +98,17 @@ async function envoyerEmailConfirmationcode(email, code) {
     </div>
   </div>
     `
-  });
+ };
+  try {
+    await sgMail.send(msg);
+    console.log('Email envoyé via SendGrid !');
+  } catch (err) {
+    console.error('Erreur SendGrid :', err);
+  }
 }
 //envoyer un email de remerciment a l'utilisateur 
 async function envoyerEmailMerciUtilisateur(emailUser) {
-  const transporter = nodemailer.createTransport({
-    service: 'gmail',
-    auth: {
-      user: "qcmed.2025@gmail.com",
-      pass: "xhvs ezbq mxze qqxd" // ⚠️ mot de passe d’application Gmail
-    },
-    tls: {
-    rejectUnauthorized: false
-  },
-  secure:true
-  });
-
-  await transporter.sendMail({
+  const msg ={
     from: 'QCMed <qcmed.2025@gmail.com>',
     to: emailUser,
     subject: 'Merci pour votre signalement - QCMed',
@@ -153,24 +133,17 @@ async function envoyerEmailMerciUtilisateur(emailUser) {
         </div>
       </div>
     `
-  });
+  };
+  try {
+    await sgMail.send(msg);
+    console.log('Email envoyé via SendGrid !');
+  } catch (err) {
+    console.error('Erreur SendGrid :', err);
+  }
 }
 
 async function envoyerEmailsignalemet(emailUser, question, reponses, reponsesCorrectes, typeErreur, commentaire) {
-  const transporter = nodemailer.createTransport({
-    service: 'gmail',
-    auth: {
-      user: "qcmed.2025@gmail.com",
-      pass: "xhvs ezbq mxze qqxd"
-    },
-    tls: {
-    rejectUnauthorized: false
-  },
-  secure:true
-    
-  });
-
-  await transporter.sendMail({
+  const msg ={
     from: 'QCMed <qcmed.2025@gmail.com>',
 
     to: 'on_hamitouche@esi.dz' ,//email hamzi 
@@ -230,7 +203,13 @@ async function envoyerEmailsignalemet(emailUser, question, reponses, reponsesCor
 
 
     `
-  });
+  };
+  try {
+    await sgMail.send(msg);
+    console.log('Email envoyé via SendGrid !');
+  } catch (err) {
+    console.error('Erreur SendGrid :', err);
+  }
 }
 
 
@@ -244,19 +223,7 @@ async function envoyerEmailValidation(email, id, anneeActuelle, anneeSuivante, t
   const lienRester = `/validation-annee.html?id=${id}&token=${token}&choix=reste`;
   const lienPasser = `/validation-annee.html?id=${id}&token=${token}&choix=passe`;
 
-  const transporter = nodemailer.createTransport({
-    service: 'gmail',
-    auth: {
-      user: "qcmed.2025@gmail.com",
-      pass: "xhvs ezbq mxze qqxd" // mot de passe d’application
-    },
-    tls: {
-    rejectUnauthorized: false
-  },
-  secure:true
-  });
-
-  await transporter.sendMail({
+  const msg ={
     from: 'QCMed <qcmed.2025@gmail.com>',
     to: email,
     subject: 'Validation de votre année scolaire - QCMed',
@@ -293,24 +260,18 @@ async function envoyerEmailValidation(email, id, anneeActuelle, anneeSuivante, t
         </div>
       </div>
     `
-  });
+  };
+  try {
+    await sgMail.send(msg);
+    console.log('Email envoyé via SendGrid !');
+  } catch (err) {
+    console.error('Erreur SendGrid :', err);
+  }
 }
 
 
 async function envoyerEmailConfirmationNouvelle(email, lien) {
-  const transporter = nodemailer.createTransport({
-    service: 'gmail',
-    auth: {
-      user: "qcmed.2025@gmail.com",
-      pass: "xhvs ezbq mxze qqxd"
-    },
-    tls: {
-      rejectUnauthorized: false
-    },
-    secure: true
-  });
-
-  await transporter.sendMail({
+  const msg ={
     from: 'QCMed <qcmed.2025@gmail.com>',
     to: email,
     subject: 'Confirmez votre nouvelle adresse e-mail QCMed',
@@ -349,24 +310,18 @@ async function envoyerEmailConfirmationNouvelle(email, lien) {
       </div>
     </div>
     `
-  });
+  };
+  try {
+    await sgMail.send(msg);
+    console.log('Email envoyé via SendGrid !');
+  } catch (err) {
+    console.error('Erreur SendGrid :', err);
+  }
 }
 
 
 async function envoyermailcontact(nom,email, message) {
-  const transporter = nodemailer.createTransport({
-    service: 'gmail',
-    auth: {
-      user: "qcmed.2025@gmail.com",
-      pass: "xhvs ezbq mxze qqxd"
-    },
-    tls: {
-      rejectUnauthorized: false
-    },
-    secure: true
-  });
-
-  await transporter.sendMail({
+  const msg ={
     from: 'QCMed <qcmed.2025@gmail.com>',
     to: "qcmed.2025@gmail.com",
     subject: `Message de ${nom}`,
@@ -405,7 +360,13 @@ async function envoyermailcontact(nom,email, message) {
 </div>
 
     `
-  });
+  };
+  try {
+    await sgMail.send(msg);
+    console.log('Email envoyé via SendGrid !');
+  } catch (err) {
+    console.error('Erreur SendGrid :', err);
+  }
 }
 
 

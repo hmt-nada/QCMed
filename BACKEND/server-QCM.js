@@ -169,12 +169,12 @@ app.post('/api/pseudo', async (req, res) => {
 
 
 
-// --- Renvoyer un email de confirmation ---
+// --- Renvoyer un email de confirmation (version PostgreSQL / Neon) ---
 app.post("/api/resend-confirmation", async (req, res) => {
   const { email } = req.body;
 
   try {
-    // 🔹 1. Récupérer le token existant
+    // 1️⃣ Vérifier si l'email existe dans la table verifications_email
     const selectQuery = `
       SELECT token, expire, resend_count, last_resend 
       FROM verifications_email 
@@ -188,34 +188,39 @@ app.post("/api/resend-confirmation", async (req, res) => {
 
     const row = result.rows[0];
 
-    // 🔹 2. Vérifier le nombre de tentatives
-    if (row.resend_count >= 3) {
+    // 2️⃣ Vérifier le nombre de renvois (max 3)
+    if (Number(row.resend_count) >= 3) {
       return res.json({ success: false, message: "Nombre maximum de renvois atteint." });
     }
 
-    // 🔹 3. Vérifier le délai de 5 minutes
+    // 3️⃣ Vérifier le délai minimum (5 min)
     const now = Date.now();
-    if (row.last_resend && now - Number(row.last_resend) < 5 * 60 * 1000) {
-      const restant = Math.ceil((5 * 60 * 1000 - (now - Number(row.last_resend))) / 1000);
+    const lastResend = row.last_resend ? new Date(row.last_resend).getTime() : 0;
+
+    if (lastResend && now - lastResend < 5 * 60 * 1000) {
+      const restant = Math.ceil((5 * 60 * 1000 - (now - lastResend)) / 1000);
       return res.json({
         success: false,
         message: `Veuillez attendre ${restant} secondes avant de renvoyer l'email.`,
       });
     }
 
-    // 🔹 4. Générer un nouveau token (optionnel mais propre)
+    // 4️⃣ Générer un nouveau token (sécurisé)
     const newToken = require("crypto").randomBytes(32).toString("hex");
     const newExpire = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24h
 
-    // 🔹 5. Mettre à jour le token, le compteur et la date d’envoi
+    // 5️⃣ Mettre à jour le token + compteur + date
     const updateQuery = `
       UPDATE verifications_email
-      SET token = $1, expire = $2, resend_count = resend_count + 1, last_resend = $3
+      SET token = $1,
+          expire = $2,
+          resend_count = resend_count + 1,
+          last_resend = to_timestamp($3 / 1000.0)
       WHERE email = $4
     `;
     await db.query(updateQuery, [newToken, newExpire, now, email]);
 
-    // 🔹 6. Envoyer le mail
+    // 6️⃣ Envoyer le mail
     const baseUrl = process.env.BASE_URL || "http://localhost:3000";
     const lien = `${baseUrl}/api/confirmation/${newToken}`;
 
@@ -231,64 +236,107 @@ app.post("/api/resend-confirmation", async (req, res) => {
 
 //recuperation du compte avec code
 
-app.post('/api/envoyer-code', (req, res) => {
+app.post('/api/envoyer-code', async (req, res) => {
   const { email } = req.body;
   const code = Math.floor(100000 + Math.random() * 900000).toString();
-  const expiration = new Date(Date.now() + 90_000).toISOString();
+  const expiration = new Date(Date.now() + 90_000); // 90 secondes
 
-  db.get("SELECT * FROM utilisateurs WHERE email = ? AND email_active = 1", [email], (err, user) => {
-    if (err) return res.status(500).json({ error: "Erreur serveur" });
-    if (!user) return res.status(404).json({ error: "Utilisateur introuvable" });
+  try {
+    // 1️⃣ Vérifier si l'utilisateur existe et que son email est actif
+    const userQuery = `
+      SELECT * FROM utilisateurs 
+      WHERE email = $1 AND email_active = TRUE
+    `;
+    const userResult = await db.query(userQuery, [email]);
 
-    // Vérifie si une entrée existe déjà dans verifications_email
-    db.get("SELECT * FROM verifications_email WHERE email = ?", [email], (err, existing) => {
-      if (err) return res.status(500).json({ error: "Erreur serveur" });
+    if (userResult.rowCount === 0) {
+      return res.status(404).json({ error: "Utilisateur introuvable" });
+    }
 
-      const query = existing
-        ? "UPDATE verifications_email SET code = ?, codeExpiration = ? WHERE email = ?"
-        : "INSERT INTO verifications_email (email, code, codeExpiration) VALUES (?, ?, ?)";
+    // 2️⃣ Vérifier si une entrée existe déjà dans verifications_email
+    const checkQuery = `
+      SELECT * FROM verifications_email WHERE email = $1
+    `;
+    const checkResult = await db.query(checkQuery, [email]);
 
-      const params = existing ? [code, expiration, email] : [email, code, expiration];
+    if (checkResult.rowCount > 0) {
+      // 🔹 Mise à jour du code et de l’expiration
+      const updateQuery = `
+        UPDATE verifications_email
+        SET code = $1, codeexpiration = $2
+        WHERE email = $3
+      `;
+      await db.query(updateQuery, [code, expiration, email]);
+    } else {
+      // 🔹 Création d'une nouvelle entrée
+      const insertQuery = `
+        INSERT INTO verifications_email (email, code, codeexpiration)
+        VALUES ($1, $2, $3)
+      `;
+      await db.query(insertQuery, [email, code, expiration]);
+    }
 
-      db.run(query, params, (err) => {
-        if (err) return res.status(500).json({ error: "Erreur serveur" });
+    // 3️⃣ Envoi de l'email avec le code
+    await envoyerEmailConfirmationcode(email, code);
 
-        envoyerEmailConfirmationcode(email, code)
-          .then(() => res.json({ success: true, message: "Email envoyé avec succès." }))
-          .catch((err) => {
-            console.error("Erreur envoi email :", err.message);
-            res.status(500).json({ success: false, message: "Erreur lors de l'envoi du code." });
-          });
-      });
-    });
-  });
+    res.json({ success: true, message: "Email envoyé avec succès." });
+
+  } catch (err) {
+    console.error("❌ Erreur dans /api/envoyer-code :", err.message);
+    res.status(500).json({ success: false, message: "Erreur serveur lors de l'envoi du code." });
+  }
 });
+
 
 //verification du code 
 
-app.post('/api/verifier-code', (req, res) => {
+app.post('/api/verifier-code', async (req, res) => {
   const { email, code } = req.body;
 
-  db.get("SELECT * FROM verifications_email WHERE email = ?", [email], (err, user) => {
-    if (err) return res.status(500).json({ success: false, message: "Erreur serveur." });
-    if (!user) return res.status(404).json({ success: false, message: "Utilisateur introuvable." });
+  try {
+    // 1️⃣ Récupérer la ligne correspondante
+    const query = `SELECT * FROM verifications_email WHERE email = $1`;
+    const result = await db.query(query, [email]);
 
+    if (result.rowCount === 0) {
+      return res.status(404).json({ success: false, message: "Utilisateur introuvable." });
+    }
+
+    const user = result.rows[0];
+
+    // 2️⃣ Vérifier le code
     if (user.code !== code) {
       return res.json({ success: false, message: "Code incorrect." });
     }
 
-    const expirationDate = new Date(user.codeExpiration);
+    // 3️⃣ Vérifier l’expiration
+    const expirationDate = new Date(user.codeexpiration);
     const maintenant = new Date();
 
     if (maintenant > expirationDate) {
-      db.run("UPDATE verifications_email SET code = NULL, codeExpiration = NULL WHERE email = ?", [email]);
+      await db.query(
+        `UPDATE verifications_email 
+         SET code = NULL, codeexpiration = NULL 
+         WHERE email = $1`,
+        [email]
+      );
       return res.json({ success: false, message: "Code expiré." });
     }
 
-    // ✅ Supprimer le code après succès
-    db.run("UPDATE verifications_email SET code = NULL, codeExpiration = NULL WHERE email = ?", [email]);
+    // 4️⃣ Supprimer le code après succès
+    await db.query(
+      `UPDATE verifications_email 
+       SET code = NULL, codeexpiration = NULL 
+       WHERE email = $1`,
+      [email]
+    );
+
     return res.json({ success: true, message: "Code valide." });
-  });
+
+  } catch (err) {
+    console.error("❌ Erreur dans /api/verifier-code :", err.message);
+    return res.status(500).json({ success: false, message: "Erreur serveur." });
+  }
 });
 
 
@@ -299,7 +347,6 @@ app.post('/api/verifier-code', (req, res) => {
 app.post('/api/renvoyer-code', async (req, res) => {
   const { email } = req.body;
 
-  // Vérification basique
   if (!email) {
     return res.status(400).json({ success: false, message: "Email requis." });
   }
@@ -308,10 +355,9 @@ app.post('/api/renvoyer-code', async (req, res) => {
   const expiration = new Date(Date.now() + 90_000).toISOString();
 
   try {
-    // Mise à jour dans PostgreSQL
     const updateQuery = `
       UPDATE verifications_email
-      SET code = $1, codeExpiration = $2
+      SET code = $1, "codeExpiration" = $2
       WHERE email = $3
       RETURNING email;
     `;
@@ -322,7 +368,6 @@ app.post('/api/renvoyer-code', async (req, res) => {
       return res.status(404).json({ success: false, message: "Aucun utilisateur trouvé avec cet email." });
     }
 
-    // Envoi de l'email de confirmation avec le code
     await envoyerEmailConfirmationcode(email, code);
     res.json({ success: true, message: "Code renvoyé avec succès." });
 
@@ -475,143 +520,184 @@ app.get('/api/utilisateur', (req, res) => {
 
 
 //initialisation des champs des infos du compte 
-app.get('/api/mon-compte', (req, res) => {
-  const email = req.session.user.email;
-  const query = "SELECT nom, prenom, pseudo, faculte, avatar FROM utilisateurs WHERE email = ?";
+app.get('/api/mon-compte', async (req, res) => {
+  const email = req.session.user?.email;
+  if (!email) {
+    return res.status(401).json({ success: false, message: "Utilisateur non authentifié" });
+  }
 
-  db.get(query, [email], (err, row) => {
-    if (err) {
-      console.error("Erreur récupération utilisateur:", err.message);
-      return res.status(500).json({ success: false, message: "Erreur serveur" });
-    }
+  const query = `
+    SELECT nom, prenom, pseudo, faculte, avatar
+    FROM utilisateurs
+    WHERE email = $1
+  `;
 
-    if (!row) {
+  try {
+    const result = await db.query(query, [email]); // ⚠️ db.query au lieu de db.get
+    if (result.rows.length === 0) {
       return res.json({ success: false, message: "Utilisateur non trouvé" });
     }
 
-    return res.json({ success: true, utilisateur: row });
-  });
+    return res.json({ success: true, utilisateur: result.rows[0] });
+  } catch (err) {
+    console.error("Erreur récupération utilisateur:", err.message);
+    return res.status(500).json({ success: false, message: "Erreur serveur" });
+  }
 });
 
 // --- Route de la réinitialisation des champs
 // --- Route de la réinitialisation des champs
-app.post('/api/update', (req, res) => {
-  const email = req.session.user.email;
+app.post('/api/update', async (req, res) => {
+  const email = req.session.user?.email;
+  if (!email) {
+    return res.status(401).json({ success: false, message: "Utilisateur non authentifié." });
+  }
+
   const { nom, prenom, pseudo, faculte, avatar } = req.body;
 
   const updateQuery = `
     UPDATE utilisateurs
-    SET nom = ?, prenom = ?, pseudo = ?, faculte = ?, avatar = ?
-    WHERE email = ?
+    SET nom = $1, prenom = $2, pseudo = $3, faculte = $4, avatar = $5
+    WHERE email = $6
+    RETURNING email;
   `;
 
-  db.run(updateQuery, [nom, prenom, pseudo, faculte, avatar, email], function (err) {
-    if (err) {
-      console.error("Erreur update profil :", err.message);
-      return res.status(500).json({ success: false, message: "Erreur serveur" });
-    }
-    if (this.changes === 0) {
+  try {
+    const result = await db.query(updateQuery, [nom, prenom, pseudo, faculte, avatar, email]);
+
+    if (result.rowCount === 0) {
       return res.status(404).json({ success: false, message: "Utilisateur non trouvé." });
     }
 
     // 🔑 Mise à jour de la session
     req.session.user = {
-      ...req.session.user, // garder les champs existants (id, email, etc.)
+      ...req.session.user,
       pseudo,
       avatar
     };
 
     console.log("Utilisateur mis à jour :", email);
     return res.json({ success: true, message: "Informations mises à jour avec succès !" });
-  });
+
+  } catch (err) {
+    console.error("Erreur update profil :", err.message);
+    return res.status(500).json({ success: false, message: "Erreur serveur." });
+  }
 });
+app.post("/api/change-password", async (req, res) => {
+  const email = req.session.user?.email;
+  if (!email) {
+    return res.status(401).json({ error: "Utilisateur non authentifié." });
+  }
 
-
-//changement du password 
-app.post("/api/change-password", (req, res) => {
   const { currentPassword, newPassword } = req.body;
-const email=req.session.user.email;
-  db.get("SELECT * FROM utilisateurs WHERE email = ?", [email], async (err, user) => {
-    if (err || !user) {
+
+  try {
+    // 🔍 Vérifie si l'utilisateur existe
+    const userResult = await db.query("SELECT mot_de_passe FROM utilisateurs WHERE email = $1", [email]);
+    if (userResult.rows.length === 0) {
       return res.status(404).json({ error: "Utilisateur introuvable." });
     }
 
+    const user = userResult.rows[0];
     const match = await bcrypt.compare(currentPassword, user.mot_de_passe);
     if (!match) {
-
       return res.status(401).json({ error: "Mot de passe actuel incorrect." });
     }
 
     const hashedNewPassword = await bcrypt.hash(newPassword, 10);
-    db.run("UPDATE utilisateurs SET mot_de_passe = ? WHERE email = ?", [hashedNewPassword, email], (err) => {
-      if (err) {
-        return res.status(500).json({ error: "Erreur de mise à jour." });
-      }
-      return res.status(200).json({ message: "Mot de passe changé avec succès." });
-    });
-  });
+    const updateResult = await db.query(
+      "UPDATE utilisateurs SET mot_de_passe = $1 WHERE email = $2 RETURNING email",
+      [hashedNewPassword, email]
+    );
+
+    if (updateResult.rowCount === 0) {
+      return res.status(500).json({ error: "Erreur de mise à jour." });
+    }
+
+    return res.status(200).json({ message: "Mot de passe changé avec succès." });
+
+  } catch (err) {
+    console.error("Erreur changement mot de passe :", err.message);
+    return res.status(500).json({ error: "Erreur serveur." });
+  }
 });
+
 
 //nouveau mot de passe 
 app.post("/api/new-password", async (req, res) => {
   const { email, password } = req.body;
 
-  db.get("SELECT * FROM utilisateurs WHERE email = ?", [email], async (err, user) => {
-    if (err || !user) {
+  try {
+    // 🔍 Vérifier que l'utilisateur existe
+    const userResult = await db.query("SELECT * FROM utilisateurs WHERE email = $1", [email]);
+    if (userResult.rows.length === 0) {
       return res.status(404).json({ error: "Utilisateur introuvable." });
     }
 
-    try {
-      const hashedNewPassword = await bcrypt.hash(password, 10);
+    const user = userResult.rows[0];
 
-      db.run(
-        "UPDATE utilisateurs SET mot_de_passe = ?, email_disconnect = ? WHERE email = ?",
-        [hashedNewPassword, false, email],
-        (err) => {
-          if (err) {
-            console.error("❌ Erreur mise à jour :", err);
-            return res.status(500).json({ error: "Erreur de mise à jour." });
-          }
+    // 🔐 Hasher le nouveau mot de passe
+    const hashedNewPassword = await bcrypt.hash(password, 10);
 
-          console.log(`✅ Mot de passe mis à jour pour ${email}, utilisateur reconnecté.`);
+    // 🔄 Mettre à jour le mot de passe et reconnecter
+    const updateQuery = `
+      UPDATE utilisateurs
+      SET mot_de_passe = $1, email_disconnect = $2
+      WHERE email = $3
+      RETURNING email, nom;
+    `;
+    const updateResult = await db.query(updateQuery, [hashedNewPassword, false, email]);
 
-          return res.status(200).json({
-            message: "Mot de passe changé avec succès.",
-            user: { email: user.email, nom: user.nom },
-          });
-        }
-      );
-      // 🔹 Récupérer les infos de l’utilisateur pour la session
-        const getUser = `SELECT id, email, pseudo, avatar, annee, annee_validated 
-                         FROM utilisateurs WHERE email = ?`;
-        db.get(getUser, [email], (err, user) => {
-          if (err || !user) {
-            return res.status(500).send("Impossible de charger l'utilisateur.");
-          }
-       // 🔹 Créer la session utilisateur
-          req.session.user = {
-            id: user.id,
-            annee_validated: user.annee_validated,
-            validation_envoyee: user.validation_envoyee,
-            email: user.email,
-            pseudo: user.pseudo,
-            avatar: user.avatar,
-            annee: user.annee
-          };
-// Donner une durée de vie spéciale (30 jours) à cette session
-//autoriser la connexion directe pendant 30 jours
-     
- });
-    } catch (e) {
-      console.error("❌ Erreur hash mot de passe :", e);
-      return res.status(500).json({ error: "Erreur serveur" });
+    if (updateResult.rowCount === 0) {
+      return res.status(500).json({ error: "Erreur de mise à jour." });
     }
-  });
+
+    console.log(`✅ Mot de passe mis à jour pour ${email}, utilisateur reconnecté.`);
+
+    // 🧠 Récupérer à nouveau les infos utilisateur pour la session
+    const getUserQuery = `
+      SELECT id, email, pseudo, avatar, annee, annee_validated, validation_envoyee
+      FROM utilisateurs
+      WHERE email = $1
+    `;
+    const getUserResult = await db.query(getUserQuery, [email]);
+    const utilisateur = getUserResult.rows[0];
+
+    if (!utilisateur) {
+      return res.status(500).send("Impossible de charger l'utilisateur.");
+    }
+
+    // 🔑 Créer la session utilisateur
+    req.session.user = {
+      id: utilisateur.id,
+      annee_validated: utilisateur.annee_validated,
+      validation_envoyee: utilisateur.validation_envoyee,
+      email: utilisateur.email,
+      pseudo: utilisateur.pseudo,
+      avatar: utilisateur.avatar,
+      annee: utilisateur.annee
+    };
+
+    // ⏰ (Optionnel) durée de session 30 jours
+    req.session.cookie.maxAge = 30 * 24 * 60 * 60 * 1000; // 30 jours
+
+    return res.status(200).json({
+      message: "Mot de passe changé avec succès.",
+      user: { email: utilisateur.email, nom: user.nom },
+    });
+
+  } catch (err) {
+    console.error("❌ Erreur new-password :", err.message);
+    return res.status(500).json({ error: "Erreur serveur." });
+  }
 });
+
 
 // 🔹 Route : changement d'email
 app.post('/api/change-mail', async (req, res) => {
   console.log("📩 [API] /api/change-mail appelée");
+
   try {
     const { newemail, oldemail, password } = req.body;
     console.log("👉 Données reçues:", { newemail, oldemail, password });
@@ -624,12 +710,12 @@ app.post('/api/change-mail', async (req, res) => {
       return res.status(404).json({ error: 'Utilisateur introuvable.' });
     }
 
-    const user = await new Promise((resolve, reject) => {
-      db.get("SELECT * FROM utilisateurs WHERE email = ?", [currentemail], (err, row) => {
-        if (err) reject(err);
-        else resolve(row);
-      });
-    });
+    // 🔹 1️⃣ Récupérer l'utilisateur actuel
+    const userResult = await db.query(
+      "SELECT * FROM utilisateurs WHERE email = $1",
+      [currentemail]
+    );
+    const user = userResult.rows[0];
 
     if (!user) {
       console.warn("⚠️ Utilisateur introuvable en base");
@@ -638,11 +724,13 @@ app.post('/api/change-mail', async (req, res) => {
 
     console.log("✅ Utilisateur trouvé en base:", user.email);
 
+    // 🔹 2️⃣ Vérifier l'ancien email
     if (oldemail !== user.email) {
       console.warn("⚠️ Ancien email incorrect:", oldemail, "≠", user.email);
       return res.status(401).json({ error: 'email incorrect' });
     }
 
+    // 🔹 3️⃣ Vérifier le mot de passe
     const match = await bcrypt.compare(password, user.mot_de_passe);
     console.log("🔐 Vérif mot de passe:", match);
 
@@ -651,51 +739,51 @@ app.post('/api/change-mail', async (req, res) => {
       return res.status(401).json({ error: 'password incorrect' });
     }
 
-    const existingUser = await new Promise((resolve, reject) => {
-      db.get("SELECT * FROM utilisateurs WHERE email = ?", [newemail], (err, row) => {
-        if (err) reject(err);
-        else resolve(row);
-      });
-    });
-
-    if (existingUser) {
+    // 🔹 4️⃣ Vérifier que le nouvel email n’existe pas déjà
+    const existingUserResult = await db.query(
+      "SELECT * FROM utilisateurs WHERE email = $1",
+      [newemail]
+    );
+    if (existingUserResult.rows.length > 0) {
       console.warn("⚠️ Email déjà utilisé:", newemail);
       return res.status(400).json({ error: 'Ce nouvel email est déjà utilisé.' });
     }
 
     console.log("📌 Mise à jour email_pending →", newemail);
 
-    db.run("UPDATE utilisateurs SET email_pending = ? WHERE email = ?", [newemail, currentemail], (err) => {
-      if (err) {
-        console.error("🔥 Erreur update DB:", err);
-        return res.status(500).json({ error: 'Erreur serveur.' });
-      }
+    // 🔹 5️⃣ Mettre à jour le champ email_pending
+    await db.query(
+      "UPDATE utilisateurs SET email_pending = $1 WHERE email = $2",
+      [newemail, currentemail]
+    );
 
-      const expiration = new Date(Date.now() + 24*60*60*1000).toISOString();
-      const token = require('crypto').randomBytes(32).toString('hex');
-      console.log("🆕 Token généré:", token);
+    // 🔹 6️⃣ Créer un token de confirmation
+    const expiration = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
+    const token = require('crypto').randomBytes(32).toString('hex');
+    console.log("🆕 Token généré:", token);
 
-      db.run("INSERT INTO verifications_email (email, token, expire) VALUES (?, ?, ?)", [newemail, token, expiration], async (err2) => {
-        if (err2) {
-          console.error("🔥 Erreur insert token:", err2);
-          return res.status(500).json({ error: 'Erreur serveur.' });
-        }
-const baseUrl = process.env.BASE_URL || 'http://localhost:3000';
-const lien = `${baseUrl}/api/confirmationnewmail/${token}`;
+    // 🔹 7️⃣ Insérer la vérification dans la table verifications_email
+    await db.query(
+      `INSERT INTO verifications_email (email, token, expire)
+       VALUES ($1, $2, $3)`,
+      [newemail, token, expiration]
+    );
 
-       
-        console.log("📧 Envoi email de confirmation à", newemail, "→ lien:", lien);
+    // 🔹 8️⃣ Envoi du mail de confirmation
+    const baseUrl = process.env.BASE_URL || 'http://localhost:3000';
+    const lien = `${baseUrl}/api/confirmationnewmail/${token}`;
 
-        try {
-          await envoyerEmailConfirmationNouvelle(newemail, lien);
-          console.log("✅ Email de confirmation envoyé");
-          return res.json({ success: true, message: 'Un email de confirmation a été envoyé.' });
-        } catch (errMail) {
-          console.error("🔥 Erreur envoi email:", errMail);
-          return res.status(500).json({ error: 'Erreur envoi email.' });
-        }
-      });
-    });
+    console.log("📧 Envoi email de confirmation à", newemail, "→ lien:", lien);
+
+    try {
+      await envoyerEmailConfirmationNouvelle(newemail, lien);
+      console.log("✅ Email de confirmation envoyé");
+      return res.json({ success: true, message: 'Un email de confirmation a été envoyé.' });
+    } catch (errMail) {
+      console.error("🔥 Erreur envoi email:", errMail);
+      return res.status(500).json({ error: 'Erreur envoi email.' });
+    }
+
   } catch (err) {
     console.error("🔥 Exception /api/change-mail:", err);
     return res.status(500).json({ error: 'Erreur serveur.' });
@@ -707,160 +795,189 @@ const lien = `${baseUrl}/api/confirmationnewmail/${token}`;
 
 //connexion a un compte
 
-app.post("/api/connexion", (req, res) => {
+app.post("/api/connexion", async (req, res) => {
   const { email, password } = req.body;
 
-  db.get("SELECT * FROM utilisateurs WHERE email = ? AND email_active = 1" , [email], async (err, user) => {
-    if (err || !user) {
+  try {
+    // 🔹 Requête PostgreSQL (note : pas de `?`, mais `$1`, `$2`, etc.)
+    const result = await pool.query(
+      "SELECT * FROM utilisateurs WHERE email = $1 AND email_active = TRUE",
+      [email]
+    );
+
+    const user = result.rows[0];
+    if (!user) {
       return res.status(404).json({ error: "Utilisateur introuvable" });
     }
 
+    // 🔐 Vérification du mot de passe
     const match = await bcrypt.compare(password, user.mot_de_passe);
     if (!match) {
       return res.status(401).json({ error: "Mot de passe incorrect" });
     }
 
-// Définir rôle
+    // 🧩 Déterminer le rôle
     const role = (email === ADMIN_EMAIL) ? "admin" : "user";
 
-    // ✅ Mettre à jour email_disconnect = false
-    db.run("UPDATE utilisateurs SET email_disconnect = ? WHERE email = ?", [false, email], (err) => {
-  if (err) {
-    console.error("❌ Erreur mise à jour connexion :", err);
-    return res.status(500).json({ error: "Erreur interne lors de la connexion" });
-  }
+    // 🔹 Mise à jour du champ email_disconnect
+    await pool.query(
+      "UPDATE utilisateurs SET email_disconnect = FALSE WHERE email = $1",
+      [email]
+    );
 
-  // 🔹 Récupérer les infos de l’utilisateur pour la session
-  const getUser = `SELECT id, email, pseudo, avatar, annee, annee_validated
-                   FROM utilisateurs WHERE email = ?`;
+    // 🔹 Récupérer les infos de l’utilisateur pour la session
+    const userData = await pool.query(
+      `SELECT id, email, pseudo, avatar, annee, annee_validated
+       FROM utilisateurs WHERE email = $1`,
+      [email]
+    );
 
-  db.get(getUser, [email], (err, user) => {
-    if (err || !user) {
+    const utilisateur = userData.rows[0];
+    if (!utilisateur) {
       return res.status(500).send("Impossible de charger l'utilisateur.");
     }
 
     // 🔹 Créer la session utilisateur
     req.session.user = {
-      id: user.id,
-      annee_validated: user.annee_validated,
-      validation_envoyee: user.validation_envoyee,
-      email: user.email,
-      pseudo: user.pseudo,
-      avatar: user.avatar,
-      role:role,
-      annee: user.annee
+      id: utilisateur.id,
+      annee_validated: utilisateur.annee_validated,
+      validation_envoyee: utilisateur.validation_envoyee,
+      email: utilisateur.email,
+      pseudo: utilisateur.pseudo,
+      avatar: utilisateur.avatar,
+      role: role,
+      annee: utilisateur.annee
     };
 
     console.log(`✅ Utilisateur ${email} connecté (email_disconnect = false)`);
 
-    //Répondre uniquement ici, après avoir mis la session
+    // ✅ Réponse finale
     return res.status(200).json({
       success: true,
       message: "Connexion réussie",
-      utilisateur: req.session.user   // tu peux renvoyer direct l’utilisateur
+      utilisateur: req.session.user
     });
-  });
+  } catch (err) {
+    console.error("❌ Erreur dans /api/connexion :", err);
+    return res.status(500).json({ error: "Erreur interne lors de la connexion" });
+  }
 });
 
-    });
-  });
-
 
 
 // Déconnexion d'un compte
 // Déconnexion d'un compte
-app.post("/api/deconnexion", (req, res) => {
-  if (!req.session.user) {
-    return res.json({ success: true, message: "Pas de session active." });
-  }
-
-  const emailUser = req.session.user.email;
-
-  // Mise à jour de la DB
-  db.run("UPDATE utilisateurs SET email_disconnect = ? WHERE email = ?", [true, emailUser], (err) => {
-    if (err) {
-      console.error("❌ Erreur update email_disconnect :", err);
-      return res.status(500).json({ error: "Erreur lors de la mise à jour de la déconnexion." });
+app.post("/api/deconnexion", async (req, res) => {
+  try {
+    // 🔹 Vérifier s'il existe une session active
+    if (!req.session.user) {
+      return res.json({ success: true, message: "Pas de session active." });
     }
 
-    // Suppression session et cookie
+    const emailUser = req.session.user.email;
+
+    // 🔹 Mise à jour du champ email_disconnect dans la base
+    await pool.query(
+      "UPDATE utilisateurs SET email_disconnect = TRUE WHERE email = $1",
+      [emailUser]
+    );
+
+    // 🔹 Suppression de la session et du cookie
     delete req.session.user;
     res.clearCookie("connect.sid");
 
     console.log(`✅ Utilisateur ${emailUser} déconnecté (email_disconnect = true)`);
 
+    // 🔹 Réponse finale
     return res.json({ success: true, message: "Déconnexion réussie." });
-  });
+
+  } catch (err) {
+    console.error("❌ Erreur update email_disconnect :", err);
+    return res.status(500).json({
+      error: "Erreur lors de la mise à jour de la déconnexion."
+    });
+  }
 });
 
 
+
 //suppression du compte  
-app.delete("/api/suppression", (req, res) => {
-  const { password } = req.body;
-const email=req.session.user.email;
-  db.get("SELECT * FROM utilisateurs WHERE email = ?", [email], async (err, user) => {
-    if (err || !user) {
+app.delete("/api/suppression", async (req, res) => {
+  try {
+    const { password } = req.body;
+    const email = req.session.user?.email;
+
+    if (!email) {
+      return res.status(401).json({ error: "Aucune session active." });
+    }
+
+    // 🔹 Vérifier que l'utilisateur existe
+    const result = await pool.query("SELECT * FROM utilisateurs WHERE email = $1", [email]);
+    const user = result.rows[0];
+
+    if (!user) {
       return res.status(404).json({ error: "Utilisateur introuvable." });
     }
 
+    // 🔹 Vérification du mot de passe
     const match = await bcrypt.compare(password, user.mot_de_passe);
     if (!match) {
-
       return res.status(401).json({ error: "Mot de passe actuel incorrect." });
     }
 
-   db.run("DELETE FROM utilisateurs WHERE email = ?", [email], function (err) {
-      if (err) {
-        return res.status(500).json({ error: "Erreur lors de la suppression du compte." });
-      }
-    // ➤ Supprimer la session serveur
-      if (req.session.user) {
-        req.session.destroy(err => {
-          if (err) {
-            return res.status(500).json({ error: "Erreur lors de la suppression de la session." });
-          }
+    // 🔹 Suppression du compte utilisateur
+    await pool.query("DELETE FROM utilisateurs WHERE email = $1", [email]);
 
-          // ➤ Supprimer aussi le cookie côté client
-          res.clearCookie("connect.sid");
+    // 🔹 Suppression de la session côté serveur
+    if (req.session.user) {
+      req.session.destroy(err => {
+        if (err) {
+          console.error("Erreur suppression session :", err);
+          return res.status(500).json({ error: "Erreur lors de la suppression de la session." });
+        }
 
-          return res.json({ message: "Compte supprimé et déconnecté avec succès." });
-        });
-      } else {
-        return res.json({ message: "Compte supprimé avec succès." });
-      }
-    });
-  });
+        // 🔹 Suppression du cookie côté client
+        res.clearCookie("connect.sid");
+
+        console.log(`🗑️ Compte ${email} supprimé avec succès.`);
+        return res.json({ message: "Compte supprimé et déconnecté avec succès." });
+      });
+    } else {
+      return res.json({ message: "Compte supprimé avec succès." });
+    }
+
+  } catch (err) {
+    console.error("🔥 Erreur lors de la suppression :", err);
+    return res.status(500).json({ error: "Erreur serveur." });
+  }
 });
 
 //supprimer les comptes inactives 
 
-setInterval(() => {
+setInterval(async () => {
   const now = new Date().toISOString();
-  const deleteQuery = `
-    DELETE FROM utilisateurs
-    WHERE email IN (
-      SELECT email FROM verifications_email WHERE expire < ?
-    ) AND email_active = 0
-  `;
 
-  db.run(deleteQuery, [now], function (err) {
-    if (err) {
-      console.error("❌ Erreur suppression comptes inactifs :", err.message);
-    } else {
-      console.log(`🧹 Comptes supprimés : ${this.changes}`);
-    }
-  });
+  try {
+    // 🔹 Suppression des comptes inactifs dont le token a expiré
+    const deleteUsersQuery = `
+      DELETE FROM utilisateurs
+      WHERE email IN (
+        SELECT email FROM verifications_email WHERE expire < $1
+      )
+      AND email_active = FALSE
+    `;
+    const resultUsers = await pool.query(deleteUsersQuery, [now]);
+    console.log(`🧹 Comptes supprimés : ${resultUsers.rowCount}`);
 
-  // Supprimer aussi les anciens tokens
-  db.run(`DELETE FROM verifications_email WHERE expire < ?`, [now]);
-}, 60 * 60 * 1000); // toutes les heures
+    // 🔹 Suppression des anciens tokens expirés
+    const deleteTokensQuery = `DELETE FROM verifications_email WHERE expire < $1`;
+    const resultTokens = await pool.query(deleteTokensQuery, [now]);
+    console.log(`🧾 Tokens supprimés : ${resultTokens.rowCount}`);
 
-
-
-
-
-
-
+  } catch (err) {
+    console.error("❌ Erreur suppression comptes/tokens inactifs :", err.message);
+  }
+}, 60 * 60 * 1000); // ⏰ exécution toutes les heures
 
 
 //stocker le module choisis dans la session 
@@ -911,71 +1028,82 @@ function melanger(array) {
 }
 //récuperation ds questions 
 
-app.get("/api/questions", (req, res) => {
-  // Ici tu récupères la session (fac, module, cours, nombre)
-  const { faculte, module, cours, nombre, correction } = req.session.qcm || {};
+app.get("/api/questions", async (req, res) => {
+  try {
+    // 🔹 Récupération des infos QCM stockées dans la session
+    const { faculte, module, cours, nombre, correction } = req.session.qcm || {};
 
-  if (!faculte || !module || !nombre) {
-    return res.json({ success: false, error: "Infos QCM manquantes en session" });
-  }
-
-  // Construire la requête SQL
-  let sql = "SELECT * FROM questions WHERE module = ?";
-  let params = [module];
-
-  // Facultés multiples
-  if (Array.isArray(faculte) && faculte.length > 0) {
-    sql += " AND faculte IN (" + faculte.map(() => "?").join(",") + ")";
-    params = params.concat(faculte);
-  } else if (typeof faculte === "string") {
-    sql += " AND faculte = ?";
-    params.push(faculte);
-  }
-
-  // Cours multiples
-  if (Array.isArray(cours) && cours.length > 0) {
-    sql += " AND cours IN (" + cours.map(() => "?").join(",") + ")";
-    params = params.concat(cours);
-  } else if (typeof cours === "string") {
-    sql += " AND cours = ?";
-    params.push(cours);
-  }
-
-  db.all(sql, params, (err, rows) => {
-    if (err) {
-      console.error("❌ Erreur SELECT :", err.message);
-      return res.json({ success: false, error: "Erreur BDD" });
+    if (!faculte || !module || !nombre) {
+      return res.json({ success: false, error: "Infos QCM manquantes en session" });
     }
+
+    // 🔹 Construction dynamique de la requête
+    let sql = "SELECT * FROM questions WHERE module = $1";
+    const params = [module];
+    let paramIndex = 2; // car $1 déjà utilisé
+
+    // Facultés multiples
+    if (Array.isArray(faculte) && faculte.length > 0) {
+      const placeholders = faculte.map((_, i) => `$${paramIndex + i}`).join(", ");
+      sql += ` AND faculte IN (${placeholders})`;
+      params.push(...faculte);
+      paramIndex += faculte.length;
+    } else if (typeof faculte === "string") {
+      sql += ` AND faculte = $${paramIndex++}`;
+      params.push(faculte);
+    }
+
+    // Cours multiples
+    if (Array.isArray(cours) && cours.length > 0) {
+      const placeholders = cours.map((_, i) => `$${paramIndex + i}`).join(", ");
+      sql += ` AND cours IN (${placeholders})`;
+      params.push(...cours);
+      paramIndex += cours.length;
+    } else if (typeof cours === "string") {
+      sql += ` AND cours = $${paramIndex++}`;
+      params.push(cours);
+    }
+
+    // 🔹 Exécution de la requête
+    const { rows } = await pool.query(sql, params);
 
     if (!rows.length) {
       return res.json({ success: false, error: "Aucune question trouvée" });
     }
 
-    // Mélanger et limiter au nombre demandé
+    // 🔹 Sélectionner les questions selon le nombre demandé
     let selected;
-  if (req.session.qcm.nombre === "toutes") {
-    selected = rows; // toutes les questions
-  } else {
-    // convertir en nombre entier au cas où
-    const nb = parseInt(req.session.qcm.nombre, 10);
-    if (isNaN(nb) || nb <= 0) {
-      return res.json({ success: false, error: "Nombre de questions invalide" });
-    }
-    selected = melanger(rows).slice(0, nb); // mélanger et limiter
-  }
+    if (nombre === "toutes") {
+      selected = rows;
+    } else {
+      const nb = parseInt(nombre, 10);
+      if (isNaN(nb) || nb <= 0) {
+        return res.json({ success: false, error: "Nombre de questions invalide" });
+      }
 
-    // Transformer pour le frontend
+      // Fonction de mélange locale
+      const melanger = (arr) => arr.sort(() => Math.random() - 0.5);
+      selected = melanger(rows).slice(0, nb);
+    }
+
+    // 🔹 Formatage pour le frontend
     const payload = selected.map(q => ({
       question: q.question,
       cours: q.cours,
       reponses: JSON.parse(q.options),
       corrects: JSON.parse(q.correct),
-      image: q.image ? `/images/${q.image}` : null 
+      image: q.image ? `/images/${q.image}` : null
     }));
 
-    res.json({ success: true, questions: payload, correction: correction });
-  });
+    // 🔹 Réponse finale
+    res.json({ success: true, questions: payload, correction });
+
+  } catch (err) {
+    console.error("❌ Erreur SELECT PostgreSQL :", err.message);
+    return res.json({ success: false, error: "Erreur BDD" });
+  }
 });
+
 //stocker la note de utilisateur 
 app.post("/api/submit-qcm", (req, res) => {
     req.session.qcm = req.session.qcm || {};  // si casier vide, on le crée
@@ -1046,18 +1174,21 @@ app.post("/api/report-error", async (req, res) => {
 
 
 // 🔹 Fonction pour récupérer tous les utilisateurs
-function getUtilisateurs() {
-  return new Promise((resolve, reject) => {
-    db.all(
-      "SELECT id, nom, prenom, email, annee FROM utilisateurs WHERE email_active = 1 AND annee NOT LIKE '%7ème Année Médecine%'",
-      [],
-      (err, rows) => {
-        if (err) reject(err);
-        else resolve(rows);
-      }
-    );
-  });
+async function getUtilisateurs() {
+  try {
+    const query = `
+      SELECT id, nom, prenom, email, annee
+      FROM utilisateurs
+      WHERE email_active = TRUE
+        AND annee NOT LIKE '%7ème Année Médecine%'
+    `;
+    const { rows } = await pool.query(query);
+    return rows;
+  } catch (err) {
+    throw err;
+  }
 }
+
 // Construit un libellé propre et cohérent
 function libelleAnnee(n) {
   const suffix = {1:"1ère",2:"2ème",3:"3ème",4:"4ème",5:"5ème",6:"6ème",7:"7ème"}[n] || `${n}ème`;
@@ -1085,45 +1216,65 @@ function generateToken() {
 //validation de l'anneé chaque rentrée (le 20 septemre de chaque année)
 //min heure jour mois 
 cron.schedule('5 20 6 9 *', async () => {
-  console.log("Début envoi email automatique");
+  console.log("📧 Début envoi email automatique");
 
   try {
-    const utilisateurs = await getUtilisateurs(); // 👉 utilise ta fonction avec conditions
+    const utilisateurs = await getUtilisateurs(); // ta fonction déjà adaptée pour PostgreSQL
 
     for (const u of utilisateurs) {
       const token = generateToken();
 
-      db.run(
-        "UPDATE utilisateurs SET token_validation = ?, annee_validated = 0, validation_envoyee = 1 WHERE id = ?",
-        [token, u.id],
-        (err) => {
-          if (err) {
-            console.error("Erreur update token pour utilisateur", u.id, err);
-          } else {
-            envoyerEmailValidation(
-              u.email,
-              u.id,
-              u.annee,
-              getAnneeSuivante(u.annee),
-              token
-              
-            );
-          }
-        }
-      );
+      try {
+        // 🔹 Mise à jour PostgreSQL
+        await pool.query(
+          `UPDATE utilisateurs
+           SET token_validation = $1,
+               annee_validated = 0,
+               validation_envoyee = 1
+           WHERE id = $2`,
+          [token, u.id]
+        );
+
+        // 🔹 Envoi email
+        await envoyerEmailValidation(
+          u.email,
+          u.id,
+          u.annee,
+          getAnneeSuivante(u.annee),
+          token
+        );
+
+        console.log(`✅ Email envoyé à ${u.email} avec token ${token}`);
+
+      } catch (errUpdate) {
+        console.error(`❌ Erreur update token pour utilisateur ${u.id}:`, errUpdate);
+      }
     }
+
   } catch (err) {
-    console.error("Erreur récupération utilisateurs :", err);
+    console.error("❌ Erreur récupération utilisateurs :", err);
   }
 }, { timezone: 'Africa/Algiers' });
-
 //l'envoie de l'email pour la validation de l'annee 
 
-app.post("/api/choix-annee", (req, res) => {
+app.post("/api/choix-annee", async (req, res) => {
   const { id, choix, token } = req.body;
-  if (!id || !choix || !token) return res.status(400).send("Paramètres manquants");
 
-  db.get("SELECT annee, email, id, pseudo, avatar, token_validation, annee_validated FROM utilisateurs WHERE id = ?", [id], (err, user) => {
+  if (!id || !choix || !token) {
+    return res.status(400).send("Paramètres manquants");
+  }
+
+  try {
+    // 🔹 Récupérer l'utilisateur
+    const result = await pool.query(
+      `SELECT annee, email, id, pseudo, avatar, token_validation, annee_validated, validation_envoyee
+       FROM utilisateurs
+       WHERE id = $1`,
+      [id]
+    );
+
+    const user = result.rows[0];
+
     if (!user) return res.status(404).send("Utilisateur introuvable");
     if (user.token_validation !== token) return res.status(403).send("Token invalide");
 
@@ -1132,49 +1283,62 @@ app.post("/api/choix-annee", (req, res) => {
       return res.json({ success: false, alreadyValidated: true });
     }
 
-    // Sinon, on valide maintenant
-    
+    // 🔹 Calcul de la nouvelle année
     const nouvelleAnnee = (choix === "passe") ? getAnneeSuivante(user.annee) : user.annee;
 
-    db.run(
-      "UPDATE utilisateurs SET annee = ?, annee_validated = 1 WHERE id = ?",
-      [nouvelleAnnee, id],
-      function(err) {
-        if (err) return res.status(500).send("Erreur serveur");
-         // ⚡ Mettre à jour la session avec la nouvelle année
-        req.session.user = {
-          email: user.email,
-          annee_validated: 1,
-          annee: nouvelleAnnee,
-          validation_envoyee: user.validation_envoyee,
-          id: user.id,          
-          pseudo: user.pseudo,
-          avatar: user.avatar,
-            
-        };
-        return res.json({ success: true, email: user.email });
-      }
+    // 🔹 Mise à jour PostgreSQL
+    await pool.query(
+      `UPDATE utilisateurs
+       SET annee = $1, annee_validated = TRUE
+       WHERE id = $2`,
+      [nouvelleAnnee, id]
     );
-  });
+
+    // 🔹 Mise à jour de la session
+    req.session.user = {
+      email: user.email,
+      annee_validated: true,
+      annee: nouvelleAnnee,
+      validation_envoyee: user.validation_envoyee,
+      id: user.id,
+      pseudo: user.pseudo,
+      avatar: user.avatar,
+    };
+
+    return res.json({ success: true, email: user.email });
+
+  } catch (err) {
+    console.error("❌ Erreur PostgreSQL /choix-annee :", err.message);
+    return res.status(500).send("Erreur serveur");
+  }
 });
 
 //verifier si la session existe et l'année est validée (ouverture)
-app.get("/api/check-status", (req, res) => {
-    if (!req.session.user) {
-        return res.json({ session: false });
-    }
+app.get("/api/check-status", async (req, res) => {
+  if (!req.session.user) {
+    return res.json({ session: false });
+  }
 
-    const userId = req.session.user.id;
-    db.get("SELECT annee_validated FROM utilisateurs WHERE id = ?", [userId], (err, row) => {
-        if (err) {
-            return res.status(500).json({ session: true, annee_validated: false });
-        }
-        return res.json({ 
-            session: true, 
-            annee_validated: row ? row.annee_validated === 1 : false
-        });
+  const userId = req.session.user.id;
+
+  try {
+    const { rows } = await pool.query(
+      "SELECT annee_validated FROM utilisateurs WHERE id = $1",
+      [userId]
+    );
+
+    const row = rows[0];
+    return res.json({
+      session: true,
+      annee_validated: row ? row.annee_validated === true : false
     });
+
+  } catch (err) {
+    console.error("❌ Erreur PostgreSQL /check-status :", err.message);
+    return res.status(500).json({ session: true, annee_validated: false });
+  }
 });
+
 
 
 app.post('/api/contact-mail', async (req, res) => {
