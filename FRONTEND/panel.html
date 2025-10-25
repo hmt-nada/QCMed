@@ -32,35 +32,44 @@
   <script>
    fetch('/api/adminquestions')
   .then(r => {
-    if (!r.ok) throw new Error('HTTP ' + r.status);
-    return r.json();
+    console.log("Réponse brute:", r);
+    return r.text(); // <-- premier debug
   })
-  .then(data => {
-    console.log("data:", data);
-    if (!data.success || !Array.isArray(data.questions)) {
-      throw new Error('Format inattendu');
+  .then(txt => {
+    console.log("Texte reçu:", txt);
+    try {
+      const data = JSON.parse(txt);
+      if (!data.success || !Array.isArray(data.questions)) {
+        throw new Error('Format inattendu');
+      }
+
+      const tbody = document.querySelector('#table-questions tbody');
+      tbody.innerHTML = '';
+      data.questions.forEach(q => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${q.id}</td>
+          <td>${q.faculte || ''}</td>
+          <td>${q.module || ''}</td>
+          <td>${q.cours || ''}</td>
+          <td>${q.question || ''}</td>
+          <td><pre>${(q.options||[]).join('\n')}</pre></td>
+          <td><pre>${(q.correct||[]).join(', ')}</pre></td>
+          <td>${q.image ? '<img src="' + q.image + '" width="80">' : '—'}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+
+    } catch(e) {
+      console.error("❌ JSON parse error:", e);
+      alert("Erreur JSON: " + e.message);
     }
-    const tbody = document.querySelector('#table-questions tbody');
-    tbody.innerHTML = '';
-    data.questions.forEach(q => {
-      const tr = document.createElement('tr');
-      tr.innerHTML = `
-        <td>${q.id}</td>
-        <td>${q.faculte || ''}</td>
-        <td>${q.module || ''}</td>
-        <td>${q.cours || ''}</td>
-        <td>${q.question || ''}</td>
-        <td><pre>${(q.options||[]).join('\n')}</pre></td>
-        <td><pre>${(q.correct||[]).join(', ')}</pre></td>
-        <td>${q.image ? '<img src="' + q.image + '" width="80">' : '—'}</td>
-      `;
-      tbody.appendChild(tr);
-    });
   })
   .catch(err => {
-    console.error(err);
-    alert('Erreur: ' + err.message);
+    console.error("❌ Fetch error:", err);
+    alert("Erreur fetch: " + err.message);
   });
+
   </script>
 </body>
 </html>

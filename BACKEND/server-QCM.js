@@ -1438,19 +1438,17 @@ app.get('*', (req, res) => {
 // 🔹 Route pour renvoyer toutes les questions
 app.get('/api/adminquestions', async (req, res) => {
   try {
-    // 🔹 Vérifier que l'utilisateur est connecté et admin
-    
+    console.log("✅ Route /api/adminquestions appelée par admin", req.session.user.email);
 
-    // 🔹 Récupérer toutes les questions de la table
     const sql = "SELECT * FROM questions ORDER BY id ASC";
-    const result = await db.query(sql);
+    const result = await db.query(sql); // PostgreSQL avec pool.query
 
-    // 🔹 Normaliser et parser options/correct si JSON
+    // Normaliser options/correct
     const questions = result.rows.map(r => {
       let options = [];
       let correct = [];
-      try { options = r.options ? JSON.parse(r.options) : []; } catch (e) { options = (r.options ? [r.options] : []); }
-      try { correct = r.correct ? JSON.parse(r.correct) : []; } catch (e) { correct = (r.correct ? [r.correct] : []); }
+      try { options = r.options ? JSON.parse(r.options) : []; } catch(e){ options = r.options ? [r.options] : [] }
+      try { correct = r.correct ? JSON.parse(r.correct) : []; } catch(e){ correct = r.correct ? [r.correct] : [] }
 
       return {
         id: r.id,
@@ -1458,17 +1456,16 @@ app.get('/api/adminquestions', async (req, res) => {
         module: r.module,
         cours: r.cours,
         question: r.question,
-        options: options,
-        correct: correct,
+        options,
+        correct,
         image: r.image
       };
     });
 
-    // 🔹 Retour JSON complet
     res.json({ success: true, questions });
 
   } catch (err) {
-    console.error("Erreur SQL /adminquestions :", err);
+    console.error("❌ Erreur SQL /adminquestions :", err);
     res.status(500).json({ success: false, error: err.message });
   }
 });
