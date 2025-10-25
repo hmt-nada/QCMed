@@ -9,6 +9,7 @@ const nodemailer = require("nodemailer");
 const cron = require("node-cron");
 const crypto = require("crypto");
 const bodyParser = require('body-parser');
+require('dotenv').config();
 
 
 const {
