@@ -800,7 +800,7 @@ app.post("/api/connexion", async (req, res) => {
 
   try {
     // 🔹 Requête PostgreSQL (note : pas de `?`, mais `$1`, `$2`, etc.)
-    const result = await pool.query(
+    const result = await db.query(
       "SELECT * FROM utilisateurs WHERE email = $1 AND email_active = TRUE",
       [email]
     );
@@ -820,13 +820,13 @@ app.post("/api/connexion", async (req, res) => {
     const role = (email === ADMIN_EMAIL) ? "admin" : "user";
 
     // 🔹 Mise à jour du champ email_disconnect
-    await pool.query(
+    await db.query(
       "UPDATE utilisateurs SET email_disconnect = FALSE WHERE email = $1",
       [email]
     );
 
     // 🔹 Récupérer les infos de l’utilisateur pour la session
-    const userData = await pool.query(
+    const userData = await db.query(
       `SELECT id, email, pseudo, avatar, annee, annee_validated
        FROM utilisateurs WHERE email = $1`,
       [email]
@@ -877,7 +877,7 @@ app.post("/api/deconnexion", async (req, res) => {
     const emailUser = req.session.user.email;
 
     // 🔹 Mise à jour du champ email_disconnect dans la base
-    await pool.query(
+    await db.query(
       "UPDATE utilisateurs SET email_disconnect = TRUE WHERE email = $1",
       [emailUser]
     );
@@ -912,7 +912,7 @@ app.delete("/api/suppression", async (req, res) => {
     }
 
     // 🔹 Vérifier que l'utilisateur existe
-    const result = await pool.query("SELECT * FROM utilisateurs WHERE email = $1", [email]);
+    const result = await db.query("SELECT * FROM utilisateurs WHERE email = $1", [email]);
     const user = result.rows[0];
 
     if (!user) {
@@ -926,7 +926,7 @@ app.delete("/api/suppression", async (req, res) => {
     }
 
     // 🔹 Suppression du compte utilisateur
-    await pool.query("DELETE FROM utilisateurs WHERE email = $1", [email]);
+    await db.query("DELETE FROM utilisateurs WHERE email = $1", [email]);
 
     // 🔹 Suppression de la session côté serveur
     if (req.session.user) {
@@ -966,12 +966,12 @@ setInterval(async () => {
       )
       AND email_active = FALSE
     `;
-    const resultUsers = await pool.query(deleteUsersQuery, [now]);
+    const resultUsers = await db.query(deleteUsersQuery, [now]);
     console.log(`🧹 Comptes supprimés : ${resultUsers.rowCount}`);
 
     // 🔹 Suppression des anciens tokens expirés
     const deleteTokensQuery = `DELETE FROM verifications_email WHERE expire < $1`;
-    const resultTokens = await pool.query(deleteTokensQuery, [now]);
+    const resultTokens = await db.query(deleteTokensQuery, [now]);
     console.log(`🧾 Tokens supprimés : ${resultTokens.rowCount}`);
 
   } catch (err) {
@@ -1065,7 +1065,7 @@ app.get("/api/questions", async (req, res) => {
     }
 
     // 🔹 Exécution de la requête
-    const { rows } = await pool.query(sql, params);
+    const { rows } = await db.query(sql, params);
 
     if (!rows.length) {
       return res.json({ success: false, error: "Aucune question trouvée" });
@@ -1182,7 +1182,7 @@ async function getUtilisateurs() {
       WHERE email_active = TRUE
         AND annee NOT LIKE '%7ème Année Médecine%'
     `;
-    const { rows } = await pool.query(query);
+    const { rows } = await db.query(query);
     return rows;
   } catch (err) {
     throw err;
@@ -1226,7 +1226,7 @@ cron.schedule('5 20 6 9 *', async () => {
 
       try {
         // 🔹 Mise à jour PostgreSQL
-        await pool.query(
+        await db.query(
           `UPDATE utilisateurs
            SET token_validation = $1,
                annee_validated = 0,
@@ -1266,7 +1266,7 @@ app.post("/api/choix-annee", async (req, res) => {
 
   try {
     // 🔹 Récupérer l'utilisateur
-    const result = await pool.query(
+    const result = await db.query(
       `SELECT annee, email, id, pseudo, avatar, token_validation, annee_validated, validation_envoyee
        FROM utilisateurs
        WHERE id = $1`,
@@ -1287,7 +1287,7 @@ app.post("/api/choix-annee", async (req, res) => {
     const nouvelleAnnee = (choix === "passe") ? getAnneeSuivante(user.annee) : user.annee;
 
     // 🔹 Mise à jour PostgreSQL
-    await pool.query(
+    await db.query(
       `UPDATE utilisateurs
        SET annee = $1, annee_validated = TRUE
        WHERE id = $2`,
@@ -1322,7 +1322,7 @@ app.get("/api/check-status", async (req, res) => {
   const userId = req.session.user.id;
 
   try {
-    const { rows } = await pool.query(
+    const { rows } = await db.query(
       "SELECT annee_validated FROM utilisateurs WHERE id = $1",
       [userId]
     );
