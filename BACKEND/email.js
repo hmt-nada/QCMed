@@ -1,19 +1,13 @@
 const nodemailer = require("nodemailer");
-
+const sgMail = require('@sendgrid/mail');
+// Remplace par ta clé API
+sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 async function envoyerEmailConfirmation(email, lien) {
-  const transporter = nodemailer.createTransport({
-    service: 'gmail',
-    auth: {
-      user: "qcmed.2025@gmail.com",
-      pass: "xhvs ezbq mxze qqxd"
-    },
-   tls: {
-    rejectUnauthorized: false
-  },
-  secure:true
-  });
 
-  await transporter.sendMail({
+  const msg = {
+   
+
+ 
     from: 'QCMed <qcmed.2025@gmail.com>',
     to: email,
     subject: ' Confirmez votre inscription à QCMed ',
@@ -53,7 +47,14 @@ async function envoyerEmailConfirmation(email, lien) {
       </div>
     </div>
     `
-  });
+  
+};
+try {
+    await sgMail.send(msg);
+    console.log('Email envoyé via SendGrid !');
+  } catch (err) {
+    console.error('Erreur SendGrid :', err);
+  }
 }
 
 async function envoyerEmailConfirmationcode(email, code) {
