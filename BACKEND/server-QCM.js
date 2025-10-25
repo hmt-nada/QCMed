@@ -119,7 +119,6 @@ app.post('/api/inscription', async (req, res) => {
 
 
 
-// --- Route pour pseudo et avatar ---
 app.post('/api/pseudo', async (req, res) => {
   const { pseudo, avatar, email } = req.body;
   console.log("Reçu pour pseudo :", pseudo, avatar, email);
@@ -132,7 +131,6 @@ app.post('/api/pseudo', async (req, res) => {
       WHERE email = $3
       RETURNING id
     `;
-
     const result = await db.query(updateQuery, [pseudo, avatar, email]);
 
     if (result.rowCount === 0) {
@@ -142,23 +140,25 @@ app.post('/api/pseudo', async (req, res) => {
     // 🔹 2. Créer le token de vérification email
     const expiration = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24h
     const token = require('crypto').randomBytes(32).toString('hex');
-
     const insertToken = `
       INSERT INTO verifications_email (email, token, expire)
       VALUES ($1, $2, $3)
     `;
     await db.query(insertToken, [email, token, expiration]);
 
-    // 🔹 3. Générer le lien et envoyer l'email
+    // 🔹 3. Générer le lien
     const baseUrl = process.env.BASE_URL || 'http://localhost:3000';
     const lien = `${baseUrl}/api/confirmation/${token}`;
 
-    await envoyerEmailConfirmation(email, lien);
+    // 🔹 4. Envoyer l'email en arrière-plan (non bloquant)
+    envoyerEmailConfirmation(email, lien)
+      .then(() => console.log("✅ Email envoyé :", email))
+      .catch(err => console.error("❌ Erreur en envoyant l'email :", err.message));
 
-    console.log("✅ Utilisateur mis à jour avec pseudo/avatar :", email);
+    // 🔹 5. Répondre immédiatement au frontend
     return res.json({
       success: true,
-      message: "Email envoyé. Veuillez vérifier votre boîte mail."
+      message: "Pseudo/avatar mis à jour. Vérifiez votre boîte mail."
     });
 
   } catch (err) {
@@ -166,6 +166,7 @@ app.post('/api/pseudo', async (req, res) => {
     return res.status(500).json({ success: false, message: "Erreur serveur." });
   }
 });
+
 
 
 // --- Renvoyer un email de confirmation ---
