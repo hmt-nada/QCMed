@@ -1195,44 +1195,48 @@ app.post('/api/contact-mail', async (req, res) => {
 }
 });
 //nombre de cours par module 
-app.get("/stats/cours-par-module", (req, res) => {
-  const sql = `
-    SELECT module, COUNT(DISTINCT cours) AS nombre_cours
-    FROM questions
-    GROUP BY module
-  `;
-  db.all(sql, [], (err, rows) => {
-    if (err) {
-      console.error(err.message);
-      res.status(500).json({ error: "Erreur serveur" });
-    } else {
-      res.json(rows); // [{module:"anatomie", nombre_cours:5}, ...]
-    }
-  });
+// --- Route : nombre de cours par module (PostgreSQL / Neon) ---
+app.get("/stats/cours-par-module", async (req, res) => {
+  try {
+    const result = await db.query(`
+      SELECT LOWER(TRIM(module)) AS module, COUNT(DISTINCT cours) AS nombre_cours
+      FROM questions
+      GROUP BY LOWER(TRIM(module))
+    `);
+
+    res.json(result.rows);
+  } catch (err) {
+    console.error("❌ Erreur stats cours par module :", err.message);
+    res.status(500).json({ error: "Erreur serveur" });
+  }
 });
+
 
 // Nombre de questions par cours pour  module et  faculté
-app.get("/stats/questions-par-cours", (req, res) => {
+// --- Route : nombre de questions par cours (PostgreSQL / Neon) ---
+app.get("/stats/questions-par-cours", async (req, res) => {
   const { module, faculte } = req.query; // récupère ?module=...&faculte=...
 
-  const sql = `
-    SELECT cours, COUNT(*) AS nombre_questions
-    FROM questions
-    WHERE module = ? AND faculte = ?
-    GROUP BY cours
-  `;
+  try {
+    const query = `
+      SELECT LOWER(TRIM(cours)) AS cours, COUNT(*) AS nombre_questions
+      FROM questions
+      WHERE LOWER(TRIM(module)) = LOWER(TRIM($1))
+        AND LOWER(TRIM(faculte)) = LOWER(TRIM($2))
+      GROUP BY LOWER(TRIM(cours))
+    `;
 
-  db.all(sql, [module, faculte], (err, rows) => {
-    if (err) {
-      console.error(err.message);
-      res.status(500).json({ error: "Erreur serveur" });
-    } else {
-      // Exemple de réponse :
-      // [{cours:"structuredesglucides", nombre_questions:2}, {cours:"lipides", nombre_questions:5}]
-      res.json(rows);
-    }
-  });
+    const result = await db.query(query, [module, faculte]);
+
+    // Exemple de réponse :
+    // [{ cours: "structuredesglucides", nombre_questions: 2 }, { cours: "lipides", nombre_questions: 5 }]
+    res.json(result.rows);
+  } catch (err) {
+    console.error("❌ Erreur stats questions par cours :", err.message);
+    res.status(500).json({ error: "Erreur serveur" });
+  }
 });
+
 
 const frontend = path.join(__dirname, '../FRONTEND');
 
