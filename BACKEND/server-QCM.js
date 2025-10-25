@@ -817,7 +817,7 @@ app.post("/api/connexion", async (req, res) => {
     }
 
     // 🧩 Déterminer le rôle
-    const role = (email === ADMIN_EMAIL) ? "admin" : "user";
+    //const role = (email === ADMIN_EMAIL) ? "admin" : "user";
 
     // 🔹 Mise à jour du champ email_disconnect
     await db.query(
@@ -845,7 +845,7 @@ app.post("/api/connexion", async (req, res) => {
       email: utilisateur.email,
       pseudo: utilisateur.pseudo,
       avatar: utilisateur.avatar,
-      role: role,
+      //role: role,
       annee: utilisateur.annee
     };
 
