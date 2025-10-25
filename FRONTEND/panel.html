@@ -2,17 +2,22 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8">
-  <title>Liste des Questions</title>
+  <title>Admin - Gestion Questions</title>
   <style>
     body { font-family: Arial; margin: 20px; background: #f0f0f0; }
     table { width: 100%; border-collapse: collapse; background: white; }
     th, td { border: 1px solid #ccc; padding: 8px; vertical-align: top; }
     th { background: #007bff; color: white; }
-    pre { white-space: pre-wrap; word-wrap: break-word; }
+    td[contenteditable="true"] { background: #ffffe0; }
+    button { margin: 2px; cursor: pointer; }
+    #add-question-btn { margin: 10px 0; padding: 8px 12px; font-size: 16px; }
+    img { max-width: 80px; }
+    pre { white-space: pre-wrap; word-wrap: break-word; margin: 0; }
   </style>
 </head>
 <body>
-  <h1>📘 Liste complète des questions</h1>
+  <h1>📘 Panel Admin - Gestion des Questions</h1>
+
   <table id="table-questions">
     <thead>
       <tr>
@@ -21,55 +26,126 @@
         <th>Module</th>
         <th>Cours</th>
         <th>Question</th>
-        <th>Options</th>
-        <th>Réponses correctes</th>
+        <th>Options (JSON)</th>
+        <th>Réponses correctes (JSON)</th>
         <th>Image</th>
+        <th>Actions</th>
       </tr>
     </thead>
     <tbody></tbody>
   </table>
 
-  <script>
-   fetch('/api/adminquestions')
-  .then(r => {
-    console.log("Réponse brute:", r);
-    return r.text(); // <-- premier debug
-  })
-  .then(txt => {
-    console.log("Texte reçu:", txt);
-    try {
-      const data = JSON.parse(txt);
-      if (!data.success || !Array.isArray(data.questions)) {
-        throw new Error('Format inattendu');
-      }
+  <button id="add-question-btn">➕ Ajouter Question</button>
 
-      const tbody = document.querySelector('#table-questions tbody');
-      tbody.innerHTML = '';
-      data.questions.forEach(q => {
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-          <td>${q.id}</td>
-          <td>${q.faculte || ''}</td>
-          <td>${q.module || ''}</td>
-          <td>${q.cours || ''}</td>
-          <td>${q.question || ''}</td>
-          <td><pre>${(q.options||[]).join('\n')}</pre></td>
-          <td><pre>${(q.correct||[]).join(', ')}</pre></td>
-          <td>${q.image ? '<img src="' + q.image + '" width="80">' : '—'}</td>
-        `;
-        tbody.appendChild(tr);
+<script>
+const tbody = document.querySelector('#table-questions tbody');
+
+// 🔹 Charger toutes les questions
+async function loadQuestions() {
+  try {
+    const res = await fetch('/api/adminquestions');
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const data = await res.json();
+    if (!data.success || !Array.isArray(data.questions)) throw new Error('Format inattendu');
+    renderQuestions(data.questions);
+  } catch (err) {
+    console.error("❌ Load error:", err);
+    alert("Erreur lors du chargement : " + err.message);
+  }
+}
+
+// 🔹 Affichage et gestion actions
+function renderQuestions(questions) {
+  tbody.innerHTML = '';
+  questions.forEach(q => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>${q.id}</td>
+      <td contenteditable="true" data-field="faculte">${q.faculte || ''}</td>
+      <td contenteditable="true" data-field="module">${q.module || ''}</td>
+      <td contenteditable="true" data-field="cours">${q.cours || ''}</td>
+      <td contenteditable="true" data-field="question">${q.question || ''}</td>
+      <td contenteditable="true" data-field="options">${JSON.stringify(q.options || [])}</td>
+      <td contenteditable="true" data-field="correct">${JSON.stringify(q.correct || [])}</td>
+      <td contenteditable="true" data-field="image">${q.image || ''}</td>
+      <td>
+        <button class="save-btn">💾 Sauvegarder</button>
+        <button class="delete-btn">❌ Supprimer</button>
+      </td>
+    `;
+    tbody.appendChild(tr);
+
+    // 🔹 Sauvegarder
+    tr.querySelector('.save-btn').onclick = async () => {
+      const updated = {};
+      tr.querySelectorAll('[data-field]').forEach(td => {
+        const field = td.dataset.field;
+        let value = td.innerText;
+        if (field === 'options' || field === 'correct') {
+          try { value = JSON.parse(value); } catch { value = []; }
+        }
+        updated[field] = value;
       });
+      try {
+        const res = await fetch(`/api/adminquestions/${q.id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(updated)
+        });
+        const result = await res.json();
+        if (!result.success) throw new Error(result.error || "Erreur serveur");
+        alert('✅ Question sauvegardée');
+        loadQuestions();
+      } catch (err) {
+        console.error("❌ Save error:", err);
+        alert("Erreur sauvegarde : " + err.message);
+      }
+    };
 
-    } catch(e) {
-      console.error("❌ JSON parse error:", e);
-      alert("Erreur JSON: " + e.message);
-    }
-  })
-  .catch(err => {
-    console.error("❌ Fetch error:", err);
-    alert("Erreur fetch: " + err.message);
+    // 🔹 Supprimer
+    tr.querySelector('.delete-btn').onclick = async () => {
+      if (!confirm('Supprimer cette question ?')) return;
+      try {
+        const res = await fetch(`/api/adminquestions/${q.id}`, { method: 'DELETE' });
+        const result = await res.json();
+        if (!result.success) throw new Error(result.error || "Erreur serveur");
+        tr.remove();
+      } catch (err) {
+        console.error("❌ Delete error:", err);
+        alert("Erreur suppression : " + err.message);
+      }
+    };
   });
+}
 
-  </script>
+// 🔹 Ajouter une nouvelle question
+document.getElementById('add-question-btn').onclick = async () => {
+  const newQ = {
+    faculte: 'Nouvelle faculté',
+    module: 'Nouveau module',
+    cours: 'Nouveau cours',
+    question: 'Nouvelle question',
+    options: ['Option1','Option2'],
+    correct: ['Option1'],
+    image: ''
+  };
+  try {
+    const res = await fetch('/api/adminquestions', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(newQ)
+    });
+    const data = await res.json();
+    if (!data.success) throw new Error(data.error || "Erreur serveur");
+    loadQuestions();
+  } catch (err) {
+    console.error("❌ Add error:", err);
+    alert("Erreur ajout : " + err.message);
+  }
+};
+
+// 🔹 Initialisation
+loadQuestions();
+</script>
 </body>
 </html>

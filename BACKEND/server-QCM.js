@@ -1444,6 +1444,72 @@ app.get('/api/adminquestions', async (req, res) => {
   }
 });
 
+app.post('/api/adminquestions', async (req, res) => {
+  try {
+    const { faculte, module, cours, question, options, correct, image } = req.body;
+
+    const sql = `
+      INSERT INTO questions (faculte, module, cours, question, options, correct, image)
+      VALUES ($1, $2, $3, $4, $5, $6, $7)
+      RETURNING *
+    `;
+    const params = [
+      faculte,
+      module,
+      cours,
+      question,
+      JSON.stringify(options || []),
+      JSON.stringify(correct || []),
+      image || null
+    ];
+
+    const result = await db.query(sql, params);
+    res.json({ success: true, question: result.rows[0] });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+app.put('/api/adminquestions/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { faculte, module, cours, question, options, correct, image } = req.body;
+
+    const sql = `
+      UPDATE questions
+      SET faculte=$1, module=$2, cours=$3, question=$4, options=$5, correct=$6, image=$7
+      WHERE id=$8
+      RETURNING *
+    `;
+    const params = [
+      faculte,
+      module,
+      cours,
+      question,
+      JSON.stringify(options || []),
+      JSON.stringify(correct || []),
+      image || null,
+      id
+    ];
+
+    const result = await db.query(sql, params);
+    res.json({ success: true, question: result.rows[0] });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+app.delete('/api/adminquestions/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    await db.query("DELETE FROM questions WHERE id=$1", [id]);
+    res.json({ success: true });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
 //************************************************************************************************* */
 
 
