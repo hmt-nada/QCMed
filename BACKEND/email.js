@@ -7,7 +7,7 @@ async function envoyerEmailConfirmation(email, lien) {
       user: "qcmed.2025@gmail.com",
       pass: "xhvs ezbq mxze qqxd"
     },
-    tls: {
+   tls: {
     rejectUnauthorized: false
   },
   secure:true
