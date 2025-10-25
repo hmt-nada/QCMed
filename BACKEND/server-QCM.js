@@ -352,8 +352,8 @@ app.get('/api/confirmation/:token', async (req, res) => {
 
     const email = rows[0].email;
 
-    // 2️⃣ Activer l'email dans la table utilisateurs
-    const update = `UPDATE utilisateurs SET email_active = 1 WHERE email = $1`;
+    // 2️⃣ Activer l'email dans la table utilisateurs ✅ (booléen, pas entier)
+    const update = `UPDATE utilisateurs SET email_active = true WHERE email = $1`;
     await db.query(update, [email]);
 
     // 3️⃣ Supprimer le token
