@@ -1404,36 +1404,10 @@ app.get("/stats/questions-par-cours", async (req, res) => {
     res.status(500).json({ error: "Erreur serveur" });
   }
 });
-
-
-const frontend = path.join(__dirname, '../FRONTEND');
-
-// Servir les fichiers statiques
-app.use(express.static(frontend));
-
-// Route racine
-app.get('/', (req, res) => {
-  res.sendFile(path.join(frontend, 'ouverture2.html'));
-});
-
-// Fallback SPA (pour toutes les autres routes)
-app.get('*', (req, res) => {
-  res.sendFile(path.join(frontend, 'ouverture2.html'));
-});
-
-
 //************************************************************************************************* */
-
-
 //connexion admin 
 
 // Middleware
-
-
-
-
-
-
 // Route pour récupérer toutes les questions
 // 🔹 Route pour renvoyer toutes les questions
 app.get('/api/adminquestions', async (req, res) => {
@@ -1468,6 +1442,28 @@ app.get('/api/adminquestions', async (req, res) => {
     console.error("❌ Erreur SQL /adminquestions :", err);
     res.status(500).json({ success: false, error: err.message });
   }
+});
+
+//************************************************************************************************* */
+
+
+
+
+
+
+const frontend = path.join(__dirname, '../FRONTEND');
+
+// Servir les fichiers statiques
+app.use(express.static(frontend));
+
+// Route racine
+app.get('/', (req, res) => {
+  res.sendFile(path.join(frontend, 'ouverture2.html'));
+});
+
+// Fallback SPA (pour toutes les autres routes)
+app.get('*', (req, res) => {
+  res.sendFile(path.join(frontend, 'ouverture2.html'));
 });
 
 
