@@ -794,6 +794,10 @@ app.post('/api/change-mail', async (req, res) => {
       
 
 //connexion a un compte
+const ADMIN_EMAIL = "on_hamitouche@esi.dz";  // email de l’admin
+
+/*const ADMIN_EMAILS = ["on_hamitouche@esi.dz", "autre@exemple.com"];
+const role = ADMIN_EMAILS.includes(email.toLowerCase()) ? "admin" : "user";*/
 
 app.post("/api/connexion", async (req, res) => {
   const { email, password } = req.body;
@@ -817,7 +821,7 @@ app.post("/api/connexion", async (req, res) => {
     }
 
     // 🧩 Déterminer le rôle
-    //const role = (email === ADMIN_EMAIL) ? "admin" : "user";
+    const role = (email === ADMIN_EMAIL) ? "admin" : "user";
 
     // 🔹 Mise à jour du champ email_disconnect
     await db.query(
@@ -845,7 +849,7 @@ app.post("/api/connexion", async (req, res) => {
       email: utilisateur.email,
       pseudo: utilisateur.pseudo,
       avatar: utilisateur.avatar,
-      //role: role,
+      role: role,
       annee: utilisateur.annee
     };
 
@@ -1424,7 +1428,7 @@ app.get('*', (req, res) => {
 //connexion admin 
 
 // Middleware
-//const ADMIN_EMAIL = "on_hamitouche@esi.dz";  // email de l’admin
+
 
 
 
@@ -1432,16 +1436,13 @@ app.get('*', (req, res) => {
 
 // Route pour récupérer toutes les questions
 // 🔹 Route pour renvoyer toutes les questions
-app.get('/api/adminquestions', (req, res) => {
-  const sql = `SELECT id, faculte, module, cours, question, options, correct, image FROM questions`;
-  db.all(sql, [], (err, rows) => {
-    if (err) {
-      console.error("Erreur SQL:", err.message);
-      return res.status(500).json({ success: false, error: err.message });
-    }
+app.get('/api/adminquestions', async (req, res) => {
+  try {
+    const sql = `SELECT id, faculte, module, cours, question, options, correct, image FROM questions`;
+    const result = await db.query(sql);
 
-    // Normaliser les noms et parser options/correct si ce sont des JSON strings
-    const questions = rows.map(r => {
+    // Normaliser et parser options/correct si JSON
+    const questions = result.rows.map(r => {
       let options = [];
       let correct = [];
       try { options = r.options ? JSON.parse(r.options) : []; } catch (e) { options = (r.options ? [r.options] : []); }
@@ -1453,15 +1454,19 @@ app.get('/api/adminquestions', (req, res) => {
         module: r.module,
         cours: r.cours,
         question: r.question,
-        options: options,    // tableau
-        correct: correct,    // tableau
+        options: options,
+        correct: correct,
         image: r.image
       };
     });
 
     res.json({ success: true, questions });
-  });
+  } catch (err) {
+    console.error("Erreur SQL /adminquestions :", err);
+    res.status(500).json({ success: false, error: err.message });
+  }
 });
+
 
 
 

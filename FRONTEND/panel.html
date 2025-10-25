@@ -30,7 +30,7 @@
   </table>
 
   <script>
-   fetch('/api/questions')
+   fetch('/api/adminquestions')
   .then(r => {
     if (!r.ok) throw new Error('HTTP ' + r.status);
     return r.json();
