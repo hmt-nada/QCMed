@@ -1600,8 +1600,14 @@ app.post('/api/saveChanges', async (req, res) => {
 
       // Supprimé ❌
       else if (q.state === "deleted" && q.id) {
-        await client.query(`DELETE FROM questions WHERE id=$1`, [q.id]);
+
+        const idNum = Number(q.id);
+      console.log("➡ Suppression question id =", idNum);
+      if (!Number.isFinite(idNum) || idNum <= 0) {
+        throw new Error("ID invalide pour suppression: " + q.id);
       }
+      await client.query(`DELETE FROM questions WHERE id=$1`, [idNum]);
+    }
     }
 
     await client.query("COMMIT");
