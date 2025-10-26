@@ -906,6 +906,7 @@ app.post("/api/deconnexion", async (req, res) => {
 
 //suppression du compte  
 app.delete("/api/suppression", async (req, res) => {
+  
   try {
     const { password } = req.body;
     const email = req.session.user?.email;
@@ -1529,13 +1530,17 @@ app.put('/api/adminquestions/:id', async (req, res) => {
 // 🔹 ROUTE : Supprimer une question
 // ============================================
 app.delete('/api/adminquestions/:id', async (req, res) => {
+  console.log("🧩 [DEBUG SERVEUR] Requête DELETE reçue :", req.params);
   try {
-    const { id } = req.params;
-    if (!id || isNaN(id)) {
+    const id = parseInt(req.params.id);
+     console.log("🧠 [DEBUG SERVEUR] ID interprété :", id);
+    if ( isNaN(id)) {
+      console.error("❌ [DEBUG SERVEUR] ID invalide reçu :", req.params.id);
       return res.status(400).json({ success: false, error: "ID invalide" });
     }
 
-    await db.query("DELETE FROM questions WHERE id=$1", [Number(id)]);
+    const result=await db.query("DELETE FROM questions WHERE id=$1", [Number(id)]);
+   console.log("🗑️ [DEBUG SERVEUR] Résultat SQL :", result.rowCount, "ligne(s) supprimée(s)");
     res.json({ success: true });
 
   } catch (err) {

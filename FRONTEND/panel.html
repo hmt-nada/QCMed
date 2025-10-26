@@ -41,11 +41,13 @@
 <script>
   let questions = [];
 let isLoading = false; // empêche les doubles appels
+
   async function saveAll() {
   const changedQuestions = questions.filter(q =>
     ["new", "changed", "deleted"].includes(q.state)
   );
-
+console.log("🧩 [DEBUG] Tentative suppression :", changedQuestions);
+console.log("🧠 [DEBUG] ID envoyé au serveur :", changedQuestions.id);
   try {
     const res = await fetch("/api/saveChanges", {
       method: "POST",
@@ -192,7 +194,6 @@ function renderQuestions() {
     tr.querySelector('.delete-btn').onclick = () => deleteQuestion(index);
   });
 }
-
 
 // 🔹 Ajouter une nouvelle question
 document.getElementById('add-question-btn').onclick = addQuestion;
