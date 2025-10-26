@@ -47,8 +47,10 @@ let isLoading = false; // empêche les doubles appels
     ["new", "changed", "deleted"].includes(q.state)
   );
 console.log("🧩 [DEBUG] Tentative suppression :", changedQuestions);
-console.log("🧠 [DEBUG] ID envoyé au serveur :", changedQuestions.id);
+console.log("🧠 [DEBUG] IDs envoyés au serveur :", changedQuestions.map(q => q.id));
+
   try {
+    console.table(questions.filter(q => q.state === "deleted"));
     const res = await fetch("/api/saveChanges", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
