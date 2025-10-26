@@ -1520,23 +1520,20 @@ app.delete('/api/adminquestions/:id', async (req, res) => {
     res.status(500).json({ success: false, error: err.message });
   }
 });
-app.post('/api/save-questions', (req, res) => {
-  const questions = req.body.questions; // tableau envoyé par le frontend
+app.post('/api/save-questions', async (req, res) => {
+  const questions = req.body.questions;
   if (!Array.isArray(questions)) {
     return res.status(400).json({ success: false, message: "Format invalide" });
   }
 
-  // Exemple avec SQLite
-  const stmt = db.prepare(`
-    INSERT OR REPLACE INTO questions (id, faculte, module, cours, question, options, correct, image)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-  `);
-
   try {
-    db.serialize(() => {
-      questions.forEach(q => {
-        stmt.run(
-          q.id,
+    for (const q of questions) {
+      if (!q.id) {
+        // 🔹 Nouvelle question → INSERT
+        await db.query(`
+          INSERT INTO questions (faculte, module, cours, question, options, correct, image)
+          VALUES ($1, $2, $3, $4, $5, $6, $7)
+        `, [
           q.faculte || '',
           q.module || '',
           q.cours || '',
@@ -1544,16 +1541,33 @@ app.post('/api/save-questions', (req, res) => {
           JSON.stringify(q.options || []),
           JSON.stringify(q.correct || []),
           q.image || ''
-        );
-      });
-    });
-    stmt.finalize();
-    res.json({ success: true, message: "Questions sauvegardées" });
+        ]);
+      } else {
+        // 🔹 Question existante → UPDATE
+        await db.query(`
+          UPDATE questions
+          SET faculte=$1, module=$2, cours=$3, question=$4, options=$5, correct=$6, image=$7
+          WHERE id=$8
+        `, [
+          q.faculte || '',
+          q.module || '',
+          q.cours || '',
+          q.question || '',
+          JSON.stringify(q.options || []),
+          JSON.stringify(q.correct || []),
+          q.image || '',
+          q.id
+        ]);
+      }
+    }
+
+    res.json({ success: true, message: "Questions sauvegardées avec succès" });
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ success: false, message: "Erreur serveur" });
+    console.error("❌ Erreur SQL save-questions :", err);
+    res.status(500).json({ success: false, message: err.message });
   }
 });
+
 //************************************************************************************************* */
 
 

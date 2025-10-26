@@ -128,10 +128,10 @@ document.getElementById('save-all-btn').onclick = async () => {
   });
 
   try {
-    const res = await fetch('/api/adminquestions/saveall', {
+    const res = await fetch('/api/save-questions', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ updates })
+      body: JSON.stringify({ questions:updates })
     });
     const result = await res.json();
     if (!result.success) throw new Error(result.error || "Erreur serveur");
@@ -142,6 +142,7 @@ document.getElementById('save-all-btn').onclick = async () => {
     alert("Erreur sauvegarde : " + err.message);
   }
 };
+
 
 // 🔹 Initialisation
 loadQuestions();
