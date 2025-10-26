@@ -1432,7 +1432,6 @@ app.get('/api/adminquestions', async (req, res) => {
 
     const questions = result.rows.map(r => ({
       // 🧩 On ne renvoie pas l'id au frontend si tu veux le cacher
-      id: r.id ?? null,
       faculte: r.faculte || "",
       module: r.module || "",
       cours: r.cours || "",
@@ -1553,50 +1552,45 @@ app.post('/api/save-questions', async (req, res) => {
     return res.status(400).json({ success: false, message: "Format invalide" });
   }
 
+  const client = await db.connect();
   try {
-    for (const q of questions) {
-      const id = q.id && !isNaN(q.id) ? Number(q.id) : null;
+    await client.query('BEGIN');
 
-      if (!id) {
-        // INSERT (nouvelle question)
-        await db.query(`
-          INSERT INTO questions (faculte, module, cours, question, options, correct, image)
-          VALUES ($1, $2, $3, $4, $5, $6, $7)
-        `, [
-          q.faculte || '',
-          q.module || '',
-          q.cours || '',
-          q.question || '',
-          JSON.stringify(q.options || []),
-          JSON.stringify(q.correct || []),
-          q.image || ''
-        ]);
-      } else {
-        // UPDATE (question existante)
-        await db.query(`
-          UPDATE questions
-          SET faculte=$1, module=$2, cours=$3, question=$4, options=$5, correct=$6, image=$7
-          WHERE id=$8
-        `, [
-          q.faculte || '',
-          q.module || '',
-          q.cours || '',
-          q.question || '',
-          JSON.stringify(q.options || []),
-          JSON.stringify(q.correct || []),
-          q.image || '',
-          id
-        ]);
-      }
+    // 1️⃣ Supprimer toutes les questions existantes
+    await client.query('DELETE FROM questions');
+
+    // 2️⃣ Réinitialiser le compteur auto-incrément
+    await client.query('ALTER SEQUENCE questions_id_seq RESTART WITH 1');
+
+    // 3️⃣ Réinsérer toutes les nouvelles questions
+    const insertSQL = `
+      INSERT INTO questions (faculte, module, cours, question, options, correct, image)
+      VALUES ($1, $2, $3, $4, $5, $6, $7)
+    `;
+    for (const q of questions) {
+      await client.query(insertSQL, [
+        q.faculte || '',
+        q.module || '',
+        q.cours || '',
+        q.question || '',
+        JSON.stringify(q.options || []),
+        JSON.stringify(q.correct || []),
+        q.image || ''
+      ]);
     }
 
-    res.json({ success: true, message: "Questions sauvegardées avec succès" });
+    await client.query('COMMIT');
+    res.json({ success: true, message: "✅ Toutes les questions ont été remplacées avec succès" });
 
   } catch (err) {
+    await client.query('ROLLBACK');
     console.error("❌ Erreur SQL save-questions :", err);
     res.status(500).json({ success: false, message: err.message });
+  } finally {
+    client.release();
   }
 });
+
 
 
 //************************************************************************************************* */

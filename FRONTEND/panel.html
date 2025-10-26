@@ -24,7 +24,7 @@
   <table id="table-questions">
     <thead>
       <tr>
-        <th>ID</th>
+        
         <th>Faculté</th>
         <th>Module</th>
         <th>Cours</th>
@@ -62,7 +62,7 @@ function renderQuestions(questions) {
     const tr = document.createElement('tr');
     tr.dataset.id = q.id; // ID pour la sauvegarde
     tr.innerHTML = `
-      <td>${q.id}</td>
+     
       <td contenteditable="true" data-field="faculte">${q.faculte || ''}</td>
       <td contenteditable="true" data-field="module">${q.module || ''}</td>
       <td contenteditable="true" data-field="cours">${q.cours || ''}</td>
@@ -95,7 +95,7 @@ document.getElementById('add-question-btn').onclick = () => {
   const tr = document.createElement('tr');
   tr.dataset.id = ''; // nouvelle question sans ID
   tr.innerHTML = `
-    <td>—</td>
+   
     <td contenteditable="true" data-field="faculte">Nouvelle faculté</td>
     <td contenteditable="true" data-field="module">Nouveau module</td>
     <td contenteditable="true" data-field="cours">Nouveau cours</td>
@@ -113,35 +113,35 @@ document.getElementById('add-question-btn').onclick = () => {
 // 🔹 Sauvegarder tout
 document.getElementById('save-all-btn').onclick = async () => {
   const rows = Array.from(tbody.querySelectorAll('tr'));
-  const updates = rows.map(tr => {
-    const id = tr.dataset.id;
-    const data = {};
+  const questions = rows.map(tr => {
+    const q = {};
     tr.querySelectorAll('[data-field]').forEach(td => {
       const field = td.dataset.field;
-      let value = td.innerText;
+      let value = td.innerText.trim();
       if (field === 'options' || field === 'correct') {
         try { value = JSON.parse(value); } catch { value = []; }
       }
-      data[field] = value;
+      q[field] = value;
     });
-    return { id, ...data };
+    return q;
   });
 
   try {
     const res = await fetch('/api/save-questions', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ questions:updates })
+      body: JSON.stringify({ questions })
     });
     const result = await res.json();
-    if (!result.success) throw new Error(result.error || "Erreur serveur");
-    alert('✅ Toutes les modifications ont été sauvegardées');
+    if (!result.success) throw new Error(result.message || "Erreur serveur");
+    alert(result.message);
     loadQuestions();
   } catch (err) {
     console.error("❌ Save all error:", err);
     alert("Erreur sauvegarde : " + err.message);
   }
 };
+
 
 
 // 🔹 Initialisation
