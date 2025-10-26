@@ -202,7 +202,6 @@ function saveEdit(index) {
   actionsTd.appendChild(span);
 }
 
-
 // enable editing mode for a line
 function enableEdit(index) {
   const q = questions[index];
@@ -240,6 +239,7 @@ function enableEdit(index) {
   span.style.marginLeft = '6px';
   actionsTd.appendChild(span);
 }
+
 
 
 // cancel editing and restore oldData
@@ -453,8 +453,8 @@ actionsTd.appendChild(editBtn);
 }
 
 
-document.getElementById('add-question-btn').onclick = addQuestion;
-document.getElementById('save-all-btn').onclick = saveAll;
+document.getElementById('addBtn').onclick = addQuestion;
+document.getElementById('saveBtn').onclick = saveAll;
 
 loadQuestions();
 window.addEventListener("scroll", () => {
