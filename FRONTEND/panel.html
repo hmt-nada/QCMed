@@ -4,7 +4,6 @@
   
   <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="style.css"/>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">
@@ -36,6 +35,34 @@
     #add-question-btn, #save-all-btn { margin: 10px 5px; padding: 8px 12px; font-size: 16px; }
     img { max-width: 80px; }
     pre { white-space: pre-wrap; word-wrap: break-word; margin: 0; }
+  .btn-update {
+  background-color: #4caf50;
+  color: white;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.btn-update:hover {
+  background-color: #45a049;
+}
+td[contenteditable="true"] {
+  cursor: text;
+  background-color: #fff9e6;
+  transition: background-color 0.2s ease;
+}
+td[contenteditable="true"]:focus {
+  background-color: #fff3b0;
+}
+button:hover {
+  transform: scale(1.05);
+}
+button:active {
+  transform: scale(0.97);
+}
+
   </style>
 </head>
 <body>
@@ -104,14 +131,75 @@ console.log("🧠 [DEBUG] IDs envoyés au serveur :", changedQuestions.map(q => 
     alert("Erreur réseau : " + err.message);
   }
 }
+function saveEdit(index) {
+  const q = questions[index];
+  const tr = document.querySelectorAll('#table-questions tbody tr')[index];
+  const editableCells = tr.querySelectorAll('td:not(:last-child)');
+
+  const fields = ['faculte', 'module', 'cours', 'question', 'options', 'correct', 'image'];
+
+  // 🔹 Sauvegarde des nouvelles valeurs
+  editableCells.forEach((td, i) => {
+    let value = td.innerText.trim();
+    if (fields[i] === 'options' || fields[i] === 'correct') {
+      try { value = JSON.parse(value); } catch { /* garde texte brut si erreur */ }
+    }
+    q[fields[i]] = value;
+    td.removeAttribute('contenteditable');
+    td.style.backgroundColor = '';
+  });
+
+  // 🔹 Marque la ligne comme changée
+  q.state = q.state === 'new' ? 'new' : 'changed';
+
+  // 🔹 Réinitialise le bouton
+  const editBtn = tr.querySelector('button');
+  editBtn.textContent = '📝 Modifier';
+  editBtn.onclick = (e) => {
+    e.preventDefault();
+    enableEdit(index);
+  };
+
+  // 🔹 Actualise le badge visuel
+  const span = tr.querySelector('span');
+  if (span) {
+    span.textContent = '(changed)';
+    span.style.color = 'orange';
+  }
+}
+
 // enable editing mode for a line
 function enableEdit(index) {
   const q = questions[index];
-  // sauvegarde la version avant modification (copie profonde)
+  const tr = document.querySelectorAll('#table-questions tbody tr')[index];
+
+  // 🧠 Sauvegarde avant modification
   q.oldData = JSON.parse(JSON.stringify(q));
   q.state = q.state === "new" ? "new" : "editing";
-  renderQuestions();
+
+  // 🔹 Rendre les cellules éditables (sauf la colonne actions)
+  const editableCells = tr.querySelectorAll('td:not(:last-child)');
+  editableCells.forEach(td => {
+    td.setAttribute('contenteditable', 'true');
+    td.style.outline = 'none';
+    td.style.backgroundColor = '#fffdf0'; // léger jaune clair
+  });
+
+  // 🔹 Changer le bouton “Modifier” en “Enregistrer”
+  const editBtn = tr.querySelector('button');
+  editBtn.textContent = '💾 Enregistrer';
+  editBtn.onclick = () => saveEdit(index);
+
+  // 🔹 Changer la couleur d’état visuel
+  const span = tr.querySelector('span');
+  if (span) {
+    span.textContent = '(editing)';
+    span.style.color = 'orange';
+  }
+  
+
 }
+
 
 // cancel editing and restore oldData
 function cancelEdit(index) {
@@ -294,9 +382,13 @@ function renderQuestions() {
       actionsTd.appendChild(cancelBtn);
     } else {
       const editBtn = document.createElement('button');
-      editBtn.textContent = '📝 Modifier';
-      editBtn.onclick = () => enableEdit(index);
-      actionsTd.appendChild(editBtn);
+      editBtn.classList.add('btn-update');
+editBtn.textContent = '📝 Modifier';
+editBtn.addEventListener('click', (e) => {
+  e.preventDefault();
+  enableEdit(index);
+});
+actionsTd.appendChild(editBtn);
 
       // visual state badge
       const span = document.createElement('span');
