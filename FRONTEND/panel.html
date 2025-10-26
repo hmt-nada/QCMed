@@ -368,11 +368,8 @@ function renderQuestions() {
     const tr = document.createElement('tr');
 
     // id hidden cell
-    const idCell = document.createElement('td');
-    idCell.style.display = 'none';
-    idCell.textContent = q.id ?? '';
-    tr.appendChild(idCell);
-
+ tr.dataset.id = q.id ?? '';
+  
     function makeCell(field, isTextarea = false) {
       const td = document.createElement('td');
       if (q.state === 'editing' || q.state === 'new') {
