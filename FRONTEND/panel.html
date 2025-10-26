@@ -71,8 +71,10 @@ console.log("🧠 [DEBUG] IDs envoyés au serveur :", changedQuestions.map(q => 
 }
 
 function handleInputChange(index, field, value) {
+   if (!questions[index]) return;
+   
   // ✅ Met à jour la valeur
-  questions[index][field] = value;
+  if (field !== "id") questions[index][field] = value;
 
   // ✅ On change l’état UNE SEULE FOIS
   if (questions[index].state === "unchanged") {
@@ -163,6 +165,7 @@ function renderQuestions() {
     const tr = document.createElement('tr');
     tr.dataset.id = q.id || '';
     tr.innerHTML = `
+       <td style="display:none" data-field="id">${q.id ?? ''}</td>
       <td contenteditable="true" data-field="faculte">${q.faculte || ''}</td>
       <td contenteditable="true" data-field="module">${q.module || ''}</td>
       <td contenteditable="true" data-field="cours">${q.cours || ''}</td>
