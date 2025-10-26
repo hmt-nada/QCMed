@@ -84,6 +84,21 @@ button:active {
 body {
   padding-top: 70px; /* pour éviter que le contenu passe sous la barre */
 }
+input, textarea {
+  outline: none;        /* supprime le contour par défaut */
+  border: none;         /* supprime la bordure si tu veux un look plus clean */
+  width: 100%;          /* occupe toute la cellule */
+  box-sizing: border-box; /* pour que padding ne dépasse pas */
+  background: transparent; /* background transparent pour ne pas changer la couleur de la cellule */
+  font-family: inherit; /* hérite de la police de la table */
+  font-size: inherit;   /* hérite de la taille de la table */
+}
+
+input:focus, textarea:focus {
+  outline: none;        /* assure qu’au focus rien n’apparaît */
+  box-shadow: none;     /* supprime tout effet de surbrillance */
+  background: transparent; /* garde le fond transparent si tu veux */
+}
 
   </style>
 </head>
@@ -369,7 +384,7 @@ function renderQuestions() {
 
     // id hidden cell
  tr.dataset.id = q.id ?? '';
-  
+
     function makeCell(field, isTextarea = false) {
       const td = document.createElement('td');
       if (q.state === 'editing' || q.state === 'new') {
