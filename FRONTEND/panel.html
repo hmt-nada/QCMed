@@ -62,14 +62,38 @@ button:hover {
 button:active {
   transform: scale(0.97);
 }
+.toolbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  background: #ffffffee; /* fond blanc semi-transparent */
+  backdrop-filter: blur(6px);
+  padding: 10px 20px;
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  z-index: 1000;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+  transition: background 0.3s ease, box-shadow 0.3s ease;
+}
+.toolbar.scrolled {
+  background: #f8f8f8ee;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+}
+body {
+  padding-top: 70px; /* pour éviter que le contenu passe sous la barre */
+}
 
   </style>
 </head>
 <body>
-  <h1>📘 Panel Admin - Gestion des Questions</h1>
+  <div class="toolbar">
+     <h1>📘 Panel Admin - Gestion des Questions</h1>
+  <button id="addBtn" onclick="addQuestion()">➕ Ajouter une question</button>
+  <button id="saveBtn" onclick="saveAll()">💾 Sauvegarder les modifications</button>
+</div>
 
-  <button id="add-question-btn">➕ Ajouter Question</button>
-  <button id="save-all-btn">💾 Sauvegarder tout</button>
 
   <table id="table-questions">
     <thead>
@@ -135,7 +159,6 @@ function saveEdit(index) {
   const q = questions[index];
   const tr = document.querySelectorAll('#table-questions tbody tr')[index];
   const editableCells = tr.querySelectorAll('td:not(:last-child)');
-
   const fields = ['faculte', 'module', 'cours', 'question', 'options', 'correct', 'image'];
 
   // 🔹 Sauvegarde des nouvelles valeurs
@@ -152,52 +175,70 @@ function saveEdit(index) {
   // 🔹 Marque la ligne comme changée
   q.state = q.state === 'new' ? 'new' : 'changed';
 
-  // 🔹 Réinitialise le bouton
-  const editBtn = tr.querySelector('button');
+  // 🔹 Restaure les boutons
+  const actionsTd = tr.querySelector('td:last-child');
+  actionsTd.innerHTML = ''; // on vide la cellule d’actions
+
+  // 📝 Bouton Modifier
+  const editBtn = document.createElement('button');
   editBtn.textContent = '📝 Modifier';
   editBtn.onclick = (e) => {
     e.preventDefault();
     enableEdit(index);
   };
+  actionsTd.appendChild(editBtn);
 
-  // 🔹 Actualise le badge visuel
-  const span = tr.querySelector('span');
-  if (span) {
-    span.textContent = '(changed)';
-    span.style.color = 'orange';
-  }
+  // ❌ Bouton Supprimer (remis comme avant)
+  const delBtn = document.createElement('button');
+  delBtn.textContent = '❌';
+  delBtn.onclick = () => deleteQuestion(index);
+  actionsTd.appendChild(delBtn);
+
+  // 🔹 Badge visuel
+  const span = document.createElement('span');
+  span.textContent = '(changed)';
+  span.style.color = 'orange';
+  span.style.marginLeft = '6px';
+  actionsTd.appendChild(span);
 }
+
 
 // enable editing mode for a line
 function enableEdit(index) {
   const q = questions[index];
   const tr = document.querySelectorAll('#table-questions tbody tr')[index];
 
-  // 🧠 Sauvegarde avant modification
   q.oldData = JSON.parse(JSON.stringify(q));
   q.state = q.state === "new" ? "new" : "editing";
 
-  // 🔹 Rendre les cellules éditables (sauf la colonne actions)
   const editableCells = tr.querySelectorAll('td:not(:last-child)');
   editableCells.forEach(td => {
     td.setAttribute('contenteditable', 'true');
     td.style.outline = 'none';
-    td.style.backgroundColor = '#fffdf0'; // léger jaune clair
+    td.style.backgroundColor = '#fffdf0';
   });
 
-  // 🔹 Changer le bouton “Modifier” en “Enregistrer”
-  const editBtn = tr.querySelector('button');
-  editBtn.textContent = '💾 Enregistrer';
-  editBtn.onclick = () => saveEdit(index);
+  const actionsTd = tr.querySelector('td:last-child');
+  actionsTd.innerHTML = '';
 
-  // 🔹 Changer la couleur d’état visuel
-  const span = tr.querySelector('span');
-  if (span) {
-    span.textContent = '(editing)';
-    span.style.color = 'orange';
-  }
-  
+  // 💾 Bouton Enregistrer
+  const saveBtn = document.createElement('button');
+  saveBtn.textContent = '💾 Enregistrer';
+  saveBtn.onclick = () => saveEdit(index);
+  actionsTd.appendChild(saveBtn);
 
+  // ❌ Bouton Annuler
+  const cancelBtn = document.createElement('button');
+  cancelBtn.textContent = '❌ Annuler';
+  cancelBtn.onclick = () => cancelEdit(index);
+  actionsTd.appendChild(cancelBtn);
+
+  // 🔸 Badge visuel
+  const span = document.createElement('span');
+  span.textContent = '(editing)';
+  span.style.color = 'orange';
+  span.style.marginLeft = '6px';
+  actionsTd.appendChild(span);
 }
 
 
@@ -416,6 +457,12 @@ document.getElementById('add-question-btn').onclick = addQuestion;
 document.getElementById('save-all-btn').onclick = saveAll;
 
 loadQuestions();
+window.addEventListener("scroll", () => {
+  const toolbar = document.querySelector(".toolbar");
+  if (window.scrollY > 30) toolbar.classList.add("scrolled");
+  else toolbar.classList.remove("scrolled");
+});
+
 </script>
 </body>
 </html>
