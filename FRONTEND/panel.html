@@ -333,12 +333,13 @@ function addQuestion() {
     options: ["", "", "", ""],
     correct: [],
     image: "",
-    state: "new",
+    state: "editing", // <-- ici au lieu de "new"
     oldData: null
   };
   questions.push(newQuestion);
   renderQuestions();
 }
+
 
 const tbody = document.querySelector('#table-questions tbody');
 
