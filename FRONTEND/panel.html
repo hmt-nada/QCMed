@@ -67,14 +67,31 @@
 }
 
 function handleInputChange(index, field, value) {
+  // ✅ Met à jour la valeur
   questions[index][field] = value;
 
+  // ✅ On change l’état UNE SEULE FOIS
   if (questions[index].state === "unchanged") {
     questions[index].state = "changed";
   }
 
-  renderQuestions(); // ou juste update du champ dans ton DOM
+  // 🚫 Si c’est déjà "new" ou "changed", on ne fait rien
+  // (donc pas de reassignation inutile)
+
+  // ✅ Met juste à jour le badge de statut visuel
+  const tr = document.querySelectorAll('tbody tr')[index];
+  if (tr) {
+    const span = tr.querySelector('span');
+    if (span) {
+      span.textContent = `(${questions[index].state})`;
+      span.style.color =
+        questions[index].state === 'new' ? 'green' :
+        questions[index].state === 'changed' ? 'orange' :
+        questions[index].state === 'deleted' ? 'red' : '#888';
+    }
+  }
 }
+
 function deleteQuestion(index) {
   if (questions[index].state === "new") {
     // Si c’est une question jamais encore en base, on la retire simplement du tableau
