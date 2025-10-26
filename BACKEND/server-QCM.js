@@ -794,10 +794,9 @@ app.post('/api/change-mail', async (req, res) => {
       
 
 //connexion a un compte
-const ADMIN_EMAIL = "on_hamitouche@esi.dz";  // email de l’admin
 
-/*const ADMIN_EMAILS = ["on_hamitouche@esi.dz", "autre@exemple.com"];
-const role = ADMIN_EMAILS.includes(email.toLowerCase()) ? "admin" : "user";*/
+
+const ADMIN_EMAILS = ["on_hamitouche@esi.dz", "hamziakramdjouad@gmail.com"];
 
 app.post("/api/connexion", async (req, res) => {
   const { email, password } = req.body;
@@ -821,8 +820,8 @@ app.post("/api/connexion", async (req, res) => {
     }
 
     // 🧩 Déterminer le rôle
-    const role = (email === ADMIN_EMAIL) ? "admin" : "user";
-
+   
+     const role = ADMIN_EMAILS.map(e => e.toLowerCase()).includes(email.toLowerCase())? "admin": "user";
     // 🔹 Mise à jour du champ email_disconnect
     await db.query(
       "UPDATE utilisateurs SET email_disconnect = FALSE WHERE email = $1",

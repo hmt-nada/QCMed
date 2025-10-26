@@ -93,19 +93,15 @@ function handleInputChange(index, field, value) {
 }
 
 function deleteQuestion(index) {
-  const q = questions[index];
-
-  // Si c’est une question jamais enregistrée en base → on la retire directement du tableau
-  if (q.state === "new" || !q.id) {
+  if (questions[index].state === "new") {
+    // Si c’est une question jamais encore en base, on la retire simplement du tableau
     questions.splice(index, 1);
   } else {
-    // Si elle existe en base → on la marque "deleted"
-    q.state = "deleted";
+    // Si c’est une question existante, on la garde mais on marque pour suppression
+    questions[index].state = "deleted";
   }
-
   renderQuestions();
 }
-
 function addQuestion() {
   const newQuestion = {
     faculte: "",
