@@ -1560,6 +1560,9 @@ app.delete('/api/adminquestions', async (req, res) => {
 // ============================================
 // 🔹 ROUTE : Sauvegarder uniquement les changements
 // ============================================
+// ============================================
+// 🔹 ROUTE : Sauvegarder uniquement les changements (par question)
+// ============================================
 app.post('/api/saveChanges', async (req, res) => {
   const questions = req.body.questions;
   if (!Array.isArray(questions)) {
@@ -1571,7 +1574,7 @@ app.post('/api/saveChanges', async (req, res) => {
     await client.query('BEGIN');
 
     for (const q of questions) {
-      // Ajout
+      // 🔸 AJOUT
       if (q.state === 'new') {
         await client.query(
           `INSERT INTO questions (faculte, module, cours, question, options, correct, image)
@@ -1588,90 +1591,53 @@ app.post('/api/saveChanges', async (req, res) => {
         );
       }
 
-      // Modification
+      // 🔸 MODIFICATION PAR TEXTE (question)
       else if (q.state === 'changed') {
-        if (q.id) {
-          // Option : vérification optimiste (si oldData fourni)
-          if (q.oldData && q.oldData.question !== undefined) {
-            // vérifier que la ligne en base correspond toujours à oldData.question
-            const check = await client.query('SELECT question FROM questions WHERE id=$1', [q.id]);
-            if (check.rowCount === 0) {
-              throw new Error(`Conflit: ligne id=${q.id} introuvable`);
-            }
-            // si tu veux vérifier encore plus de champs, compare d'autres champs avec q.oldData.*
-            // Ex : if (check.rows[0].question !== q.oldData.question) { throw conflict... }
-          }
+        const oldQ = q.oldQuestion || (q.oldData ? q.oldData.question : null);
+        if (!oldQ) throw new Error('❌ Ancienne question manquante pour modification.');
 
-          const result = await client.query(
-            `UPDATE questions
-             SET faculte=$1, module=$2, cours=$3, question=$4, options=$5, correct=$6, image=$7
-             WHERE id=$8`,
-            [
-              q.faculte || '',
-              q.module || '',
-              q.cours || '',
-              q.question || '',
-              JSON.stringify(q.options || []),
-              JSON.stringify(q.correct || []),
-              q.image || null,
-              q.id
-            ]
-          );
-          if (result.rowCount === 0) {
-            throw new Error(`Échec mise à jour id=${q.id}`);
-          }
-        } else {
-          // si pas d'id (au cas improbable), tenter par oldData.question
-          if (q.oldData && q.oldData.question) {
-            const result = await client.query(
-              `UPDATE questions
-               SET faculte=$1, module=$2, cours=$3, question=$4, options=$5, correct=$6, image=$7
-               WHERE question=$8`,
-              [
-                q.faculte || '',
-                q.module || '',
-                q.cours || '',
-                q.question || '',
-                JSON.stringify(q.options || []),
-                JSON.stringify(q.correct || []),
-                q.image || null,
-                q.oldData.question
-              ]
-            );
-            if (result.rowCount === 0) {
-              throw new Error('Échec mise à jour (par question) — ligne introuvable');
-            }
-          } else {
-            throw new Error('ID manquant pour modification');
-          }
+        const result = await client.query(
+          `UPDATE questions
+           SET faculte=$1, module=$2, cours=$3, question=$4, options=$5, correct=$6, image=$7
+           WHERE question=$8`,
+          [
+            q.faculte || '',
+            q.module || '',
+            q.cours || '',
+            q.question || '',
+            JSON.stringify(q.options || []),
+            JSON.stringify(q.correct || []),
+            q.image || null,
+            oldQ
+          ]
+        );
+
+        if (result.rowCount === 0) {
+          throw new Error(`⚠️ Aucune ligne trouvée pour question="${oldQ}"`);
         }
       }
 
-      // Suppression
+      // 🔸 SUPPRESSION PAR TEXTE
       else if (q.state === 'deleted') {
-        if (q.id) {
-          await client.query('DELETE FROM questions WHERE id=$1', [q.id]);
-        } else if (q.oldData && q.oldData.question) {
-          await client.query('DELETE FROM questions WHERE question=$1', [q.oldData.question]);
-        } else if (q.question) {
-          await client.query('DELETE FROM questions WHERE question=$1', [q.question]);
-        } else {
-          throw new Error('Identifiant manquant pour suppression');
-        }
+        const target = q.oldQuestion || (q.oldData ? q.oldData.question : q.question);
+        if (!target) throw new Error('❌ Question introuvable pour suppression.');
+
+        await client.query('DELETE FROM questions WHERE question=$1', [target]);
       }
     }
 
     await client.query('COMMIT');
-    res.json({ success: true, message: 'Modifications sauvegardées' });
+    res.json({ success: true, message: '✅ Modifications sauvegardées avec succès' });
 
   } catch (err) {
     await client.query('ROLLBACK');
-    console.error('Erreur /api/saveChanges :', err);
+    console.error('❌ Erreur /api/saveChanges :', err);
     res.status(500).json({ success: false, message: err.message });
   } finally {
     client.release();
   }
 });
+
 
 
 
