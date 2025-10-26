@@ -1,7 +1,30 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
+  
   <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css"/>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Oleo+Script:wght@400;700&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">    
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:ital,wght@0,200..1000;1,200..1000&family=Oleo+Script:wght@400;700&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">
+<script src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js"></script>
+
+   <!------------------------------------l'image de favicon ----------------------------------------------->
+
+<link rel="icon" type="image/png" href="logo/favicon-96x96.png" sizes="96x96" />
+<link rel="icon" type="image/svg+xml" href="logo/favicon.svg" />
+<link rel="shortcut icon" href="logo/favicon.ico" />
+<link rel="apple-touch-icon" sizes="180x180" href="logo/apple-touch-icon.png" />
+<meta name="apple-mobile-web-app-title" content="QCMed" />
+<link rel="manifest" href="logo/site.webmanifest" />
+
   <title>Admin - Gestion Questions</title>
   <style>
     body { font-family: Arial; margin: 20px; background: #f0f0f0; }
@@ -54,7 +77,8 @@ let isLoading = false; // empêche les doubles appels
     options: q.options,
     correct: q.correct,
     image: q.image,
-    state: q.state
+    state: q.state,
+      oldData: q.oldData || null
   }));
 
 console.log("🧩 [DEBUG] Tentative suppression :", changedQuestions);
@@ -79,6 +103,52 @@ console.log("🧠 [DEBUG] IDs envoyés au serveur :", changedQuestions.map(q => 
     console.error("Erreur saveAll:", err);
     alert("Erreur réseau : " + err.message);
   }
+}
+// enable editing mode for a line
+function enableEdit(index) {
+  const q = questions[index];
+  // sauvegarde la version avant modification (copie profonde)
+  q.oldData = JSON.parse(JSON.stringify(q));
+  q.state = q.state === "new" ? "new" : "editing";
+  renderQuestions();
+}
+
+// cancel editing and restore oldData
+function cancelEdit(index) {
+  const q = questions[index];
+  if (q.oldData) {
+    // restaure valeurs
+    q.faculte = q.oldData.faculte;
+    q.module = q.oldData.module;
+    q.cours = q.oldData.cours;
+    q.question = q.oldData.question;
+    q.options = q.oldData.options;
+    q.correct = q.oldData.correct;
+    q.image = q.oldData.image;
+    q.oldData = null;
+  }
+  q.state = q.state === "new" ? "new" : "unchanged";
+  renderQuestions();
+}
+
+// accept edit, mark as changed
+function validateEdit(index) {
+  const q = questions[index];
+  // si on veut, on peut vérifier qu'au moins un champ a changé
+  q.state = q.state === "new" ? "new" : "changed";
+  renderQuestions();
+}
+// update a single field while editing
+function updateField(index, field, value) {
+  const q = questions[index];
+  if (!q) return;
+  if (field === "options" || field === "correct") {
+    // try to parse JSON if user types JSON
+    if (typeof value === "string") {
+      try { value = JSON.parse(value); } catch { /* assume it's already array when passed */ }
+    }
+  }
+  q[field] = value;
 }
 
 function handleInputChange(index, field, value) {
@@ -126,6 +196,7 @@ function deleteQuestion(index) {
 
 function addQuestion() {
   const newQuestion = {
+    id: null,
     faculte: "",
     module: "",
     cours: "",
@@ -133,100 +204,125 @@ function addQuestion() {
     options: ["", "", "", ""],
     correct: [],
     image: "",
-    state: "new"
+    state: "new",
+    oldData: null
   };
   questions.push(newQuestion);
   renderQuestions();
 }
+
 const tbody = document.querySelector('#table-questions tbody');
 
 // 🔹 Charger toutes les questions
 async function loadQuestions() {
-  if (isLoading) {
-    console.warn("⚠️ Chargement déjà en cours — ignoré.");
-    return;
-  }
+  if (isLoading) return;
   isLoading = true;
-  console.log("📥 Chargement des questions depuis le serveur...");
-
   try {
     const res = await fetch('/api/adminquestions');
     if (!res.ok) throw new Error('HTTP ' + res.status);
     const data = await res.json();
-
-    if (!data.success || !Array.isArray(data.questions)) {
-      throw new Error("Format inattendu de la réponse");
-    }
-
-    // 🧹 Nettoyer complètement avant de réaffecter
-    questions = [];
-    questions = data.questions;
-
-    console.log(`✅ ${questions.length} questions chargées.`);
+    if (!data.success) throw new Error('Format inattendu');
+    questions = data.questions.map(q => ({ ...q })); // shallow copy
     renderQuestions();
-
-  } catch (err) {
-    console.error("❌ Erreur lors du chargement :", err);
-    alert("Erreur : " + err.message);
+  } catch (e) {
+    console.error(e);
+    alert('Erreur: ' + e.message);
   } finally {
     isLoading = false;
   }
 }
-
+// render function with edit/validate/cancel controls
 function renderQuestions() {
-  console.log("🎨 Rendu de", questions.length, "questions");
-  tbody.innerHTML = ''; // supprime toutes les lignes existantes avant le rendu
-
+  const tbody = document.querySelector('#table-questions tbody');
+  tbody.innerHTML = '';
   questions.forEach((q, index) => {
     const tr = document.createElement('tr');
-    tr.dataset.id = q.id || '';
-    tr.innerHTML = `
-       <td style="display:none" data-field="id">${q.id ?? ''}</td>
-      <td contenteditable="true" data-field="faculte">${q.faculte || ''}</td>
-      <td contenteditable="true" data-field="module">${q.module || ''}</td>
-      <td contenteditable="true" data-field="cours">${q.cours || ''}</td>
-      <td contenteditable="true" data-field="question">${q.question || ''}</td>
-      <td contenteditable="true" data-field="options">${JSON.stringify(q.options || [])}</td>
-      <td contenteditable="true" data-field="correct">${JSON.stringify(q.correct || [])}</td>
-      <td contenteditable="true" data-field="image">${q.image || ''}</td>
-      <td>
-        <button class="delete-btn">❌</button>
-        <span style="font-size:12px;color:${
-          q.state === 'new' ? 'green' :
-          q.state === 'changed' ? 'orange' :
-          q.state === 'deleted' ? 'red' : '#888'
-        }">(${q.state})</span>
-      </td>
-    `;
+
+    // id hidden cell
+    const idCell = document.createElement('td');
+    idCell.style.display = 'none';
+    idCell.textContent = q.id ?? '';
+    tr.appendChild(idCell);
+
+    function makeCell(field, isTextarea = false) {
+      const td = document.createElement('td');
+      if (q.state === 'editing') {
+        const input = isTextarea ? document.createElement('textarea') : document.createElement('input');
+        input.value = (field === 'options' || field === 'correct') ? JSON.stringify(q[field] || []) : (q[field] ?? '');
+        input.oninput = (e) => updateField(index, field, isTextarea ? e.target.value : e.target.value);
+        td.appendChild(input);
+      } else {
+        td.contentEditable = false;
+        td.textContent = (field === 'options' || field === 'correct') ? JSON.stringify(q[field] || []) : (q[field] ?? '');
+      }
+      return td;
+    }
+
+    tr.appendChild(makeCell('faculte'));
+    tr.appendChild(makeCell('module'));
+    tr.appendChild(makeCell('cours'));
+    tr.appendChild(makeCell('question', true));
+    tr.appendChild(makeCell('options', true));
+    tr.appendChild(makeCell('correct', true));
+    tr.appendChild(makeCell('image'));
+
+    const actionsTd = document.createElement('td');
+
+    // Delete button (mark deleted)
+    const delBtn = document.createElement('button');
+    delBtn.textContent = '❌';
+    delBtn.onclick = () => {
+      if (q.state === 'new') {
+        questions.splice(index, 1);
+      } else {
+        q.state = 'deleted';
+      }
+      renderQuestions();
+    };
+    actionsTd.appendChild(delBtn);
+
+    // Edit / Validate / Cancel buttons
+    if (q.state === 'editing') {
+      const saveBtn = document.createElement('button');
+      saveBtn.textContent = '✅ Valider';
+      saveBtn.onclick = () => validateEdit(index);
+      actionsTd.appendChild(saveBtn);
+
+      const cancelBtn = document.createElement('button');
+      cancelBtn.textContent = '❌ Annuler';
+      cancelBtn.onclick = () => cancelEdit(index);
+      actionsTd.appendChild(cancelBtn);
+    } else {
+      const editBtn = document.createElement('button');
+      editBtn.textContent = '📝 Modifier';
+      editBtn.onclick = () => enableEdit(index);
+      actionsTd.appendChild(editBtn);
+
+      // visual state badge
+      const span = document.createElement('span');
+      span.style.fontSize = '12px';
+      span.style.marginLeft = '6px';
+      span.style.color =
+        q.state === 'new' ? 'green' :
+        q.state === 'changed' ? 'orange' :
+        q.state === 'deleted' ? 'red' : '#888';
+      span.textContent = `(${q.state})`;
+      actionsTd.appendChild(span);
+    }
+
+    if (q.state === 'deleted') {
+      tr.style.opacity = '0.5';
+    }
+
+    tr.appendChild(actionsTd);
     tbody.appendChild(tr);
-
-    // gestion édition et suppression (comme avant)
-    tr.querySelectorAll('[contenteditable="true"]').forEach(td => {
-      td.addEventListener('input', () => {
-        const field = td.dataset.field;
-        let value = td.innerText.trim();
-        if (field === 'options' || field === 'correct') {
-          try { value = JSON.parse(value); } catch { value = []; }
-        }
-        handleInputChange(index, field, value);
-      });
-    });
-
-    tr.querySelector('.delete-btn').onclick = () => deleteQuestion(index);
   });
 }
 
-// 🔹 Ajouter une nouvelle question
+
 document.getElementById('add-question-btn').onclick = addQuestion;
-
-
-// 🔹 Sauvegarder tout
 document.getElementById('save-all-btn').onclick = saveAll;
 
-
-
-
-// 🔹 Initialisation
 loadQuestions();
 </script>
 </body>

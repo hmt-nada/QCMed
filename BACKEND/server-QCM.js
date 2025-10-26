@@ -1567,64 +1567,112 @@ app.post('/api/saveChanges', async (req, res) => {
   }
 
   const client = await db.connect();
-
   try {
-    await client.query("BEGIN");
+    await client.query('BEGIN');
 
     for (const q of questions) {
-      // ➕ Ajout
-      if (q.state === "new") {
+      // Ajout
+      if (q.state === 'new') {
         await client.query(
           `INSERT INTO questions (faculte, module, cours, question, options, correct, image)
            VALUES ($1,$2,$3,$4,$5,$6,$7)`,
           [
-            q.faculte || "",
-            q.module || "",
-            q.cours || "",
-            q.question || "",
+            q.faculte || '',
+            q.module || '',
+            q.cours || '',
+            q.question || '',
             JSON.stringify(q.options || []),
             JSON.stringify(q.correct || []),
-            q.image || ""
+            q.image || null
           ]
         );
       }
 
-      // ✏️ Modification
-      else if (q.state === "changed" && q.oldQuestion) {
-        await client.query(
-          `UPDATE questions
-           SET faculte=$1, module=$2, cours=$3, question=$4, options=$5, correct=$6, image=$7
-           WHERE question=$8`,
-          [
-            q.faculte || "",
-            q.module || "",
-            q.cours || "",
-            q.question || "",
-            JSON.stringify(q.options || []),
-            JSON.stringify(q.correct || []),
-            q.image || "",
-            q.oldQuestion // ← Ancien texte
-          ]
-        );
+      // Modification
+      else if (q.state === 'changed') {
+        if (q.id) {
+          // Option : vérification optimiste (si oldData fourni)
+          if (q.oldData && q.oldData.question !== undefined) {
+            // vérifier que la ligne en base correspond toujours à oldData.question
+            const check = await client.query('SELECT question FROM questions WHERE id=$1', [q.id]);
+            if (check.rowCount === 0) {
+              throw new Error(`Conflit: ligne id=${q.id} introuvable`);
+            }
+            // si tu veux vérifier encore plus de champs, compare d'autres champs avec q.oldData.*
+            // Ex : if (check.rows[0].question !== q.oldData.question) { throw conflict... }
+          }
+
+          const result = await client.query(
+            `UPDATE questions
+             SET faculte=$1, module=$2, cours=$3, question=$4, options=$5, correct=$6, image=$7
+             WHERE id=$8`,
+            [
+              q.faculte || '',
+              q.module || '',
+              q.cours || '',
+              q.question || '',
+              JSON.stringify(q.options || []),
+              JSON.stringify(q.correct || []),
+              q.image || null,
+              q.id
+            ]
+          );
+          if (result.rowCount === 0) {
+            throw new Error(`Échec mise à jour id=${q.id}`);
+          }
+        } else {
+          // si pas d'id (au cas improbable), tenter par oldData.question
+          if (q.oldData && q.oldData.question) {
+            const result = await client.query(
+              `UPDATE questions
+               SET faculte=$1, module=$2, cours=$3, question=$4, options=$5, correct=$6, image=$7
+               WHERE question=$8`,
+              [
+                q.faculte || '',
+                q.module || '',
+                q.cours || '',
+                q.question || '',
+                JSON.stringify(q.options || []),
+                JSON.stringify(q.correct || []),
+                q.image || null,
+                q.oldData.question
+              ]
+            );
+            if (result.rowCount === 0) {
+              throw new Error('Échec mise à jour (par question) — ligne introuvable');
+            }
+          } else {
+            throw new Error('ID manquant pour modification');
+          }
+        }
       }
 
-      // ❌ Suppression
-      else if (q.state === "deleted" && q.question) {
-        await client.query(`DELETE FROM questions WHERE question=$1`, [q.question]);
+      // Suppression
+      else if (q.state === 'deleted') {
+        if (q.id) {
+          await client.query('DELETE FROM questions WHERE id=$1', [q.id]);
+        } else if (q.oldData && q.oldData.question) {
+          await client.query('DELETE FROM questions WHERE question=$1', [q.oldData.question]);
+        } else if (q.question) {
+          await client.query('DELETE FROM questions WHERE question=$1', [q.question]);
+        } else {
+          throw new Error('Identifiant manquant pour suppression');
+        }
       }
     }
 
-    await client.query("COMMIT");
-    res.json({ success: true, message: "✅ Modifications sauvegardées avec succès" });
+    await client.query('COMMIT');
+    res.json({ success: true, message: 'Modifications sauvegardées' });
 
   } catch (err) {
-    await client.query("ROLLBACK");
-    console.error("❌ Erreur SQL /api/saveChanges :", err);
+    await client.query('ROLLBACK');
+    console.error('Erreur /api/saveChanges :', err);
     res.status(500).json({ success: false, message: err.message });
   } finally {
     client.release();
   }
 });
+
 
 
 //************************************************************************************************* */
