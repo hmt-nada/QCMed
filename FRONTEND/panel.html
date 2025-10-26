@@ -40,7 +40,7 @@
 
 <script>
   let questions = [];
-
+let isLoading = false; // empêche les doubles appels
   async function saveAll() {
   const changedQuestions = questions.filter(q =>
     ["new", "changed", "deleted"].includes(q.state)
@@ -120,23 +120,40 @@ const tbody = document.querySelector('#table-questions tbody');
 
 // 🔹 Charger toutes les questions
 async function loadQuestions() {
+  if (isLoading) {
+    console.warn("⚠️ Chargement déjà en cours — ignoré.");
+    return;
+  }
+  isLoading = true;
+  console.log("📥 Chargement des questions depuis le serveur...");
+
   try {
     const res = await fetch('/api/adminquestions');
     if (!res.ok) throw new Error('HTTP ' + res.status);
     const data = await res.json();
-    if (!data.success || !Array.isArray(data.questions)) throw new Error('Format inattendu');
+
+    if (!data.success || !Array.isArray(data.questions)) {
+      throw new Error("Format inattendu de la réponse");
+    }
+
+    // 🧹 Nettoyer complètement avant de réaffecter
+    questions = [];
     questions = data.questions;
-renderQuestions();
+
+    console.log(`✅ ${questions.length} questions chargées.`);
+    renderQuestions();
 
   } catch (err) {
-    console.error("❌ Load error:", err);
-    alert("Erreur lors du chargement : " + err.message);
+    console.error("❌ Erreur lors du chargement :", err);
+    alert("Erreur : " + err.message);
+  } finally {
+    isLoading = false;
   }
 }
 
-// 🔹 Affichage et gestion actions
 function renderQuestions() {
-  tbody.innerHTML = '';
+  console.log("🎨 Rendu de", questions.length, "questions");
+  tbody.innerHTML = ''; // supprime toutes les lignes existantes avant le rendu
 
   questions.forEach((q, index) => {
     const tr = document.createElement('tr');
@@ -160,7 +177,7 @@ function renderQuestions() {
     `;
     tbody.appendChild(tr);
 
-    // 🟡 Gestion des modifications
+    // gestion édition et suppression (comme avant)
     tr.querySelectorAll('[contenteditable="true"]').forEach(td => {
       td.addEventListener('input', () => {
         const field = td.dataset.field;
@@ -172,7 +189,6 @@ function renderQuestions() {
       });
     });
 
-    // 🔴 Gestion suppression
     tr.querySelector('.delete-btn').onclick = () => deleteQuestion(index);
   });
 }
