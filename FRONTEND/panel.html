@@ -39,6 +39,66 @@
   </table>
 
 <script>
+  let questions = [];
+
+  async function saveAll() {
+  const changedQuestions = questions.filter(q =>
+    ["new", "changed", "deleted"].includes(q.state)
+  );
+
+  try {
+    const res = await fetch("/api/saveChanges", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ questions: changedQuestions })
+    });
+
+    const data = await res.json();
+    if (data.success) {
+      alert("✅ Changements sauvegardés !");
+      loadQuestions(); // recharger la table depuis la base
+    } else {
+      alert("❌ Erreur : " + data.message);
+    }
+  } catch (err) {
+    console.error("Erreur saveAll:", err);
+    alert("Erreur réseau : " + err.message);
+  }
+}
+
+function handleInputChange(index, field, value) {
+  questions[index][field] = value;
+
+  if (questions[index].state === "unchanged") {
+    questions[index].state = "changed";
+  }
+
+  renderQuestions(); // ou juste update du champ dans ton DOM
+}
+function deleteQuestion(index) {
+  if (questions[index].state === "new") {
+    // Si c’est une question jamais encore en base, on la retire simplement du tableau
+    questions.splice(index, 1);
+  } else {
+    // Si c’est une question existante, on la garde mais on marque pour suppression
+    questions[index].state = "deleted";
+  }
+  renderQuestions();
+}
+function addQuestion() {
+  const newQuestion = {
+    faculte: "",
+    module: "",
+    cours: "",
+    question: "",
+    options: ["", "", "", ""],
+    correct: [],
+    image: "",
+    state: "new"
+  };
+  questions.push(newQuestion);
+  renderQuestions();
+}
 const tbody = document.querySelector('#table-questions tbody');
 
 // 🔹 Charger toutes les questions
@@ -48,7 +108,9 @@ async function loadQuestions() {
     if (!res.ok) throw new Error('HTTP ' + res.status);
     const data = await res.json();
     if (!data.success || !Array.isArray(data.questions)) throw new Error('Format inattendu');
-    renderQuestions(data.questions);
+    questions = data.questions;
+renderQuestions();
+
   } catch (err) {
     console.error("❌ Load error:", err);
     alert("Erreur lors du chargement : " + err.message);
@@ -56,13 +118,13 @@ async function loadQuestions() {
 }
 
 // 🔹 Affichage et gestion actions
-function renderQuestions(questions) {
+function renderQuestions() {
   tbody.innerHTML = '';
-  questions.forEach(q => {
+
+  questions.forEach((q, index) => {
     const tr = document.createElement('tr');
-    tr.dataset.id = q.id; // ID pour la sauvegarde
+    tr.dataset.id = q.id || '';
     tr.innerHTML = `
-     
       <td contenteditable="true" data-field="faculte">${q.faculte || ''}</td>
       <td contenteditable="true" data-field="module">${q.module || ''}</td>
       <td contenteditable="true" data-field="cours">${q.cours || ''}</td>
@@ -70,77 +132,42 @@ function renderQuestions(questions) {
       <td contenteditable="true" data-field="options">${JSON.stringify(q.options || [])}</td>
       <td contenteditable="true" data-field="correct">${JSON.stringify(q.correct || [])}</td>
       <td contenteditable="true" data-field="image">${q.image || ''}</td>
-      <td><button class="delete-btn">❌ Supprimer</button></td>
+      <td>
+        <button class="delete-btn">❌</button>
+        <span style="font-size:12px;color:${
+          q.state === 'new' ? 'green' :
+          q.state === 'changed' ? 'orange' :
+          q.state === 'deleted' ? 'red' : '#888'
+        }">(${q.state})</span>
+      </td>
     `;
     tbody.appendChild(tr);
 
-    // 🔹 Supprimer
-    tr.querySelector('.delete-btn').onclick = async () => {
-      if (!confirm('Supprimer cette question ?')) return;
-      try {
-        const res = await fetch(`/api/adminquestions/${q.id}`, { method: 'DELETE' });
-        const result = await res.json();
-        if (!result.success) throw new Error(result.error || "Erreur serveur");
-        tr.remove();
-      } catch (err) {
-        console.error("❌ Delete error:", err);
-        alert("Erreur suppression : " + err.message);
-      }
-    };
+    // 🟡 Gestion des modifications
+    tr.querySelectorAll('[contenteditable="true"]').forEach(td => {
+      td.addEventListener('input', () => {
+        const field = td.dataset.field;
+        let value = td.innerText.trim();
+        if (field === 'options' || field === 'correct') {
+          try { value = JSON.parse(value); } catch { value = []; }
+        }
+        handleInputChange(index, field, value);
+      });
+    });
+
+    // 🔴 Gestion suppression
+    tr.querySelector('.delete-btn').onclick = () => deleteQuestion(index);
   });
 }
 
-// 🔹 Ajouter une nouvelle question
-document.getElementById('add-question-btn').onclick = () => {
-  const tr = document.createElement('tr');
-  tr.dataset.id = ''; // nouvelle question sans ID
-  tr.innerHTML = `
-   
-    <td contenteditable="true" data-field="faculte">Nouvelle faculté</td>
-    <td contenteditable="true" data-field="module">Nouveau module</td>
-    <td contenteditable="true" data-field="cours">Nouveau cours</td>
-    <td contenteditable="true" data-field="question">Nouvelle question</td>
-    <td contenteditable="true" data-field="options">["Option1","Option2"]</td>
-    <td contenteditable="true" data-field="correct">["Option1"]</td>
-    <td contenteditable="true" data-field="image"></td>
-    <td><button class="delete-btn">❌ Supprimer</button></td>
-  `;
-  tbody.appendChild(tr);
 
-  tr.querySelector('.delete-btn').onclick = () => tr.remove();
-};
+// 🔹 Ajouter une nouvelle question
+document.getElementById('add-question-btn').onclick = addQuestion;
+
 
 // 🔹 Sauvegarder tout
-document.getElementById('save-all-btn').onclick = async () => {
-  const rows = Array.from(tbody.querySelectorAll('tr'));
-  const questions = rows.map(tr => {
-    const q = {};
-    tr.querySelectorAll('[data-field]').forEach(td => {
-      const field = td.dataset.field;
-      let value = td.innerText.trim();
-      if (field === 'options' || field === 'correct') {
-        try { value = JSON.parse(value); } catch { value = []; }
-      }
-      q[field] = value;
-    });
-    return q;
-  });
+document.getElementById('save-all-btn').onclick = saveAll;
 
-  try {
-    const res = await fetch('/api/save-questions', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ questions })
-    });
-    const result = await res.json();
-    if (!result.success) throw new Error(result.message || "Erreur serveur");
-    alert(result.message);
-    loadQuestions();
-  } catch (err) {
-    console.error("❌ Save all error:", err);
-    alert("Erreur sauvegarde : " + err.message);
-  }
-};
 
 
 
