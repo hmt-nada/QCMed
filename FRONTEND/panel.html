@@ -43,9 +43,20 @@
 let isLoading = false; // empêche les doubles appels
 
   async function saveAll() {
-  const changedQuestions = questions.filter(q =>
-    ["new", "changed", "deleted"].includes(q.state)
-  );
+  const changedQuestions = questions
+  .filter(q => ["new", "changed", "deleted"].includes(q.state))
+  .map(q => ({
+    faculte: q.faculte,
+    module: q.module,
+    cours: q.cours,
+    question: q.question,
+    oldQuestion: q.oldQuestion || null,
+    options: q.options,
+    correct: q.correct,
+    image: q.image,
+    state: q.state
+  }));
+
 console.log("🧩 [DEBUG] Tentative suppression :", changedQuestions);
 console.log("🧠 [DEBUG] IDs envoyés au serveur :", changedQuestions.map(q => q.id));
 
@@ -73,14 +84,17 @@ console.log("🧠 [DEBUG] IDs envoyés au serveur :", changedQuestions.map(q => 
 function handleInputChange(index, field, value) {
    if (!questions[index]) return;
    
-  // ✅ Met à jour la valeur
-  if (field !== "id") questions[index][field] = value;
-
   // ✅ On change l’état UNE SEULE FOIS
-  if (questions[index].state === "unchanged") {
+  if (questions[index].state === "unchanged" && field === "question") {
+    // Sauvegarder l'ancienne question avant modification
+    questions[index].oldQuestion = questions[index].question;
+  }
+// ✅ Met à jour la valeur
+  if (field !== "id") questions[index][field] = value;
+ if (questions[index].state === "unchanged") {
     questions[index].state = "changed";
   }
-
+  
   // 🚫 Si c’est déjà "new" ou "changed", on ne fait rien
   // (donc pas de reassignation inutile)
 
@@ -100,14 +114,16 @@ function handleInputChange(index, field, value) {
 
 function deleteQuestion(index) {
   if (questions[index].state === "new") {
-    // Si c’est une question jamais encore en base, on la retire simplement du tableau
     questions.splice(index, 1);
   } else {
-    // Si c’est une question existante, on la garde mais on marque pour suppression
     questions[index].state = "deleted";
   }
   renderQuestions();
+
+  const tr = document.querySelectorAll('tbody tr')[index];
+  if (tr) tr.style.opacity = "0.5";
 }
+
 function addQuestion() {
   const newQuestion = {
     faculte: "",

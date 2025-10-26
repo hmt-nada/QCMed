@@ -1489,34 +1489,37 @@ app.post('/api/adminquestions', async (req, res) => {
 // ============================================
 // 🔹 ROUTE : Modifier une question existante
 // ============================================
-app.put('/api/adminquestions/:id', async (req, res) => {
+app.put('/api/adminquestions', async (req, res) => {
   try {
-    const { id } = req.params;
-    const { faculte, module, cours, question, options, correct, image } = req.body;
+   
+    const { faculte, module, cours, question, options, correct, image, oldQuestion } = req.body;
 
-    if (!id || isNaN(id)) {
-      return res.status(400).json({ success: false, error: "ID invalide" });
+      if (!oldQuestion || !question) {
+      return res.status(400).json({ success: false, error: "Ancienne ou nouvelle question manquante" });
     }
 
     const sql = `
       UPDATE questions
       SET faculte=$1, module=$2, cours=$3, question=$4, options=$5, correct=$6, image=$7
-      WHERE id=$8
+      WHERE question=$8
       RETURNING *
     `;
 
     const params = [
-      faculte,
-      module,
-      cours,
-      question,
+      faculte || "",
+      module || "",
+      cours || "",
+      question || "",
       JSON.stringify(options || []),
       JSON.stringify(correct || []),
       image || null,
-      Number(id)
+      oldQuestion // ← on cherche la question originale
     ];
 
     const result = await db.query(sql, params);
+     if (result.rowCount === 0)
+      return res.status(404).json({ success: false, error: "Question introuvable" });
+
     res.json({ success: true, question: result.rows[0] });
 
   } catch (err) {
@@ -1529,18 +1532,19 @@ app.put('/api/adminquestions/:id', async (req, res) => {
 // ============================================
 // 🔹 ROUTE : Supprimer une question
 // ============================================
-app.delete('/api/adminquestions/:id', async (req, res) => {
-  console.log("🧩 [DEBUG SERVEUR] Requête DELETE reçue :", req.params);
+app.delete('/api/adminquestions', async (req, res) => {
   try {
-    const id = parseInt(req.params.id);
-     console.log("🧠 [DEBUG SERVEUR] ID interprété :", id);
-    if ( isNaN(id)) {
-      console.error("❌ [DEBUG SERVEUR] ID invalide reçu :", req.params.id);
-      return res.status(400).json({ success: false, error: "ID invalide" });
+    const { question } = req.body;
+    if (!question) {
+      return res.status(400).json({ success: false, error: "Texte de la question requis" });
     }
 
-    const result=await db.query("DELETE FROM questions WHERE id=$1", [Number(id)]);
-   console.log("🗑️ [DEBUG SERVEUR] Résultat SQL :", result.rowCount, "ligne(s) supprimée(s)");
+    const result = await db.query("DELETE FROM questions WHERE question=$1", [question]);
+    console.log("🗑️ Suppression de :", question, "| Lignes supprimées :", result.rowCount);
+
+    if (result.rowCount === 0)
+      return res.status(404).json({ success: false, error: "Aucune question trouvée" });
+
     res.json({ success: true });
 
   } catch (err) {
@@ -1548,6 +1552,7 @@ app.delete('/api/adminquestions/:id', async (req, res) => {
     res.status(500).json({ success: false, error: err.message });
   }
 });
+
 
 
 
@@ -1567,52 +1572,46 @@ app.post('/api/saveChanges', async (req, res) => {
     await client.query("BEGIN");
 
     for (const q of questions) {
-      // Nouveau ➕
+      // ➕ Ajout
       if (q.state === "new") {
         await client.query(
           `INSERT INTO questions (faculte, module, cours, question, options, correct, image)
-           VALUES ($1, $2, $3, $4, $5, $6, $7)`,
+           VALUES ($1,$2,$3,$4,$5,$6,$7)`,
           [
-            q.faculte || '',
-            q.module || '',
-            q.cours || '',
-            q.question || '',
+            q.faculte || "",
+            q.module || "",
+            q.cours || "",
+            q.question || "",
             JSON.stringify(q.options || []),
             JSON.stringify(q.correct || []),
-            q.image || ''
+            q.image || ""
           ]
         );
       }
 
-      // Modifié ✏️
-      else if (q.state === "changed" && q.id) {
+      // ✏️ Modification
+      else if (q.state === "changed" && q.oldQuestion) {
         await client.query(
           `UPDATE questions
            SET faculte=$1, module=$2, cours=$3, question=$4, options=$5, correct=$6, image=$7
-           WHERE id=$8`,
+           WHERE question=$8`,
           [
-            q.faculte || '',
-            q.module || '',
-            q.cours || '',
-            q.question || '',
+            q.faculte || "",
+            q.module || "",
+            q.cours || "",
+            q.question || "",
             JSON.stringify(q.options || []),
             JSON.stringify(q.correct || []),
-            q.image || '',
-            q.id
+            q.image || "",
+            q.oldQuestion // ← Ancien texte
           ]
         );
       }
 
-      // Supprimé ❌
-      else if (q.state === "deleted" && q.id) {
-
-        const idNum = Number(q.id);
-      console.log("➡ Suppression question id =", idNum);
-      if (!Number.isFinite(idNum) || idNum <= 0) {
-        throw new Error("ID invalide pour suppression: " + q.id);
+      // ❌ Suppression
+      else if (q.state === "deleted" && q.question) {
+        await client.query(`DELETE FROM questions WHERE question=$1`, [q.question]);
       }
-      await client.query(`DELETE FROM questions WHERE id=$1`, [idNum]);
-    }
     }
 
     await client.query("COMMIT");
