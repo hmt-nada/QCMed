@@ -333,13 +333,12 @@ function addQuestion() {
     options: ["", "", "", ""],
     correct: [],
     image: "",
-    state: "editing", // <-- ici au lieu de "new"
+    state: "new",
     oldData: null
   };
   questions.push(newQuestion);
   renderQuestions();
 }
-
 
 const tbody = document.querySelector('#table-questions tbody');
 
@@ -376,15 +375,15 @@ function renderQuestions() {
 
     function makeCell(field, isTextarea = false) {
       const td = document.createElement('td');
-      if (q.state === 'editing') {
-        const input = isTextarea ? document.createElement('textarea') : document.createElement('input');
-        input.value = (field === 'options' || field === 'correct') ? JSON.stringify(q[field] || []) : (q[field] ?? '');
-        input.oninput = (e) => updateField(index, field, isTextarea ? e.target.value : e.target.value);
-        td.appendChild(input);
-      } else {
-        td.contentEditable = false;
-        td.textContent = (field === 'options' || field === 'correct') ? JSON.stringify(q[field] || []) : (q[field] ?? '');
-      }
+      if (q.state === 'editing' || q.state === 'new') {
+    const input = isTextarea ? document.createElement('textarea') : document.createElement('input');
+    input.value = (field === 'options' || field === 'correct') ? JSON.stringify(q[field] || []) : (q[field] ?? '');
+    input.oninput = (e) => updateField(index, field, isTextarea ? e.target.value : e.target.value);
+    td.appendChild(input);
+} else {
+    td.contentEditable = false;
+    td.textContent = (field === 'options' || field === 'correct') ? JSON.stringify(q[field] || []) : (q[field] ?? '');
+}
       return td;
     }
 
