@@ -1411,6 +1411,9 @@ app.get("/stats/questions-par-cours", async (req, res) => {
 // Route pour récupérer toutes les questions
 // 🔹 Route pour renvoyer toutes les questions
 // 🔹 Route pour renvoyer toutes les questions (Neon PostgreSQL)
+// ============================================
+// 🔹 ROUTE : Récupérer toutes les questions
+// ============================================
 app.get('/api/adminquestions', async (req, res) => {
   try {
     if (!req.session.user) {
@@ -1419,33 +1422,25 @@ app.get('/api/adminquestions', async (req, res) => {
 
     console.log("✅ Route /api/adminquestions appelée par :", req.session.user.email);
 
-    // ⚡ Requête PostgreSQL
     const sql = `
       SELECT id, faculte, module, cours, question, options, correct, image
       FROM questions
       ORDER BY id ASC
     `;
 
-    const result = await db.query(sql); // db = pool Neon / pg.Pool
+    const result = await db.query(sql);
 
-    // ⚙️ Normalisation options / correct
-    const questions = result.rows.map(r => {
-      let options = [];
-      let correct = [];
-      try { options = r.options ? JSON.parse(r.options) : []; } catch(e){ options = r.options ? [r.options] : [] }
-      try { correct = r.correct ? JSON.parse(r.correct) : []; } catch(e){ correct = r.correct ? [r.correct] : [] }
-
-      return {
-        id: r.id,
-        faculte: r.faculte || "",
-        module: r.module || "",
-        cours: r.cours || "",
-        question: r.question || "",
-        options,
-        correct,
-        image: r.image || ""
-      };
-    });
+    const questions = result.rows.map(r => ({
+      // 🧩 On ne renvoie pas l'id au frontend si tu veux le cacher
+      id: r.id ?? null,
+      faculte: r.faculte || "",
+      module: r.module || "",
+      cours: r.cours || "",
+      question: r.question || "",
+      options: (() => { try { return JSON.parse(r.options); } catch { return r.options ? [r.options] : []; } })(),
+      correct: (() => { try { return JSON.parse(r.correct); } catch { return r.correct ? [r.correct] : []; } })(),
+      image: r.image || ""
+    }));
 
     res.json({ success: true, questions });
 
@@ -1455,6 +1450,10 @@ app.get('/api/adminquestions', async (req, res) => {
   }
 });
 
+
+// ============================================
+// 🔹 ROUTE : Ajouter une nouvelle question
+// ============================================
 app.post('/api/adminquestions', async (req, res) => {
   try {
     const { faculte, module, cours, question, options, correct, image } = req.body;
@@ -1464,6 +1463,7 @@ app.post('/api/adminquestions', async (req, res) => {
       VALUES ($1, $2, $3, $4, $5, $6, $7)
       RETURNING *
     `;
+
     const params = [
       faculte,
       module,
@@ -1476,15 +1476,25 @@ app.post('/api/adminquestions', async (req, res) => {
 
     const result = await db.query(sql, params);
     res.json({ success: true, question: result.rows[0] });
+
   } catch (err) {
-    console.error(err);
+    console.error("❌ Erreur SQL /adminquestions POST :", err);
     res.status(500).json({ success: false, error: err.message });
   }
 });
+
+
+// ============================================
+// 🔹 ROUTE : Modifier une question existante
+// ============================================
 app.put('/api/adminquestions/:id', async (req, res) => {
   try {
     const { id } = req.params;
     const { faculte, module, cours, question, options, correct, image } = req.body;
+
+    if (!id || isNaN(id)) {
+      return res.status(400).json({ success: false, error: "ID invalide" });
+    }
 
     const sql = `
       UPDATE questions
@@ -1492,6 +1502,7 @@ app.put('/api/adminquestions/:id', async (req, res) => {
       WHERE id=$8
       RETURNING *
     `;
+
     const params = [
       faculte,
       module,
@@ -1500,26 +1511,42 @@ app.put('/api/adminquestions/:id', async (req, res) => {
       JSON.stringify(options || []),
       JSON.stringify(correct || []),
       image || null,
-      id
+      Number(id)
     ];
 
     const result = await db.query(sql, params);
     res.json({ success: true, question: result.rows[0] });
+
   } catch (err) {
-    console.error(err);
+    console.error("❌ Erreur SQL /adminquestions PUT :", err);
     res.status(500).json({ success: false, error: err.message });
   }
 });
+
+
+// ============================================
+// 🔹 ROUTE : Supprimer une question
+// ============================================
 app.delete('/api/adminquestions/:id', async (req, res) => {
   try {
     const { id } = req.params;
-    await db.query("DELETE FROM questions WHERE id=$1", [id]);
+    if (!id || isNaN(id)) {
+      return res.status(400).json({ success: false, error: "ID invalide" });
+    }
+
+    await db.query("DELETE FROM questions WHERE id=$1", [Number(id)]);
     res.json({ success: true });
+
   } catch (err) {
-    console.error(err);
+    console.error("❌ Erreur SQL /adminquestions DELETE :", err);
     res.status(500).json({ success: false, error: err.message });
   }
 });
+
+
+// ============================================
+// 🔹 ROUTE : Sauvegarder plusieurs questions
+// ============================================
 app.post('/api/save-questions', async (req, res) => {
   const questions = req.body.questions;
   if (!Array.isArray(questions)) {
@@ -1528,8 +1555,10 @@ app.post('/api/save-questions', async (req, res) => {
 
   try {
     for (const q of questions) {
-      if (!q.id) {
-        // 🔹 Nouvelle question → INSERT
+      const id = q.id && !isNaN(q.id) ? Number(q.id) : null;
+
+      if (!id) {
+        // INSERT (nouvelle question)
         await db.query(`
           INSERT INTO questions (faculte, module, cours, question, options, correct, image)
           VALUES ($1, $2, $3, $4, $5, $6, $7)
@@ -1543,7 +1572,7 @@ app.post('/api/save-questions', async (req, res) => {
           q.image || ''
         ]);
       } else {
-        // 🔹 Question existante → UPDATE
+        // UPDATE (question existante)
         await db.query(`
           UPDATE questions
           SET faculte=$1, module=$2, cours=$3, question=$4, options=$5, correct=$6, image=$7
@@ -1556,17 +1585,19 @@ app.post('/api/save-questions', async (req, res) => {
           JSON.stringify(q.options || []),
           JSON.stringify(q.correct || []),
           q.image || '',
-          q.id
+          id
         ]);
       }
     }
 
     res.json({ success: true, message: "Questions sauvegardées avec succès" });
+
   } catch (err) {
     console.error("❌ Erreur SQL save-questions :", err);
     res.status(500).json({ success: false, message: err.message });
   }
 });
+
 
 //************************************************************************************************* */
 
