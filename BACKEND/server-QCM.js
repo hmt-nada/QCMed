@@ -1364,31 +1364,34 @@ app.post('/api/contact-mail', async (req, res) => {
 });
 //nombre de cours par module 
 // --- Route : nombre de cours par module (PostgreSQL / Neon) ---
-// --- Route : nombre de cours par module (PostgreSQL / Neon) ---
 app.get("/stats/cours-par-module", async (req, res) => {
   try {
-    const result = await db.query(`
-      SELECT 
-        module_clean AS module,
-        COUNT(*) AS nombre_cours
-      FROM (
-        SELECT DISTINCT 
-          LOWER(TRIM(module)) AS module_clean,
-          LOWER(TRIM(cours)) AS cours_clean
-        FROM questions
-        WHERE module IS NOT NULL 
-          AND cours IS NOT NULL 
-          AND TRIM(module) <> '' 
-          AND TRIM(cours) <> ''
-      ) q
-      GROUP BY module_clean
-      ORDER BY module_clean;
-    `);
+    console.log("→ Route /stats/cours-par-module appelée");
+
+    // Test direct de la connexion et du type d'objet db
+    console.log("Type de db:", typeof db, "keys:", Object.keys(db || {}));
+
+    const sql = `
+      SELECT LOWER(TRIM(module)) AS module, COUNT(DISTINCT cours) AS nombre_cours
+      FROM questions
+      WHERE module IS NOT NULL
+      GROUP BY LOWER(TRIM(module))
+      ORDER BY LOWER(TRIM(module))
+    `;
+    const result = await db.query(sql);
+
+    console.log("Result rowCount:", result.rowCount);
+    console.log("Result rows sample:", result.rows && result.rows.slice(0,10));
+
+    // si aucune ligne, renvoyer un message utile
+    if (!result.rows || result.rows.length === 0) {
+      return res.json({ ok: true, message: "Aucun module trouvé (result.rows vide)", rows: [] });
+    }
 
     res.json(result.rows);
   } catch (err) {
-    console.error("❌ Erreur stats cours par module :", err.message);
-    res.status(500).json({ error: "Erreur serveur" });
+    console.error("❌ Erreur stats cours par module (POSTGRES) :", err);
+    res.status(500).json({ error: "Erreur serveur", detail: err.message });
   }
 });
 
