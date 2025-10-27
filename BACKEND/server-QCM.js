@@ -1364,36 +1364,24 @@ app.post('/api/contact-mail', async (req, res) => {
 });
 //nombre de cours par module 
 // --- Route : nombre de cours par module (PostgreSQL / Neon) ---
-app.get("/stats/cours-par-module", async (req, res) => {
-  try {
-    console.log("→ Route /stats/cours-par-module appelée");
-
-    // Test direct de la connexion et du type d'objet db
-    console.log("Type de db:", typeof db, "keys:", Object.keys(db || {}));
-
-    const sql = `
-      SELECT LOWER(TRIM(module)) AS module, COUNT(DISTINCT cours) AS nombre_cours
-      FROM questions
-      WHERE module IS NOT NULL
-      GROUP BY LOWER(TRIM(module))
-      ORDER BY LOWER(TRIM(module))
-    `;
-    const result = await db.query(sql);
-
-    console.log("Result rowCount:", result.rowCount);
-    console.log("Result rows sample:", result.rows && result.rows.slice(0,10));
-
-    // si aucune ligne, renvoyer un message utile
-    if (!result.rows || result.rows.length === 0) {
-      return res.json({ ok: true, message: "Aucun module trouvé (result.rows vide)", rows: [] });
-    }
-
-    res.json(result.rows);
-  } catch (err) {
-    console.error("❌ Erreur stats cours par module (POSTGRES) :", err);
-    res.status(500).json({ error: "Erreur serveur", detail: err.message });
-  }
-});
+fetch("/stats/cours-par-module")
+  .then(res => res.json())
+  .then(data => {
+    data.forEach(item => {
+      const moduleElement = document.querySelector(
+        `[data-module^="${item.module.trim().toLowerCase()}"]`
+      );
+      if (!moduleElement) {
+        console.warn("Module non trouvé :", item.module);
+        return;
+      }
+      const coursDiv = moduleElement.querySelector(".module-cours");
+      if (coursDiv) {
+        coursDiv.textContent = `( ${item.nombre_cours || 0} cours )`;
+      }
+    });
+  })
+  .catch(err => console.error("Erreur récupération stats :", err));
 
 
 
