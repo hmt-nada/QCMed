@@ -1364,12 +1364,25 @@ app.post('/api/contact-mail', async (req, res) => {
 });
 //nombre de cours par module 
 // --- Route : nombre de cours par module (PostgreSQL / Neon) ---
+// --- Route : nombre de cours par module (PostgreSQL / Neon) ---
 app.get("/stats/cours-par-module", async (req, res) => {
   try {
     const result = await db.query(`
-      SELECT LOWER(TRIM(module)) AS module, COUNT(DISTINCT cours) AS nombre_cours
-      FROM questions
-      GROUP BY LOWER(TRIM(module))
+      SELECT 
+        module_clean AS module,
+        COUNT(*) AS nombre_cours
+      FROM (
+        SELECT DISTINCT 
+          LOWER(TRIM(module)) AS module_clean,
+          LOWER(TRIM(cours)) AS cours_clean
+        FROM questions
+        WHERE module IS NOT NULL 
+          AND cours IS NOT NULL 
+          AND TRIM(module) <> '' 
+          AND TRIM(cours) <> ''
+      ) q
+      GROUP BY module_clean
+      ORDER BY module_clean;
     `);
 
     res.json(result.rows);
@@ -1378,6 +1391,7 @@ app.get("/stats/cours-par-module", async (req, res) => {
     res.status(500).json({ error: "Erreur serveur" });
   }
 });
+
 
 
 // Nombre de questions par cours pour  module et  faculté
