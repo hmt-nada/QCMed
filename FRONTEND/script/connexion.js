@@ -177,7 +177,7 @@ setTimeout(() => {
   
     if (!response.ok) {
       //erreurs
-     if (data.error === "password incorrect") {
+     if (data.error === "Mot de passe incorrect") {
       //mot de passe incorrect
      password.style.borderColor = "red";
      password.classList.remove('valide');     
