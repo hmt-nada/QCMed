@@ -796,7 +796,7 @@ app.post('/api/change-mail', async (req, res) => {
 //connexion a un compte
 
 
-const ADMIN_EMAILS = ["on_hamitouche@esi.dz", "hamziakramdjouad@gmail.com"];
+const ADMIN_EMAILS = ["on_hamitouche@esi.dz", "hamziakramdjouad@gmail.com", "zailalmehdi20@gmail.com"];
 
 app.post("/api/connexion", async (req, res) => {
   const { email, password } = req.body;
