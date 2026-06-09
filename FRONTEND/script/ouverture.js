@@ -2,7 +2,7 @@ const start=document.getElementById('btncommencer');
 
 start.addEventListener('click',()=>{
 // Vérification de la session et année validée
-  fetch("/api/check-status")
+  fetch(`/api/check-status`)
     .then(res => res.json())
     
        .then(data => {

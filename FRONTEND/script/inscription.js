@@ -1,7 +1,3 @@
-// Charger le son
-const clickSound = new Audio("../sounds/click2.mp3");
-
-const errorSound = new Audio("../sounds/notification.mp3");
 
 const main= document.getElementById('test1');
 //input1 et 2 du nom et prenom
@@ -361,8 +357,6 @@ if (faculte.value === "") {
   
 if (erreur) {
     event.preventDefault();
-    errorSound.currentTime = 0; // remet au début si on reclique rapidement
-        errorSound.play();
     // Supprimer d’abord pour éviter les doublons
     alertbox.classList.remove("visible"); // Réinitialise l'état
 void alertbox.offsetWidth; // Force le navigateur à re-calculer l'animation
@@ -390,7 +384,7 @@ setTimeout(() => {
        //envoie des données au backend 
 
 //evoie une requête HTTP a cette address
-fetch("/api/inscription",{
+fetch(`/api/inscription`,{
   //préciser la méthode de l'envoie:post(pour l'accepter en backend on a fait post)
   method:"post",
   //on indique que les données sont en format json
@@ -411,8 +405,6 @@ fetch("/api/inscription",{
       email.style.borderColor = "";
       titrenormal.style.display = "block";
       emailerror2.style.display = "none";
-       clickSound.currentTime = 0; // remet au début si on reclique rapidement
-        clickSound.play();
       window.location.href = "pseudo.html";
       
     }else{

@@ -150,7 +150,7 @@ const secondes=parseInt(document.getElementById("seconds").value,10);
   };
   console.log("DATA ENVOYÉ :", data); 
 //evoie une requête HTTP a cette address
-fetch("/api/choixcaract",{
+fetch(`/api/choixcaract`,{
   //préciser la méthode de l'envoie:post(pour l'accepter en backend on a fait post)
   method:"post",
 
@@ -259,7 +259,7 @@ else{
 //afficher le pseudo et avatar 
 window.addEventListener("DOMContentLoaded", () => {
 
-   fetch("/api/utilisateur", {
+   fetch(`/api/utilisateur`, {
   method: "GET",
   credentials: "include" // 👈 envoie le cookie de session
 })

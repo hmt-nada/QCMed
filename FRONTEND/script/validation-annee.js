@@ -7,7 +7,7 @@ window.addEventListener("DOMContentLoaded", () => {
   const echec=document.getElementById("echec");
   const anim = document.getElementById("animation");
 
-  fetch("/api/choix-annee", {
+  fetch(`/api/choix-annee`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ id: id, choix: type, token: token })

@@ -220,7 +220,7 @@ if((password.value.trim()==="") || (passinvalid==true)){
     
    const email = sessionStorage.getItem("emailInscrit"); // Récupère l'email stocké
 
-  fetch("/api/new-password", {
+  fetch(`/api/new-password`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json"

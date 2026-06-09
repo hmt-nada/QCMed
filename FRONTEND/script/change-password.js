@@ -170,7 +170,7 @@ boutton.addEventListener('click',function(event){
     if(erreur){ event.preventDefault(); return; }
 
     // --- Fetch pour changer mot de passe
-    fetch("/api/change-password", {
+    fetch(`/api/change-password`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -213,7 +213,7 @@ window.addEventListener("DOMContentLoaded", () => {
         sessionStorage.removeItem("passwordSuccess");
     }
 
-    fetch("/api/utilisateur", {
+    fetch(`/api/utilisateur`, {
   method: "GET",
   credentials: "include" // 👈 envoie le cookie de session
 })

@@ -135,7 +135,7 @@ function validerCours() {
     return;
   }
 
-  fetch("/api/choixcours", {
+  fetch(`/api/choixcours`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ cours }),
@@ -201,7 +201,7 @@ window.addEventListener('load', () => {
 // Récupération utilisateur et affichage des cours
 // =======================
 window.addEventListener("DOMContentLoaded", () => {
-  fetch("/api/utilisateur", {
+  fetch(`/api/utilisateur`, {
   method: "GET",
   credentials: "include" // 👈 envoie le cookie de session
 })

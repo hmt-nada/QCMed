@@ -137,7 +137,7 @@ if (erreur) {
     }
 
     
-       fetch('/api/contact-mail', { // URL côté serveur
+       fetch(`/api/contact-mail`, { // URL côté serveur
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ nom, email, message })

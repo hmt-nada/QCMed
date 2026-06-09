@@ -3,7 +3,7 @@ let currentIndex = 0; // index dans la liste filtrée
 
 // Premier affichage
 
-fetch("/api/get-results")
+fetch(`/api/get-results`)
   .then(res => res.json())
   .then(data => {
     if (!data.success) {

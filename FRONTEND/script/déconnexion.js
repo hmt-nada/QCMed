@@ -1,7 +1,7 @@
 //afficher le pseudo et avatar 
 window.addEventListener("DOMContentLoaded", () => {
    
-    fetch("/api/utilisateur", {
+    fetch(`/api/utilisateur`, {
   method: "GET",
   credentials: "include" // 👈 envoie le cookie de session
 })
@@ -26,7 +26,7 @@ window.addEventListener("DOMContentLoaded", () => {
   document.getElementById('deconnexion').addEventListener('click',()=>{
 
 // Appeler le backend pour détruire la session
-  fetch("/api/deconnexion", { method: "POST" })
+  fetch(`/api/deconnexion`, { method: "POST" })
     .then(res => res.json())
     .then(data => {
       console.log(data.message);

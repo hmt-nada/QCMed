@@ -119,7 +119,7 @@ function getResponseBoxes() {
 //récupération du tableau des records des QCMs
 
 function chargerQuestions() {
-  fetch("/api/questions")
+  fetch(`/api/questions`)
     .then(r => r.json())
     .then(data => {
       if (!data.success) throw new Error(data.error || "Erreur API");
@@ -600,7 +600,7 @@ const annuler = document.getElementById("annulerSoumission");
   };
   console.log("DATA ENVOYÉ :", data); 
 //evoie une requête HTTP a cette address
-fetch("/api/submit-qcm",{
+fetch(`/api/submit-qcm`,{
   //préciser la méthode de l'envoie:post(pour l'accepter en backend on a fait post)
   method:"post",
 
@@ -687,7 +687,7 @@ function getSelectedTypes() {
         typeErreur:types, 
         commentaire:commentaire
     };
-    fetch("/api/report-error", {
+    fetch(`/api/report-error`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(data)

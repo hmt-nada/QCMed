@@ -87,7 +87,7 @@ document.addEventListener("click", function (event) {
 //afficher le pseudo et avatar 
 window.addEventListener("DOMContentLoaded", () => {
 
-    fetch("/api/utilisateur", {
+    fetch(`/api/utilisateur`, {
   method: "GET",
   credentials: "include" // 👈 envoie le cookie de session
 })

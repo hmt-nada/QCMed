@@ -160,7 +160,7 @@ setTimeout(() => {
 
 }else {
 
-  fetch("/api/connexion", {
+  fetch(`/api/connexion`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json"

@@ -16,7 +16,7 @@ function getResponseBoxes() {
 
 // Premier affichage
 function chargerQuestions() {
-fetch("/api/tentative-faux")
+fetch(`/api/tentative-faux`)
   .then(res => res.json())
   .then(data => {
     if (!data.success) {
@@ -513,7 +513,7 @@ confirmer.addEventListener("click", () => {
   };
   console.log("DATA ENVOYÉ :", data); 
 //evoie une requête HTTP a cette address
-fetch("/api/submit-qcm",{
+fetch(`/api/submit-qcm`,{
   //préciser la méthode de l'envoie:post(pour l'accepter en backend on a fait post)
   method:"post",
 
@@ -600,7 +600,7 @@ function getSelectedTypes() {
         typeErreur:types, 
         commentaire:commentaire
     };
-    fetch("/api/report-error", {
+    fetch(`/api/report-error`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(data)

@@ -151,7 +151,7 @@ setTimeout(() => {
    sessionStorage.setItem("emailInscrit", email.value);
    event.preventDefault();
 // Appel backend pour envoyer le code
-   fetch("/api/envoyer-code", {
+   fetch(`/api/envoyer-code`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ email:  email.value.trim() })
@@ -222,7 +222,7 @@ const champ6=document.getElementById('champ6');
 
 
 renvoyer.addEventListener('click',()=>{
-  fetch("/api/renvoyer-code", {
+  fetch(`/api/renvoyer-code`, {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
@@ -306,7 +306,7 @@ boutton.addEventListener('click',async function(event){
 
     const code = lireCode();
 
-fetch("/api/verifier-code", {
+fetch(`/api/verifier-code`, {
         method: "POST",
         headers: {
             "Content-Type": "application/json",

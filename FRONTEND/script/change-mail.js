@@ -215,7 +215,7 @@ boutton.addEventListener('click', function(event) {
   if (erreur) {
     event.preventDefault();
   } else {   
-    fetch("/api/change-mail", {
+    fetch(`/api/change-mail`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -301,7 +301,7 @@ window.addEventListener("DOMContentLoaded", () => {
 
 
 
-    fetch("/api/utilisateur", {
+    fetch(`/api/utilisateur`, {
   method: "GET",
   credentials: "include" // 👈 envoie le cookie de session
 })

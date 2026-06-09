@@ -28,7 +28,7 @@ return remarque;
 
 // au chargement, récupérer la note
 document.addEventListener("DOMContentLoaded", async () => {
-    const res = await fetch("/api/get-note");
+    const res = await fetch(`/api/get-note`);
     const data = await res.json();
 
     if (data.note !== null) {

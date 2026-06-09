@@ -1,82 +1,53 @@
 const express = require("express");
 const cors = require("cors");
 const session = require("express-session");
-const { RedisStore } = require("connect-redis");
-const { createClient } = require("redis");
 const db = require("./db");
 const bcrypt = require("bcrypt");
-const nodemailer = require("nodemailer");
 const cron = require("node-cron");
 const crypto = require("crypto");
-const bodyParser = require('body-parser');
 require('dotenv').config();
 
-
 const {
-  envoyerEmailConfirmation,
-  envoyerEmailConfirmationcode,
   envoyerEmailsignalemet,
   envoyerEmailMerciUtilisateur,
   envoyerEmailValidation,
-  envoyerEmailConfirmationNouvelle,
   envoyermailcontact
 } = require("./email");
 
 const app = express();
 app.set("trust proxy", 1);
 
-
-  const redisClient = createClient({
-    url:
-      process.env.REDIS_URL ||
-      "rediss://default:ASxkAAIncDJkOGVmZTI4YzE4MDE0MGNkYTdkN2U1ZWNhNWQzZTNiMHAyMTEzNjQ@trusty-koala-11364.upstash.io:6379",
-    socket: { tls: true, rejectUnauthorized: false },
-  });
-
-  redisClient.on("error", (err) => console.error("❌ Redis error:", err));
-
-  redisClient.connect()
-  .then(() => console.log("✅ Connecté à Redis !"))
-  .catch((err) => console.error("❌ Erreur Redis :", err));
-
-  app.use(
-  session({
-    store: new RedisStore({ client: redisClient }),
-    secret: process.env.SESSION_SECRET || "hamitouchenada",
-    resave: false,
-    saveUninitialized: false,
-    cookie: {
-      secure: process.env.NODE_ENV === "production", // HTTPS seulement
-      httpOnly: true,
-      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
-      maxAge: 24 * 60 * 60 * 1000, // 24h
-    },
-  })
-);
+app.use(session({
+  secret: process.env.SESSION_SECRET || "hamitouchenada",
+  resave: false,
+  saveUninitialized: false,
+  cookie: {
+    secure: false,
+    httpOnly: true,
+    sameSite: "lax",
+    maxAge: 24 * 60 * 60 * 1000, // 24h
+  },
+}));
 
 app.use(cors({
-  origin: "https://qcmed-1x7m.onrender.com", 
+  origin: ["https://qcmed-1x7m.onrender.com"],
   credentials: true
 }));
 
 app.use(express.json());
 
-
-const codesTemp = {}; // Stock temporaire en mémoire
-
 const path = require('path');
-// Servir les fichiers frontend
 app.use(express.static(path.join(__dirname, "../frontend")));
-//autoriser l'accès aux images 
 app.use("/images", express.static(path.join(__dirname, "../frontend/images")));
 
 
-// --- Route d'inscription principale ---
+// ─── INSCRIPTION ──────────────────────────────────────────────────────────────
+// MODIFIÉ : email_active = true directement, token_validation = NULL,
+//           plus de génération de token, compte actif immédiatement
 app.post('/api/inscription', async (req, res) => {
   const { nom, prenom, faculte, annee, email, password } = req.body;
 
   try {
-    // Vérifier si l'email existe déjà
     const checkQuery = "SELECT * FROM utilisateurs WHERE email = $1";
     const checkResult = await db.query(checkQuery, [email]);
 
@@ -84,15 +55,12 @@ app.post('/api/inscription', async (req, res) => {
       return res.json({ success: false, message: "Email déjà utilisé." });
     }
 
-    // Hachage du mot de passe
     const hashedPassword = await bcrypt.hash(password, 10);
-    const token = generateToken();
 
-    // Insertion du nouvel utilisateur
     const insertQuery = `
       INSERT INTO utilisateurs 
       (nom, prenom, faculte, annee, email, mot_de_passe, email_active, email_disconnect, annee_validated, token_validation, validation_envoyee)
-      VALUES ($1, $2, $3, $4, $5, $6, false, false, true, $7, false)
+      VALUES ($1, $2, $3, $4, $5, $6, true, false, true, NULL, false)
       RETURNING id;
     `;
 
@@ -102,8 +70,7 @@ app.post('/api/inscription', async (req, res) => {
       faculte,
       annee,
       email,
-      hashedPassword,
-      token
+      hashedPassword
     ]);
 
     console.log("✅ Utilisateur ajouté avec ID :", insertResult.rows[0].id);
@@ -116,15 +83,14 @@ app.post('/api/inscription', async (req, res) => {
 });
 
 
-
-
-
+// ─── PSEUDO / AVATAR ──────────────────────────────────────────────────────────
+// MODIFIÉ : suppression de la génération de token et de l'envoi d'email de confirmation.
+//           La mise à jour du pseudo/avatar est immédiate et définitive.
+// DANS /api/pseudo — APRÈS la mise à jour en base, AVANT le res.json
 app.post('/api/pseudo', async (req, res) => {
   const { pseudo, avatar, email } = req.body;
-  console.log("Reçu pour pseudo :", pseudo, avatar, email);
 
   try {
-    // 🔹 1. Mettre à jour pseudo et avatar
     const updateQuery = `
       UPDATE utilisateurs
       SET pseudo = $1, avatar = $2
@@ -137,29 +103,28 @@ app.post('/api/pseudo', async (req, res) => {
       return res.json({ success: false, message: "Utilisateur non trouvé." });
     }
 
-    // 🔹 2. Créer le token de vérification email
-    const expiration = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24h
-    const token = require('crypto').randomBytes(32).toString('hex');
-    const insertToken = `
-      INSERT INTO verifications_email (email, token, expire)
-      VALUES ($1, $2, $3)
+    // ✅ AJOUT : récupérer les infos complètes et créer la session
+    const getUserQuery = `
+      SELECT id, email, pseudo, avatar, annee, annee_validated, validation_envoyee
+      FROM utilisateurs WHERE email = $1
     `;
-    await db.query(insertToken, [email, token, expiration]);
+    const userData = await db.query(getUserQuery, [email]);
+    const utilisateur = userData.rows[0];
 
-    // 🔹 3. Générer le lien
-    const baseUrl = process.env.BASE_URL || 'http://localhost:3000';
-    const lien = `${baseUrl}/api/confirmation/${token}`;
+    const role = ADMIN_EMAILS.map(e => e.toLowerCase()).includes(email.toLowerCase()) ? "admin" : "user";
 
-    // 🔹 4. Envoyer l'email en arrière-plan (non bloquant)
-    envoyerEmailConfirmation(email, lien)
-      .then(() => console.log("✅ Email envoyé :", email))
-      .catch(err => console.error("❌ Erreur en envoyant l'email :", err.message));
+    req.session.user = {
+      id: utilisateur.id,
+      email: utilisateur.email,
+      pseudo: utilisateur.pseudo,
+      avatar: utilisateur.avatar,
+      annee: utilisateur.annee,
+      annee_validated: utilisateur.annee_validated,
+      validation_envoyee: utilisateur.validation_envoyee,
+      role: role
+    };
 
-    // 🔹 5. Répondre immédiatement au frontend
-    return res.json({
-      success: true,
-      message: "Pseudo/avatar mis à jour. Vérifiez votre boîte mail."
-    });
+    return res.json({ success: true, message: "Pseudo et avatar mis à jour avec succès." });
 
   } catch (err) {
     console.error("❌ Erreur dans /api/pseudo :", err.message);
@@ -167,100 +132,26 @@ app.post('/api/pseudo', async (req, res) => {
   }
 });
 
-
-
-// --- Renvoyer un email de confirmation (version PostgreSQL / Neon) ---
-app.post("/api/resend-confirmation", async (req, res) => {
-  const { email } = req.body;
-
-  try {
-    // 1️⃣ Vérifier si l'email existe dans la table verifications_email
-    const selectQuery = `
-      SELECT token, expire, resend_count, last_resend 
-      FROM verifications_email 
-      WHERE email = $1
-    `;
-    const result = await db.query(selectQuery, [email]);
-
-    if (result.rowCount === 0) {
-      return res.json({ success: false, message: "Aucun token trouvé pour cet email." });
-    }
-
-    const row = result.rows[0];
-
-    // 2️⃣ Vérifier le nombre de renvois (max 3)
-    if (Number(row.resend_count) >= 3) {
-      return res.json({ success: false, message: "Nombre maximum de renvois atteint." });
-    }
-
-    // 3️⃣ Vérifier le délai minimum (5 min)
-    const now = Date.now();
-    const lastResend = row.last_resend ? new Date(row.last_resend).getTime() : 0;
-
-    if (lastResend && now - lastResend < 5 * 60 * 1000) {
-      const restant = Math.ceil((5 * 60 * 1000 - (now - lastResend)) / 1000);
-      return res.json({
-        success: false,
-        message: `Veuillez attendre ${restant} secondes avant de renvoyer l'email.`,
-      });
-    }
-
-    // 4️⃣ Générer un nouveau token (sécurisé)
-    const newToken = require("crypto").randomBytes(32).toString("hex");
-    const newExpire = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24h
-
-    // 5️⃣ Mettre à jour le token + compteur + date
-    const updateQuery = `
-      UPDATE verifications_email
-      SET token = $1,
-          expire = $2,
-          resend_count = resend_count + 1,
-          last_resend = to_timestamp($3 / 1000.0)
-      WHERE email = $4
-    `;
-    await db.query(updateQuery, [newToken, newExpire, now, email]);
-
-    // 6️⃣ Envoyer le mail
-    const baseUrl = process.env.BASE_URL || "http://localhost:3000";
-    const lien = `${baseUrl}/api/confirmation/${newToken}`;
-
-    await envoyerEmailConfirmation(email, lien);
-
-    return res.json({ success: true, message: "Email de confirmation renvoyé." });
-
-  } catch (err) {
-    console.error("❌ Erreur dans /api/resend-confirmation :", err.message);
-    return res.status(500).json({ success: false, message: "Erreur serveur." });
-  }
-});
-
-//recuperation du compte avec code
-
+// ─── ENVOI CODE (récupération de compte) ──────────────────────────────────────
+// MODIFIÉ : suppression du filtre AND email_active = TRUE.
+//           Tous les utilisateurs existants peuvent récupérer leur compte.
 app.post('/api/envoyer-code', async (req, res) => {
   const { email } = req.body;
   const code = Math.floor(100000 + Math.random() * 900000).toString();
-  const expiration = new Date(Date.now() + 90_000); // 90 secondes
+  const expiration = new Date(Date.now() + 90_000);
 
   try {
-    // 1️⃣ Vérifier si l'utilisateur existe et que son email est actif
-    const userQuery = `
-      SELECT * FROM utilisateurs 
-      WHERE email = $1 AND email_active = TRUE
-    `;
+    const userQuery = `SELECT * FROM utilisateurs WHERE email = $1`;
     const userResult = await db.query(userQuery, [email]);
 
     if (userResult.rowCount === 0) {
       return res.status(404).json({ error: "Utilisateur introuvable" });
     }
 
-    // 2️⃣ Vérifier si une entrée existe déjà dans verifications_email
-    const checkQuery = `
-      SELECT * FROM verifications_email WHERE email = $1
-    `;
+    const checkQuery = `SELECT * FROM verifications_email WHERE email = $1`;
     const checkResult = await db.query(checkQuery, [email]);
 
     if (checkResult.rowCount > 0) {
-      // 🔹 Mise à jour du code et de l’expiration
       const updateQuery = `
         UPDATE verifications_email
         SET code = $1, codeexpiration = $2
@@ -268,7 +159,6 @@ app.post('/api/envoyer-code', async (req, res) => {
       `;
       await db.query(updateQuery, [code, expiration, email]);
     } else {
-      // 🔹 Création d'une nouvelle entrée
       const insertQuery = `
         INSERT INTO verifications_email (email, code, codeexpiration)
         VALUES ($1, $2, $3)
@@ -276,7 +166,7 @@ app.post('/api/envoyer-code', async (req, res) => {
       await db.query(insertQuery, [email, code, expiration]);
     }
 
-    // 3️⃣ Envoi de l'email avec le code
+    const { envoyerEmailConfirmationcode } = require("./email");
     await envoyerEmailConfirmationcode(email, code);
 
     res.json({ success: true, message: "Email envoyé avec succès." });
@@ -288,13 +178,12 @@ app.post('/api/envoyer-code', async (req, res) => {
 });
 
 
-//verification du code 
-
+// ─── VÉRIFICATION CODE (récupération de compte) ───────────────────────────────
+// NON MODIFIÉ : cette route sert à la récupération de mot de passe, on la garde intacte.
 app.post('/api/verifier-code', async (req, res) => {
   const { email, code } = req.body;
 
   try {
-    // 1️⃣ Récupérer la ligne correspondante
     const query = `SELECT * FROM verifications_email WHERE email = $1`;
     const result = await db.query(query, [email]);
 
@@ -304,30 +193,23 @@ app.post('/api/verifier-code', async (req, res) => {
 
     const user = result.rows[0];
 
-    // 2️⃣ Vérifier le code
     if (user.code !== code) {
       return res.json({ success: false, message: "Code incorrect." });
     }
 
-    // 3️⃣ Vérifier l’expiration
     const expirationDate = new Date(user.codeexpiration);
     const maintenant = new Date();
 
     if (maintenant > expirationDate) {
       await db.query(
-        `UPDATE verifications_email 
-         SET code = NULL, codeexpiration = NULL 
-         WHERE email = $1`,
+        `UPDATE verifications_email SET code = NULL, codeexpiration = NULL WHERE email = $1`,
         [email]
       );
       return res.json({ success: false, message: "Code expiré." });
     }
 
-    // 4️⃣ Supprimer le code après succès
     await db.query(
-      `UPDATE verifications_email 
-       SET code = NULL, codeexpiration = NULL 
-       WHERE email = $1`,
+      `UPDATE verifications_email SET code = NULL, codeexpiration = NULL WHERE email = $1`,
       [email]
     );
 
@@ -340,250 +222,146 @@ app.post('/api/verifier-code', async (req, res) => {
 });
 
 
+// ─── CONNEXION ────────────────────────────────────────────────────────────────
+// MODIFIÉ : suppression du filtre AND email_active = TRUE.
+//           Tout utilisateur enregistré peut se connecter immédiatement.
+const ADMIN_EMAILS = ["on_hamitouche@esi.dz", "hamziakramdjouad@gmail.com", "zailalmehdi20@gmail.com"];
 
-
-//renvoyer le code 
-// --- Route : renvoyer le code (adaptée à PostgreSQL / Neon) ---
-app.post('/api/renvoyer-code', async (req, res) => {
-  const { email } = req.body;
-
-  if (!email) {
-    return res.status(400).json({ success: false, message: "Email requis." });
-  }
-
-  const code = Math.floor(100000 + Math.random() * 900000).toString();
-  const expiration = new Date(Date.now() + 90_000).toISOString();
+app.post("/api/connexion", async (req, res) => {
+  const { email, password } = req.body;
 
   try {
-    const updateQuery = `
-      UPDATE verifications_email
-      SET code = $1, "codeExpiration" = $2
-      WHERE email = $3
-      RETURNING email;
-    `;
+    const result = await db.query(
+      "SELECT * FROM utilisateurs WHERE email = $1",
+      [email]
+    );
 
-    const result = await db.query(updateQuery, [code, expiration, email]);
-
-    if (result.rowCount === 0) {
-      return res.status(404).json({ success: false, message: "Aucun utilisateur trouvé avec cet email." });
+    const user = result.rows[0];
+    if (!user) {
+      return res.status(404).json({ error: "Utilisateur introuvable" });
     }
 
-    await envoyerEmailConfirmationcode(email, code);
-    res.json({ success: true, message: "Code renvoyé avec succès." });
-
-  } catch (err) {
-    console.error("Erreur renvoi du code :", err.message);
-    res.status(500).json({ success: false, message: "Erreur serveur." });
-  }
-});
-
-
-
-
-//confirmation que l'email est active 
-
-// --- Route : confirmation que l'email est active (version PostgreSQL / Neon) ---
-app.get('/api/confirmation/:token', async (req, res) => {
-  const token = req.params.token;
-
-  try {
-    // 1️⃣ Vérifier le token dans la table verifications_email
-    const query = `SELECT email FROM verifications_email WHERE token = $1`;
-    const { rows } = await db.query(query, [token]);
-
-    if (rows.length === 0) {
-      return res.status(400).send("Lien invalide ou expiré.");
+    const match = await bcrypt.compare(password, user.mot_de_passe);
+    if (!match) {
+      return res.status(401).json({ error: "Mot de passe incorrect" });
     }
 
-    const email = rows[0].email;
+    const role = ADMIN_EMAILS.map(e => e.toLowerCase()).includes(email.toLowerCase()) ? "admin" : "user";
 
-    // 2️⃣ Activer l'email dans la table utilisateurs ✅ (booléen, pas entier)
-    const update = `UPDATE utilisateurs SET email_active = true WHERE email = $1`;
-    await db.query(update, [email]);
+    await db.query(
+      "UPDATE utilisateurs SET email_disconnect = FALSE WHERE email = $1",
+      [email]
+    );
 
-    // 3️⃣ Supprimer le token
-    await db.query(`DELETE FROM verifications_email WHERE token = $1`, [token]);
+    const userData = await db.query(
+      `SELECT id, email, pseudo, avatar, annee, annee_validated FROM utilisateurs WHERE email = $1`,
+      [email]
+    );
 
-    // 4️⃣ Récupérer les infos utilisateur
-    const getUser = `
-      SELECT id, email, pseudo, avatar, annee, annee_validated, validation_envoyee
-      FROM utilisateurs
-      WHERE email = $1
-    `;
-    const userResult = await db.query(getUser, [email]);
-
-    if (userResult.rows.length === 0) {
+    const utilisateur = userData.rows[0];
+    if (!utilisateur) {
       return res.status(500).send("Impossible de charger l'utilisateur.");
     }
 
-    const user = userResult.rows[0];
-
-    // 5️⃣ Créer la session utilisateur
     req.session.user = {
-      id: user.id,
-      annee_validated: user.annee_validated,
-      email: user.email,
-      pseudo: user.pseudo,
-      avatar: user.avatar,
-      annee: user.annee,
+      id: utilisateur.id,
+      annee_validated: utilisateur.annee_validated,
+      validation_envoyee: utilisateur.validation_envoyee,
+      email: utilisateur.email,
+      pseudo: utilisateur.pseudo,
+      avatar: utilisateur.avatar,
+      role: role,
+      annee: utilisateur.annee
     };
 
-    console.log("✅ Session créée :", req.session.user);
+    console.log(`✅ Utilisateur ${email} connecté`);
 
-    // 6️⃣ Rediriger vers ta page frontend
-    res.redirect(`/emailactive.html?email=${encodeURIComponent(email)}`);
+    return res.status(200).json({
+      success: true,
+      message: "Connexion réussie",
+      utilisateur: req.session.user
+    });
 
   } catch (err) {
-    console.error("❌ Erreur confirmation :", err.message);
-    res.status(500).send("Erreur serveur lors de l'activation du compte.");
+    console.error("❌ Erreur dans /api/connexion :", err);
+    return res.status(500).json({ error: "Erreur interne lors de la connexion" });
   }
 });
 
 
-// --- Route : confirmation du nouvel email (version PostgreSQL / Neon) ---
-app.get('/api/confirmationnewmail/:token', async (req, res) => {
-  const token = req.params.token;
-
+// ─── DÉCONNEXION ──────────────────────────────────────────────────────────────
+app.post("/api/deconnexion", async (req, res) => {
   try {
-    // 1️⃣ Vérifier le token
-    const query = `SELECT email FROM verifications_email WHERE token = $1`;
-    const { rows } = await db.query(query, [token]);
-
-    if (rows.length === 0) {
-      return res.status(400).send("Lien invalide ou expiré.");
+    if (!req.session.user) {
+      return res.json({ success: true, message: "Pas de session active." });
     }
 
-    const newEmail = rows[0].email;
+    const emailUser = req.session.user.email;
 
-    // 2️⃣ Mettre à jour l'adresse email définitive
-    const update = `
-      UPDATE utilisateurs
-      SET email = $1, email_pending = NULL
-      WHERE email_pending = $2
-    `;
-    await db.query(update, [newEmail, newEmail]);
+    await db.query(
+      "UPDATE utilisateurs SET email_disconnect = TRUE WHERE email = $1",
+      [emailUser]
+    );
 
-    // 3️⃣ Supprimer le token
-    await db.query(`DELETE FROM verifications_email WHERE token = $1`, [token]);
+    delete req.session.user;
+    res.clearCookie("connect.sid");
 
-    // 4️⃣ Récupérer les infos utilisateur
-    const getUser = `
-      SELECT id, email, pseudo, avatar, annee, annee_validated
-      FROM utilisateurs
-      WHERE email = $1
-    `;
-    const userResult = await db.query(getUser, [newEmail]);
-
-    if (userResult.rows.length === 0) {
-      return res.status(500).send("Impossible de charger l'utilisateur.");
-    }
-
-    const user = userResult.rows[0];
-
-    // 5️⃣ Mettre à jour la session
-    req.session.user = {
-      id: user.id,
-      annee_validated: user.annee_validated,
-      email: user.email,
-      pseudo: user.pseudo,
-      avatar: user.avatar,
-      annee: user.annee,
-    };
-
-    console.log("✅ Session utilisateur mise à jour :", req.session.user);
-
-    // 6️⃣ Rediriger vers ta page de confirmation
-    res.redirect('/accueil.html?emailChanged=true');
+    console.log(`✅ Utilisateur ${emailUser} déconnecté`);
+    return res.json({ success: true, message: "Déconnexion réussie." });
 
   } catch (err) {
-    console.error("❌ Erreur confirmation nouvel email :", err.message);
-    res.status(500).send("Erreur serveur lors de la confirmation du nouvel email.");
+    console.error("❌ Erreur update email_disconnect :", err);
+    return res.status(500).json({ error: "Erreur lors de la mise à jour de la déconnexion." });
   }
 });
 
 
-//recuperation du photo et avatar t année 
-app.get('/api/utilisateur', (req, res) => {
-  if (!req.session.user) {
-    return res.status(401).json({ success: false, message: "Non authentifié" });
-  }
-  
-  // Répond directement avec les infos stockées en session
-  return res.json({ success: true, utilisateur: {
-    pseudo: req.session.user.pseudo,
-    avatar: req.session.user.avatar,
-    annee: req.session.user.annee,
-    annee_validated: req.session.user.annee_validated,
-    validation_envoyee: req.session.user.validation_envoyee
-  }});
-});
-
-
-//initialisation des champs des infos du compte 
-app.get('/api/mon-compte', async (req, res) => {
-  const email = req.session.user?.email;
-  if (!email) {
-    return res.status(401).json({ success: false, message: "Utilisateur non authentifié" });
-  }
-
-  const query = `
-    SELECT nom, prenom, pseudo, faculte, avatar
-    FROM utilisateurs
-    WHERE email = $1
-  `;
-
+// ─── SUPPRESSION DU COMPTE ────────────────────────────────────────────────────
+app.delete("/api/suppression", async (req, res) => {
   try {
-    const result = await db.query(query, [email]); // ⚠️ db.query au lieu de db.get
-    if (result.rows.length === 0) {
-      return res.json({ success: false, message: "Utilisateur non trouvé" });
+    const { password } = req.body;
+    const email = req.session.user?.email;
+
+    if (!email) {
+      return res.status(401).json({ error: "Aucune session active." });
     }
 
-    return res.json({ success: true, utilisateur: result.rows[0] });
+    const result = await db.query("SELECT * FROM utilisateurs WHERE email = $1", [email]);
+    const user = result.rows[0];
+
+    if (!user) {
+      return res.status(404).json({ error: "Utilisateur introuvable." });
+    }
+
+    const match = await bcrypt.compare(password, user.mot_de_passe);
+    if (!match) {
+      return res.status(401).json({ error: "Mot de passe actuel incorrect." });
+    }
+
+    await db.query("DELETE FROM utilisateurs WHERE email = $1", [email]);
+
+    if (req.session.user) {
+      req.session.destroy(err => {
+        if (err) {
+          console.error("Erreur suppression session :", err);
+          return res.status(500).json({ error: "Erreur lors de la suppression de la session." });
+        }
+        res.clearCookie("connect.sid");
+        console.log(`🗑️ Compte ${email} supprimé avec succès.`);
+        return res.json({ message: "Compte supprimé et déconnecté avec succès." });
+      });
+    } else {
+      return res.json({ message: "Compte supprimé avec succès." });
+    }
+
   } catch (err) {
-    console.error("Erreur récupération utilisateur:", err.message);
-    return res.status(500).json({ success: false, message: "Erreur serveur" });
+    console.error("🔥 Erreur lors de la suppression :", err);
+    return res.status(500).json({ error: "Erreur serveur." });
   }
 });
 
-// --- Route de la réinitialisation des champs
-// --- Route de la réinitialisation des champs
-app.post('/api/update', async (req, res) => {
-  const email = req.session.user?.email;
-  if (!email) {
-    return res.status(401).json({ success: false, message: "Utilisateur non authentifié." });
-  }
 
-  const { nom, prenom, pseudo, faculte, avatar } = req.body;
-
-  const updateQuery = `
-    UPDATE utilisateurs
-    SET nom = $1, prenom = $2, pseudo = $3, faculte = $4, avatar = $5
-    WHERE email = $6
-    RETURNING email;
-  `;
-
-  try {
-    const result = await db.query(updateQuery, [nom, prenom, pseudo, faculte, avatar, email]);
-
-    if (result.rowCount === 0) {
-      return res.status(404).json({ success: false, message: "Utilisateur non trouvé." });
-    }
-
-    // 🔑 Mise à jour de la session
-    req.session.user = {
-      ...req.session.user,
-      pseudo,
-      avatar
-    };
-
-    console.log("Utilisateur mis à jour :", email);
-    return res.json({ success: true, message: "Informations mises à jour avec succès !" });
-
-  } catch (err) {
-    console.error("Erreur update profil :", err.message);
-    return res.status(500).json({ success: false, message: "Erreur serveur." });
-  }
-});
+// ─── CHANGEMENT DE MOT DE PASSE ───────────────────────────────────────────────
 app.post("/api/change-password", async (req, res) => {
   const email = req.session.user?.email;
   if (!email) {
@@ -593,7 +371,6 @@ app.post("/api/change-password", async (req, res) => {
   const { currentPassword, newPassword } = req.body;
 
   try {
-    // 🔍 Vérifie si l'utilisateur existe
     const userResult = await db.query("SELECT mot_de_passe FROM utilisateurs WHERE email = $1", [email]);
     if (userResult.rows.length === 0) {
       return res.status(404).json({ error: "Utilisateur introuvable." });
@@ -624,23 +401,19 @@ app.post("/api/change-password", async (req, res) => {
 });
 
 
-//nouveau mot de passe 
+// ─── NOUVEAU MOT DE PASSE (récupération de compte) ───────────────────────────
 app.post("/api/new-password", async (req, res) => {
   const { email, password } = req.body;
 
   try {
-    // 🔍 Vérifier que l'utilisateur existe
     const userResult = await db.query("SELECT * FROM utilisateurs WHERE email = $1", [email]);
     if (userResult.rows.length === 0) {
       return res.status(404).json({ error: "Utilisateur introuvable." });
     }
 
     const user = userResult.rows[0];
-
-    // 🔐 Hasher le nouveau mot de passe
     const hashedNewPassword = await bcrypt.hash(password, 10);
 
-    // 🔄 Mettre à jour le mot de passe et reconnecter
     const updateQuery = `
       UPDATE utilisateurs
       SET mot_de_passe = $1, email_disconnect = $2
@@ -653,13 +426,11 @@ app.post("/api/new-password", async (req, res) => {
       return res.status(500).json({ error: "Erreur de mise à jour." });
     }
 
-    console.log(`✅ Mot de passe mis à jour pour ${email}, utilisateur reconnecté.`);
+    console.log(`✅ Mot de passe mis à jour pour ${email}`);
 
-    // 🧠 Récupérer à nouveau les infos utilisateur pour la session
     const getUserQuery = `
       SELECT id, email, pseudo, avatar, annee, annee_validated, validation_envoyee
-      FROM utilisateurs
-      WHERE email = $1
+      FROM utilisateurs WHERE email = $1
     `;
     const getUserResult = await db.query(getUserQuery, [email]);
     const utilisateur = getUserResult.rows[0];
@@ -668,7 +439,6 @@ app.post("/api/new-password", async (req, res) => {
       return res.status(500).send("Impossible de charger l'utilisateur.");
     }
 
-    // 🔑 Créer la session utilisateur
     req.session.user = {
       id: utilisateur.id,
       annee_validated: utilisateur.annee_validated,
@@ -679,8 +449,7 @@ app.post("/api/new-password", async (req, res) => {
       annee: utilisateur.annee
     };
 
-    // ⏰ (Optionnel) durée de session 30 jours
-    req.session.cookie.maxAge = 30 * 24 * 60 * 60 * 1000; // 30 jours
+    req.session.cookie.maxAge = 30 * 24 * 60 * 60 * 1000;
 
     return res.status(200).json({
       message: "Mot de passe changé avec succès.",
@@ -694,23 +463,21 @@ app.post("/api/new-password", async (req, res) => {
 });
 
 
-// 🔹 Route : changement d'email
+// ─── CHANGEMENT D'EMAIL ───────────────────────────────────────────────────────
+// MODIFIÉ : suppression de token + email de confirmation.
+//           Le changement d'email est appliqué immédiatement après vérification
+//           du mot de passe. La session est mise à jour en conséquence.
 app.post('/api/change-mail', async (req, res) => {
   console.log("📩 [API] /api/change-mail appelée");
 
   try {
     const { newemail, oldemail, password } = req.body;
-    console.log("👉 Données reçues:", { newemail, oldemail, password });
-
     const currentemail = req.session?.user?.email;
-    console.log("🔑 Email session utilisateur:", currentemail);
 
     if (!currentemail) {
-      console.warn("⚠️ Aucun utilisateur en session");
       return res.status(404).json({ error: 'Utilisateur introuvable.' });
     }
 
-    // 🔹 1️⃣ Récupérer l'utilisateur actuel
     const userResult = await db.query(
       "SELECT * FROM utilisateurs WHERE email = $1",
       [currentemail]
@@ -718,71 +485,40 @@ app.post('/api/change-mail', async (req, res) => {
     const user = userResult.rows[0];
 
     if (!user) {
-      console.warn("⚠️ Utilisateur introuvable en base");
       return res.status(404).json({ error: 'Utilisateur introuvable.' });
     }
 
-    console.log("✅ Utilisateur trouvé en base:", user.email);
-
-    // 🔹 2️⃣ Vérifier l'ancien email
     if (oldemail !== user.email) {
-      console.warn("⚠️ Ancien email incorrect:", oldemail, "≠", user.email);
-      return res.status(401).json({ error: 'email incorrect' });
+      return res.status(401).json({ error: 'Email incorrect.' });
     }
 
-    // 🔹 3️⃣ Vérifier le mot de passe
     const match = await bcrypt.compare(password, user.mot_de_passe);
-    console.log("🔐 Vérif mot de passe:", match);
-
     if (!match) {
-      console.warn("⚠️ Mot de passe incorrect");
-      return res.status(401).json({ error: 'password incorrect' });
+      return res.status(401).json({ error: 'Mot de passe incorrect.' });
     }
 
-    // 🔹 4️⃣ Vérifier que le nouvel email n’existe pas déjà
     const existingUserResult = await db.query(
       "SELECT * FROM utilisateurs WHERE email = $1",
       [newemail]
     );
     if (existingUserResult.rows.length > 0) {
-      console.warn("⚠️ Email déjà utilisé:", newemail);
       return res.status(400).json({ error: 'Ce nouvel email est déjà utilisé.' });
     }
 
-    console.log("📌 Mise à jour email_pending →", newemail);
-
-    // 🔹 5️⃣ Mettre à jour le champ email_pending
+    // Changement direct sans confirmation par email
     await db.query(
-      "UPDATE utilisateurs SET email_pending = $1 WHERE email = $2",
+      "UPDATE utilisateurs SET email = $1, email_pending = NULL WHERE email = $2",
       [newemail, currentemail]
     );
 
-    // 🔹 6️⃣ Créer un token de confirmation
-    const expiration = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
-    const token = require('crypto').randomBytes(32).toString('hex');
-    console.log("🆕 Token généré:", token);
+    // Mise à jour de la session
+    req.session.user = {
+      ...req.session.user,
+      email: newemail
+    };
 
-    // 🔹 7️⃣ Insérer la vérification dans la table verifications_email
-    await db.query(
-      `INSERT INTO verifications_email (email, token, expire)
-       VALUES ($1, $2, $3)`,
-      [newemail, token, expiration]
-    );
-
-    // 🔹 8️⃣ Envoi du mail de confirmation
-    const baseUrl = process.env.BASE_URL || 'http://localhost:3000';
-    const lien = `${baseUrl}/api/confirmationnewmail/${token}`;
-
-    console.log("📧 Envoi email de confirmation à", newemail, "→ lien:", lien);
-
-    try {
-      await envoyerEmailConfirmationNouvelle(newemail, lien);
-      console.log("✅ Email de confirmation envoyé");
-      return res.json({ success: true, message: 'Un email de confirmation a été envoyé.' });
-    } catch (errMail) {
-      console.error("🔥 Erreur envoi email:", errMail);
-      return res.status(500).json({ error: 'Erreur envoi email.' });
-    }
+    console.log(`✅ Email changé : ${currentemail} → ${newemail}`);
+    return res.json({ success: true, message: 'Email mis à jour avec succès.' });
 
   } catch (err) {
     console.error("🔥 Exception /api/change-mail:", err);
@@ -790,263 +526,119 @@ app.post('/api/change-mail', async (req, res) => {
   }
 });
 
-   
-      
 
-//connexion a un compte
+// ─── PROFIL UTILISATEUR ───────────────────────────────────────────────────────
+app.get('/api/utilisateur', (req, res) => {
+  if (!req.session.user) {
+    return res.status(401).json({ success: false, message: "Non authentifié" });
+  }
+  return res.json({
+    success: true, utilisateur: {
+      pseudo: req.session.user.pseudo,
+      avatar: req.session.user.avatar,
+      annee: req.session.user.annee,
+      annee_validated: req.session.user.annee_validated,
+      validation_envoyee: req.session.user.validation_envoyee
+    }
+  });
+});
 
+app.get('/api/mon-compte', async (req, res) => {
+  const email = req.session.user?.email;
+  if (!email) {
+    return res.status(401).json({ success: false, message: "Utilisateur non authentifié" });
+  }
 
-const ADMIN_EMAILS = ["on_hamitouche@esi.dz", "hamziakramdjouad@gmail.com", "zailalmehdi20@gmail.com"];
-
-app.post("/api/connexion", async (req, res) => {
-  const { email, password } = req.body;
+  const query = `SELECT nom, prenom, pseudo, faculte, avatar FROM utilisateurs WHERE email = $1`;
 
   try {
-    // 🔹 Requête PostgreSQL (note : pas de `?`, mais `$1`, `$2`, etc.)
-    const result = await db.query(
-      "SELECT * FROM utilisateurs WHERE email = $1 AND email_active = TRUE",
-      [email]
-    );
-
-    const user = result.rows[0];
-    if (!user) {
-      return res.status(404).json({ error: "Utilisateur introuvable" });
+    const result = await db.query(query, [email]);
+    if (result.rows.length === 0) {
+      return res.json({ success: false, message: "Utilisateur non trouvé" });
     }
-
-    // 🔐 Vérification du mot de passe
-    const match = await bcrypt.compare(password, user.mot_de_passe);
-    if (!match) {
-      return res.status(401).json({ error: "Mot de passe incorrect" });
-    }
-
-    // 🧩 Déterminer le rôle
-   
-     const role = ADMIN_EMAILS.map(e => e.toLowerCase()).includes(email.toLowerCase())? "admin": "user";
-    // 🔹 Mise à jour du champ email_disconnect
-    await db.query(
-      "UPDATE utilisateurs SET email_disconnect = FALSE WHERE email = $1",
-      [email]
-    );
-
-    // 🔹 Récupérer les infos de l’utilisateur pour la session
-    const userData = await db.query(
-      `SELECT id, email, pseudo, avatar, annee, annee_validated
-       FROM utilisateurs WHERE email = $1`,
-      [email]
-    );
-
-    const utilisateur = userData.rows[0];
-    if (!utilisateur) {
-      return res.status(500).send("Impossible de charger l'utilisateur.");
-    }
-
-    // 🔹 Créer la session utilisateur
-    req.session.user = {
-      id: utilisateur.id,
-      annee_validated: utilisateur.annee_validated,
-      validation_envoyee: utilisateur.validation_envoyee,
-      email: utilisateur.email,
-      pseudo: utilisateur.pseudo,
-      avatar: utilisateur.avatar,
-      role: role,
-      annee: utilisateur.annee
-    };
-
-    console.log(`✅ Utilisateur ${email} connecté (email_disconnect = false)`);
-
-    // ✅ Réponse finale
-    return res.status(200).json({
-      success: true,
-      message: "Connexion réussie",
-      utilisateur: req.session.user
-    });
+    return res.json({ success: true, utilisateur: result.rows[0] });
   } catch (err) {
-    console.error("❌ Erreur dans /api/connexion :", err);
-    return res.status(500).json({ error: "Erreur interne lors de la connexion" });
+    console.error("Erreur récupération utilisateur:", err.message);
+    return res.status(500).json({ success: false, message: "Erreur serveur" });
+  }
+});
+
+app.post('/api/update', async (req, res) => {
+  const email = req.session.user?.email;
+  if (!email) {
+    return res.status(401).json({ success: false, message: "Utilisateur non authentifié." });
+  }
+
+  const { nom, prenom, pseudo, faculte, avatar } = req.body;
+
+  const updateQuery = `
+    UPDATE utilisateurs
+    SET nom = $1, prenom = $2, pseudo = $3, faculte = $4, avatar = $5
+    WHERE email = $6
+    RETURNING email;
+  `;
+
+  try {
+    const result = await db.query(updateQuery, [nom, prenom, pseudo, faculte, avatar, email]);
+
+    if (result.rowCount === 0) {
+      return res.status(404).json({ success: false, message: "Utilisateur non trouvé." });
+    }
+
+    req.session.user = { ...req.session.user, pseudo, avatar };
+
+    console.log("Utilisateur mis à jour :", email);
+    return res.json({ success: true, message: "Informations mises à jour avec succès !" });
+
+  } catch (err) {
+    console.error("Erreur update profil :", err.message);
+    return res.status(500).json({ success: false, message: "Erreur serveur." });
   }
 });
 
 
-
-// Déconnexion d'un compte
-// Déconnexion d'un compte
-app.post("/api/deconnexion", async (req, res) => {
-  try {
-    // 🔹 Vérifier s'il existe une session active
-    if (!req.session.user) {
-      return res.json({ success: true, message: "Pas de session active." });
-    }
-
-    const emailUser = req.session.user.email;
-
-    // 🔹 Mise à jour du champ email_disconnect dans la base
-    await db.query(
-      "UPDATE utilisateurs SET email_disconnect = TRUE WHERE email = $1",
-      [emailUser]
-    );
-
-    // 🔹 Suppression de la session et du cookie
-    delete req.session.user;
-    res.clearCookie("connect.sid");
-
-    console.log(`✅ Utilisateur ${emailUser} déconnecté (email_disconnect = true)`);
-
-    // 🔹 Réponse finale
-    return res.json({ success: true, message: "Déconnexion réussie." });
-
-  } catch (err) {
-    console.error("❌ Erreur update email_disconnect :", err);
-    return res.status(500).json({
-      error: "Erreur lors de la mise à jour de la déconnexion."
-    });
-  }
-});
-
-
-
-//suppression du compte  
-app.delete("/api/suppression", async (req, res) => {
-  
-  try {
-    const { password } = req.body;
-    const email = req.session.user?.email;
-
-    if (!email) {
-      return res.status(401).json({ error: "Aucune session active." });
-    }
-
-    // 🔹 Vérifier que l'utilisateur existe
-    const result = await db.query("SELECT * FROM utilisateurs WHERE email = $1", [email]);
-    const user = result.rows[0];
-
-    if (!user) {
-      return res.status(404).json({ error: "Utilisateur introuvable." });
-    }
-
-    // 🔹 Vérification du mot de passe
-    const match = await bcrypt.compare(password, user.mot_de_passe);
-    if (!match) {
-      return res.status(401).json({ error: "Mot de passe actuel incorrect." });
-    }
-
-    // 🔹 Suppression du compte utilisateur
-    await db.query("DELETE FROM utilisateurs WHERE email = $1", [email]);
-
-    // 🔹 Suppression de la session côté serveur
-    if (req.session.user) {
-      req.session.destroy(err => {
-        if (err) {
-          console.error("Erreur suppression session :", err);
-          return res.status(500).json({ error: "Erreur lors de la suppression de la session." });
-        }
-
-        // 🔹 Suppression du cookie côté client
-        res.clearCookie("connect.sid");
-
-        console.log(`🗑️ Compte ${email} supprimé avec succès.`);
-        return res.json({ message: "Compte supprimé et déconnecté avec succès." });
-      });
-    } else {
-      return res.json({ message: "Compte supprimé avec succès." });
-    }
-
-  } catch (err) {
-    console.error("🔥 Erreur lors de la suppression :", err);
-    return res.status(500).json({ error: "Erreur serveur." });
-  }
-});
-
-//supprimer les comptes inactives 
-
-setInterval(async () => {
-  const now = new Date().toISOString();
-
-  try {
-    // 🔹 Suppression des comptes inactifs dont le token a expiré
-    const deleteUsersQuery = `
-      DELETE FROM utilisateurs
-      WHERE email IN (
-        SELECT email FROM verifications_email WHERE expire < $1
-      )
-      AND email_active = FALSE
-    `;
-    const resultUsers = await db.query(deleteUsersQuery, [now]);
-    console.log(`🧹 Comptes supprimés : ${resultUsers.rowCount}`);
-
-    // 🔹 Suppression des anciens tokens expirés
-    const deleteTokensQuery = `DELETE FROM verifications_email WHERE expire < $1`;
-    const resultTokens = await db.query(deleteTokensQuery, [now]);
-    console.log(`🧾 Tokens supprimés : ${resultTokens.rowCount}`);
-
-  } catch (err) {
-    console.error("❌ Erreur suppression comptes/tokens inactifs :", err.message);
-  }
-}, 60 * 60 * 1000); // ⏰ exécution toutes les heures
-
-
-//stocker le module choisis dans la session 
-// Page 1 : choix du module
+// ─── QCM ──────────────────────────────────────────────────────────────────────
 app.post("/api/choixmodule", (req, res) => {
-  req.session.qcm = req.session.qcm || {};  // si casier vide, on le crée
+  req.session.qcm = req.session.qcm || {};
   req.session.qcm.module = req.body.module;
-  console.log(req.session);
-  res.json({
-    success: true
-  });
+  res.json({ success: true });
 });
 
-// Page 2 : choix du faculté
 app.post("/api/choixfaculte", (req, res) => {
-  req.session.qcm = req.session.qcm || {};  // si casier vide, on le crée
+  req.session.qcm = req.session.qcm || {};
   req.session.qcm.faculte = req.body.faculte;
-  console.log(req.session);
-  res.json({
-    success: true
-  });
+  res.json({ success: true });
 });
-// Page 3 : choix des cours
+
 app.post("/api/choixcours", (req, res) => {
-  req.session.qcm = req.session.qcm || {};  // si casier vide, on le crée
+  req.session.qcm = req.session.qcm || {};
   req.session.qcm.cours = req.body.cours;
-  console.log(req.session);
-  res.json({
-    success: true
-  });
+  res.json({ success: true });
 });
-// Page 4 : choix des caracteristiques
+
 app.post("/api/choixcaract", (req, res) => {
-  req.session.qcm = req.session.qcm || {};  // si casier vide, on le crée
+  req.session.qcm = req.session.qcm || {};
   req.session.qcm.nombre = req.body.nombre;
   req.session.qcm.correction = req.body.correction;
-  console.log(req.session);
-  res.json({
-    success: true
-  });
+  res.json({ success: true });
 });
 
-//récupération des questions a partir de la base 
-
-//fonction pour un ordre random des questions 
 function melanger(array) {
   return array.sort(() => Math.random() - 0.5);
 }
-//récuperation ds questions 
 
 app.get("/api/questions", async (req, res) => {
   try {
-    // 🔹 Récupération des infos QCM stockées dans la session
     const { faculte, module, cours, nombre, correction } = req.session.qcm || {};
 
     if (!faculte || !module || !nombre) {
       return res.json({ success: false, error: "Infos QCM manquantes en session" });
     }
 
-    // 🔹 Construction dynamique de la requête
     let sql = "SELECT * FROM questions WHERE module = $1";
     const params = [module];
-    let paramIndex = 2; // car $1 déjà utilisé
+    let paramIndex = 2;
 
-    // Facultés multiples
     if (Array.isArray(faculte) && faculte.length > 0) {
       const placeholders = faculte.map((_, i) => `$${paramIndex + i}`).join(", ");
       sql += ` AND faculte IN (${placeholders})`;
@@ -1057,7 +649,6 @@ app.get("/api/questions", async (req, res) => {
       params.push(faculte);
     }
 
-    // Cours multiples
     if (Array.isArray(cours) && cours.length > 0) {
       const placeholders = cours.map((_, i) => `$${paramIndex + i}`).join(", ");
       sql += ` AND cours IN (${placeholders})`;
@@ -1068,14 +659,12 @@ app.get("/api/questions", async (req, res) => {
       params.push(cours);
     }
 
-    // 🔹 Exécution de la requête
     const { rows } = await db.query(sql, params);
 
     if (!rows.length) {
       return res.json({ success: false, error: "Aucune question trouvée" });
     }
 
-    // 🔹 Sélectionner les questions selon le nombre demandé
     let selected;
     if (nombre === "toutes") {
       selected = rows;
@@ -1084,13 +673,9 @@ app.get("/api/questions", async (req, res) => {
       if (isNaN(nb) || nb <= 0) {
         return res.json({ success: false, error: "Nombre de questions invalide" });
       }
-
-      // Fonction de mélange locale
-      const melanger = (arr) => arr.sort(() => Math.random() - 0.5);
       selected = melanger(rows).slice(0, nb);
     }
 
-    // 🔹 Formatage pour le frontend
     const payload = selected.map(q => ({
       question: q.question,
       cours: q.cours,
@@ -1099,7 +684,6 @@ app.get("/api/questions", async (req, res) => {
       image: q.image ? `/images/${q.image}` : null
     }));
 
-    // 🔹 Réponse finale
     res.json({ success: true, questions: payload, correction });
 
   } catch (err) {
@@ -1108,63 +692,54 @@ app.get("/api/questions", async (req, res) => {
   }
 });
 
-//stocker la note de utilisateur 
 app.post("/api/submit-qcm", (req, res) => {
-    req.session.qcm = req.session.qcm || {};  // si casier vide, on le crée
-    // Stocker dans la session
-    req.session.note = req.body.note;
-    req.session.results = req.body.questions;
-       console.log(req.session);
-    res.json({ success: true });
+  req.session.qcm = req.session.qcm || {};
+  req.session.note = req.body.note;
+  req.session.results = req.body.questions;
+  res.json({ success: true });
 });
-//envoyer la note a la page de note 
+
 app.get("/api/get-note", (req, res) => {
-    if (req.session.note !== undefined) {
-        res.json({ 
-          note: req.session.note ,
-          correction: req.session.qcm.correction,
-          full:req.session.results        
-        });
-    } else {
-        res.json({ note: null });
-    }
+  if (req.session.note !== undefined) {
+    res.json({
+      note: req.session.note,
+      correction: req.session.qcm.correction,
+      full: req.session.results
+    });
+  } else {
+    res.json({ note: null });
+  }
 });
-//envoyer a la page de afficher la correction 
+
 app.get("/api/get-results", (req, res) => {
-    if (req.session.results !== undefined) {
-        res.json({ 
-          results: req.session.results,
-          success: true           
-        });
-    } else {
-        res.json({ success:false, results: null });
-    }
+  if (req.session.results !== undefined) {
+    res.json({ results: req.session.results, success: true });
+  } else {
+    res.json({ success: false, results: null });
+  }
 });
 
-//envoyer a la page de qcm de fausses questions 
 app.get("/api/tentative-faux", (req, res) => {
-    if (req.session.results !== undefined) {
-        res.json({ 
-          results: req.session.results,
-          correction:req.session.qcm.correction ,
-          success: true           
-        });
-    } else {
-        res.json({ success:false, results: null });
-    }
+  if (req.session.results !== undefined) {
+    res.json({
+      results: req.session.results,
+      correction: req.session.qcm.correction,
+      success: true
+    });
+  } else {
+    res.json({ success: false, results: null });
+  }
 });
 
-// === ROUTE SIGNALER FAUTE dans la question===
+
+// ─── SIGNALEMENT ──────────────────────────────────────────────────────────────
 app.post("/api/report-error", async (req, res) => {
   try {
     const { question, reponses, reponsesCorrectes, typeErreur, commentaire } = req.body;
     const emailUser = req.session.user.email;
 
-    // Envoyer mail à l’utilisateur
-     envoyerEmailMerciUtilisateur(emailUser);
-
-    // Envoyer mail à l’associé
-     envoyerEmailsignalemet(emailUser, question, reponses, reponsesCorrectes, typeErreur, commentaire);
+    envoyerEmailMerciUtilisateur(emailUser);
+    envoyerEmailsignalemet(emailUser, question, reponses, reponsesCorrectes, typeErreur, commentaire);
 
     res.json({ success: true, message: "Signalement envoyé !" });
 
@@ -1175,91 +750,281 @@ app.post("/api/report-error", async (req, res) => {
 });
 
 
+// ─── CONTACT ──────────────────────────────────────────────────────────────────
+app.post('/api/contact-mail', async (req, res) => {
+  const { nom, email, message } = req.body;
+
+  if (!nom || !email || !message) {
+    return res.json({ success: false, error: 'Champs manquants' });
+  }
+
+  try {
+    await envoyermailcontact(nom, email, message);
+    res.json({ success: true });
+  } catch (err) {
+    console.error(err);
+    res.json({ success: false, error: 'Erreur serveur' });
+  }
+});
 
 
-// 🔹 Fonction pour récupérer tous les utilisateurs
-async function getUtilisateurs() {
+// ─── STATS ────────────────────────────────────────────────────────────────────
+app.get("/stats/cours-par-module", async (req, res) => {
+  try {
+    const sql = `
+      SELECT LOWER(TRIM(module)) AS module, COUNT(DISTINCT cours) AS nombre_cours
+      FROM questions
+      WHERE module IS NOT NULL
+      GROUP BY LOWER(TRIM(module))
+      ORDER BY LOWER(TRIM(module))
+    `;
+    const result = await db.query(sql);
+
+    if (!result.rows || result.rows.length === 0) {
+      return res.json({ ok: true, message: "Aucun module trouvé", rows: [] });
+    }
+
+    res.json(result.rows);
+  } catch (err) {
+    console.error("❌ Erreur stats cours par module :", err);
+    res.status(500).json({ error: "Erreur serveur", detail: err.message });
+  }
+});
+
+app.get("/stats/questions-par-cours", async (req, res) => {
+  const { module, faculte } = req.query;
+
   try {
     const query = `
-      SELECT id, nom, prenom, email, annee
-      FROM utilisateurs
-      WHERE email_active = TRUE
-        AND annee NOT LIKE '%7ème Année Médecine%'
+      SELECT LOWER(TRIM(cours)) AS cours, COUNT(*) AS nombre_questions
+      FROM questions
+      WHERE LOWER(TRIM(module)) = LOWER(TRIM($1))
+        AND LOWER(TRIM(faculte)) = LOWER(TRIM($2))
+      GROUP BY LOWER(TRIM(cours))
     `;
-    const { rows } = await db.query(query);
-    return rows;
+    const result = await db.query(query, [module, faculte]);
+    res.json(result.rows);
   } catch (err) {
-    throw err;
+    console.error("❌ Erreur stats questions par cours :", err.message);
+    res.status(500).json({ error: "Erreur serveur" });
   }
+});
+
+
+// ─── ADMIN — QUESTIONS ────────────────────────────────────────────────────────
+app.get('/api/adminquestions', async (req, res) => {
+  try {
+    if (!req.session.user) {
+      return res.status(401).json({ success: false, error: "Utilisateur non connecté" });
+    }
+
+    const sql = `
+      SELECT id, faculte, module, cours, question, options, correct, image
+      FROM questions ORDER BY id ASC
+    `;
+    const result = await db.query(sql);
+
+    const questions = result.rows.map(r => ({
+      id: r.id,
+      faculte: r.faculte || "",
+      module: r.module || "",
+      cours: r.cours || "",
+      question: r.question || "",
+      options: (() => { try { return JSON.parse(r.options); } catch { return r.options ? [r.options] : []; } })(),
+      correct: (() => { try { return JSON.parse(r.correct); } catch { return r.correct ? [r.correct] : []; } })(),
+      image: r.image || "",
+      state: "unchanged"
+    }));
+
+    res.json({ success: true, questions });
+
+  } catch (err) {
+    console.error("❌ Erreur SQL /adminquestions :", err);
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+app.post('/api/adminquestions', async (req, res) => {
+  try {
+    const { faculte, module, cours, question, options, correct, image } = req.body;
+
+    const sql = `
+      INSERT INTO questions (faculte, module, cours, question, options, correct, image)
+      VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *
+    `;
+    const result = await db.query(sql, [
+      faculte, module, cours, question,
+      JSON.stringify(options || []),
+      JSON.stringify(correct || []),
+      image || null
+    ]);
+    res.json({ success: true, question: result.rows[0] });
+
+  } catch (err) {
+    console.error("❌ Erreur SQL /adminquestions POST :", err);
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+app.put('/api/adminquestions', async (req, res) => {
+  try {
+    const { faculte, module, cours, question, options, correct, image, oldQuestion } = req.body;
+
+    if (!oldQuestion || !question) {
+      return res.status(400).json({ success: false, error: "Ancienne ou nouvelle question manquante" });
+    }
+
+    const sql = `
+      UPDATE questions
+      SET faculte=$1, module=$2, cours=$3, question=$4, options=$5, correct=$6, image=$7
+      WHERE question=$8 RETURNING *
+    `;
+    const result = await db.query(sql, [
+      faculte || "", module || "", cours || "", question || "",
+      JSON.stringify(options || []),
+      JSON.stringify(correct || []),
+      image || null, oldQuestion
+    ]);
+
+    if (result.rowCount === 0)
+      return res.status(404).json({ success: false, error: "Question introuvable" });
+
+    res.json({ success: true, question: result.rows[0] });
+
+  } catch (err) {
+    console.error("❌ Erreur SQL /adminquestions PUT :", err);
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+app.delete('/api/adminquestions', async (req, res) => {
+  try {
+    const { question } = req.body;
+    if (!question) {
+      return res.status(400).json({ success: false, error: "Texte de la question requis" });
+    }
+
+    const result = await db.query("DELETE FROM questions WHERE question=$1", [question]);
+
+    if (result.rowCount === 0)
+      return res.status(404).json({ success: false, error: "Aucune question trouvée" });
+
+    res.json({ success: true });
+
+  } catch (err) {
+    console.error("❌ Erreur SQL /adminquestions DELETE :", err);
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+app.post('/api/saveChanges', async (req, res) => {
+  const questions = req.body.questions;
+  if (!Array.isArray(questions)) {
+    return res.status(400).json({ success: false, message: "Format invalide" });
+  }
+
+  const client = await db.connect();
+  try {
+    await client.query('BEGIN');
+
+    for (const q of questions) {
+      if (q.state === 'new') {
+        await client.query(
+          `INSERT INTO questions (faculte, module, cours, question, options, correct, image)
+           VALUES ($1,$2,$3,$4,$5,$6,$7)`,
+          [q.faculte || '', q.module || '', q.cours || '', q.question || '',
+           JSON.stringify(q.options || []), JSON.stringify(q.correct || []), q.image || null]
+        );
+      } else if (q.state === 'changed') {
+        const oldQ = q.oldQuestion || (q.oldData ? q.oldData.question : null);
+        if (!oldQ) throw new Error('❌ Ancienne question manquante pour modification.');
+
+        const result = await client.query(
+          `UPDATE questions
+           SET faculte=$1, module=$2, cours=$3, question=$4, options=$5, correct=$6, image=$7
+           WHERE question=$8`,
+          [q.faculte || '', q.module || '', q.cours || '', q.question || '',
+           JSON.stringify(q.options || []), JSON.stringify(q.correct || []), q.image || null, oldQ]
+        );
+        if (result.rowCount === 0) throw new Error(`⚠️ Aucune ligne trouvée pour question="${oldQ}"`);
+
+      } else if (q.state === 'deleted') {
+        const target = q.oldQuestion || (q.oldData ? q.oldData.question : q.question);
+        if (!target) throw new Error('❌ Question introuvable pour suppression.');
+        await client.query('DELETE FROM questions WHERE question=$1', [target]);
+      }
+    }
+
+    await client.query('COMMIT');
+    res.json({ success: true, message: '✅ Modifications sauvegardées avec succès' });
+
+  } catch (err) {
+    await client.query('ROLLBACK');
+    console.error('❌ Erreur /api/saveChanges :', err);
+    res.status(500).json({ success: false, message: err.message });
+  } finally {
+    client.release();
+  }
+});
+
+
+// ─── VALIDATION ANNUELLE (CRON) ───────────────────────────────────────────────
+async function getUtilisateurs() {
+  const query = `
+    SELECT id, nom, prenom, email, annee
+    FROM utilisateurs
+    WHERE annee NOT LIKE '%7ème Année Médecine%'
+  `;
+  const { rows } = await db.query(query);
+  return rows;
 }
 
-// Construit un libellé propre et cohérent
 function libelleAnnee(n) {
-  const suffix = {1:"1ère",2:"2ème",3:"3ème",4:"4ème",5:"5ème",6:"6ème",7:"7ème"}[n] || `${n}ème`;
-  return `${suffix} Année Médecine`; // toujours orthographié correctement
+  const suffix = { 1: "1ère", 2: "2ème", 3: "3ème", 4: "4ème", 5: "5ème", 6: "6ème", 7: "7ème" }[n] || `${n}ème`;
+  return `${suffix} Année Médecine`;
 }
 
 function getAnneeSuivante(anneeStr) {
-  // extrait le numéro (tolère 1ére/1ère/1eme etc.)
   const match = (anneeStr || "").match(/\d+/);
-  if (!match) return anneeStr;              // rien trouvé → on ne touche pas
+  if (!match) return anneeStr;
   let n = parseInt(match[0], 10);
-  if (Number.isNaN(n)) return anneeStr;     // sécurité
-  n = Math.min(n + 1, 7);                   // borne à 7
+  if (Number.isNaN(n)) return anneeStr;
+  n = Math.min(n + 1, 7);
   return libelleAnnee(n);
 }
 
 function generateToken() {
-  return crypto.randomBytes(16).toString("hex"); // 32 caractères hexadécimaux
+  return crypto.randomBytes(16).toString("hex");
 }
 
-
-
-
-
-//validation de l'anneé chaque rentrée (le 20 septemre de chaque année)
-//min heure jour mois 
 cron.schedule('5 20 6 9 *', async () => {
   console.log("📧 Début envoi email automatique");
 
   try {
-    const utilisateurs = await getUtilisateurs(); // ta fonction déjà adaptée pour PostgreSQL
+    const utilisateurs = await getUtilisateurs();
 
     for (const u of utilisateurs) {
       const token = generateToken();
 
       try {
-        // 🔹 Mise à jour PostgreSQL
         await db.query(
           `UPDATE utilisateurs
-           SET token_validation = $1,
-               annee_validated = 0,
-               validation_envoyee = 1
+           SET token_validation = $1, annee_validated = 0, validation_envoyee = 1
            WHERE id = $2`,
           [token, u.id]
         );
 
-        // 🔹 Envoi email
-        await envoyerEmailValidation(
-          u.email,
-          u.id,
-          u.annee,
-          getAnneeSuivante(u.annee),
-          token
-        );
-
-        console.log(`✅ Email envoyé à ${u.email} avec token ${token}`);
+        await envoyerEmailValidation(u.email, u.id, u.annee, getAnneeSuivante(u.annee), token);
+        console.log(`✅ Email envoyé à ${u.email}`);
 
       } catch (errUpdate) {
         console.error(`❌ Erreur update token pour utilisateur ${u.id}:`, errUpdate);
       }
     }
-
   } catch (err) {
     console.error("❌ Erreur récupération utilisateurs :", err);
   }
 }, { timezone: 'Africa/Algiers' });
-//l'envoie de l'email pour la validation de l'annee 
 
 app.post("/api/choix-annee", async (req, res) => {
   const { id, choix, token } = req.body;
@@ -1269,36 +1034,27 @@ app.post("/api/choix-annee", async (req, res) => {
   }
 
   try {
-    // 🔹 Récupérer l'utilisateur
     const result = await db.query(
       `SELECT annee, email, id, pseudo, avatar, token_validation, annee_validated, validation_envoyee
-       FROM utilisateurs
-       WHERE id = $1`,
+       FROM utilisateurs WHERE id = $1`,
       [id]
     );
 
     const user = result.rows[0];
-
     if (!user) return res.status(404).send("Utilisateur introuvable");
     if (user.token_validation !== token) return res.status(403).send("Token invalide");
 
-    // 🚨 Vérifier si déjà validé
     if (user.annee_validated) {
       return res.json({ success: false, alreadyValidated: true });
     }
 
-    // 🔹 Calcul de la nouvelle année
     const nouvelleAnnee = (choix === "passe") ? getAnneeSuivante(user.annee) : user.annee;
 
-    // 🔹 Mise à jour PostgreSQL
     await db.query(
-      `UPDATE utilisateurs
-       SET annee = $1, annee_validated = TRUE
-       WHERE id = $2`,
+      `UPDATE utilisateurs SET annee = $1, annee_validated = TRUE WHERE id = $2`,
       [nouvelleAnnee, id]
     );
 
-    // 🔹 Mise à jour de la session
     req.session.user = {
       email: user.email,
       annee_validated: true,
@@ -1317,7 +1073,6 @@ app.post("/api/choix-annee", async (req, res) => {
   }
 });
 
-//verifier si la session existe et l'année est validée (ouverture)
 app.get("/api/check-status", async (req, res) => {
   if (!req.session.user) {
     return res.json({ session: false });
@@ -1344,348 +1099,21 @@ app.get("/api/check-status", async (req, res) => {
 });
 
 
-
-app.post('/api/contact-mail', async (req, res) => {
-    const { nom, email, message } = req.body;
-
-    if (!nom || !email || !message) {
-        return res.json({ success: false, error: 'Champs manquants' });
-    }
-
-    // Exemple : envoyer un email
-   
-        try {
-    await envoyermailcontact(nom, email, message);
-    res.json({ success: true });
-} catch (err) {
-    console.error(err);
-    res.json({ success: false, error: 'Erreur serveur' });
-}
-});
-//nombre de cours par module 
-// --- Route : nombre de cours par module (PostgreSQL / Neon) ---
-app.get("/stats/cours-par-module", async (req, res) => {
-  try {
-    console.log("→ Route /stats/cours-par-module appelée");
-
-    // Test direct de la connexion et du type d'objet db
-    console.log("Type de db:", typeof db, "keys:", Object.keys(db || {}));
-
-    const sql = `
-      SELECT LOWER(TRIM(module)) AS module, COUNT(DISTINCT cours) AS nombre_cours
-      FROM questions
-      WHERE module IS NOT NULL
-      GROUP BY LOWER(TRIM(module))
-      ORDER BY LOWER(TRIM(module))
-    `;
-    const result = await db.query(sql);
-
-    console.log("Result rowCount:", result.rowCount);
-    console.log("Result rows sample:", result.rows && result.rows.slice(0,10));
-
-    // si aucune ligne, renvoyer un message utile
-    if (!result.rows || result.rows.length === 0) {
-      return res.json({ ok: true, message: "Aucun module trouvé (result.rows vide)", rows: [] });
-    }
-
-    res.json(result.rows);
-  } catch (err) {
-    console.error("❌ Erreur stats cours par module (POSTGRES) :", err);
-    res.status(500).json({ error: "Erreur serveur", detail: err.message });
-  }
-});
-
-
-
-// Nombre de questions par cours pour  module et  faculté
-// --- Route : nombre de questions par cours (PostgreSQL / Neon) ---
-app.get("/stats/questions-par-cours", async (req, res) => {
-  const { module, faculte } = req.query; // récupère ?module=...&faculte=...
-
-  try {
-    const query = `
-      SELECT LOWER(TRIM(cours)) AS cours, COUNT(*) AS nombre_questions
-      FROM questions
-      WHERE LOWER(TRIM(module)) = LOWER(TRIM($1))
-        AND LOWER(TRIM(faculte)) = LOWER(TRIM($2))
-      GROUP BY LOWER(TRIM(cours))
-    `;
-
-    const result = await db.query(query, [module, faculte]);
-
-    // Exemple de réponse :
-    // [{ cours: "structuredesglucides", nombre_questions: 2 }, { cours: "lipides", nombre_questions: 5 }]
-    res.json(result.rows);
-  } catch (err) {
-    console.error("❌ Erreur stats questions par cours :", err.message);
-    res.status(500).json({ error: "Erreur serveur" });
-  }
-});
-//************************************************************************************************* */
-//connexion admin 
-
-// Middleware
-// Route pour récupérer toutes les questions
-// 🔹 Route pour renvoyer toutes les questions
-// 🔹 Route pour renvoyer toutes les questions (Neon PostgreSQL)
-// ============================================
-// 🔹 ROUTE : Récupérer toutes les questions
-// ============================================
-app.get('/api/adminquestions', async (req, res) => {
-  try {
-    if (!req.session.user) {
-      return res.status(401).json({ success: false, error: "Utilisateur non connecté" });
-    }
-
-    console.log("✅ Route /api/adminquestions appelée par :", req.session.user.email);
-
-    const sql = `
-      SELECT id, faculte, module, cours, question, options, correct, image
-      FROM questions
-      ORDER BY id ASC
-    `;
-
-    const result = await db.query(sql);
-
-    const questions = result.rows.map(r => ({
-      // 🧩 On ne renvoie pas l'id au frontend si tu veux le cacher
-      id: r.id,
-      faculte: r.faculte || "",
-      module: r.module || "",
-      cours: r.cours || "",
-      question: r.question || "",
-      options: (() => { try { return JSON.parse(r.options); } catch { return r.options ? [r.options] : []; } })(),
-      correct: (() => { try { return JSON.parse(r.correct); } catch { return r.correct ? [r.correct] : []; } })(),
-      image: r.image || "",
-      state: "unchanged" // au départ, rien n’a changé
-    }));
-
-    res.json({ success: true, questions });
-
-  } catch (err) {
-    console.error("❌ Erreur SQL /adminquestions :", err);
-    res.status(500).json({ success: false, error: err.message });
-  }
-});
-
-
-
-// ============================================
-// 🔹 ROUTE : Ajouter une nouvelle question
-// ============================================
-app.post('/api/adminquestions', async (req, res) => {
-  try {
-    const { faculte, module, cours, question, options, correct, image } = req.body;
-
-    const sql = `
-      INSERT INTO questions (faculte, module, cours, question, options, correct, image)
-      VALUES ($1, $2, $3, $4, $5, $6, $7)
-      RETURNING *
-    `;
-
-    const params = [
-      faculte,
-      module,
-      cours,
-      question,
-      JSON.stringify(options || []),
-      JSON.stringify(correct || []),
-      image || null
-    ];
-
-    const result = await db.query(sql, params);
-    res.json({ success: true, question: result.rows[0] });
-
-  } catch (err) {
-    console.error("❌ Erreur SQL /adminquestions POST :", err);
-    res.status(500).json({ success: false, error: err.message });
-  }
-});
-
-
-// ============================================
-// 🔹 ROUTE : Modifier une question existante
-// ============================================
-app.put('/api/adminquestions', async (req, res) => {
-  try {
-   
-    const { faculte, module, cours, question, options, correct, image, oldQuestion } = req.body;
-
-      if (!oldQuestion || !question) {
-      return res.status(400).json({ success: false, error: "Ancienne ou nouvelle question manquante" });
-    }
-
-    const sql = `
-      UPDATE questions
-      SET faculte=$1, module=$2, cours=$3, question=$4, options=$5, correct=$6, image=$7
-      WHERE question=$8
-      RETURNING *
-    `;
-
-    const params = [
-      faculte || "",
-      module || "",
-      cours || "",
-      question || "",
-      JSON.stringify(options || []),
-      JSON.stringify(correct || []),
-      image || null,
-      oldQuestion // ← on cherche la question originale
-    ];
-
-    const result = await db.query(sql, params);
-     if (result.rowCount === 0)
-      return res.status(404).json({ success: false, error: "Question introuvable" });
-
-    res.json({ success: true, question: result.rows[0] });
-
-  } catch (err) {
-    console.error("❌ Erreur SQL /adminquestions PUT :", err);
-    res.status(500).json({ success: false, error: err.message });
-  }
-});
-
-
-// ============================================
-// 🔹 ROUTE : Supprimer une question
-// ============================================
-app.delete('/api/adminquestions', async (req, res) => {
-  try {
-    const { question } = req.body;
-    if (!question) {
-      return res.status(400).json({ success: false, error: "Texte de la question requis" });
-    }
-
-    const result = await db.query("DELETE FROM questions WHERE question=$1", [question]);
-    console.log("🗑️ Suppression de :", question, "| Lignes supprimées :", result.rowCount);
-
-    if (result.rowCount === 0)
-      return res.status(404).json({ success: false, error: "Aucune question trouvée" });
-
-    res.json({ success: true });
-
-  } catch (err) {
-    console.error("❌ Erreur SQL /adminquestions DELETE :", err);
-    res.status(500).json({ success: false, error: err.message });
-  }
-});
-
-
-
-
-
-// ============================================
-// 🔹 ROUTE : Sauvegarder uniquement les changements
-// ============================================
-// ============================================
-// 🔹 ROUTE : Sauvegarder uniquement les changements (par question)
-// ============================================
-app.post('/api/saveChanges', async (req, res) => {
-  const questions = req.body.questions;
-  if (!Array.isArray(questions)) {
-    return res.status(400).json({ success: false, message: "Format invalide" });
-  }
-
-  const client = await db.connect();
-  try {
-    await client.query('BEGIN');
-
-    for (const q of questions) {
-      // 🔸 AJOUT
-      if (q.state === 'new') {
-        await client.query(
-          `INSERT INTO questions (faculte, module, cours, question, options, correct, image)
-           VALUES ($1,$2,$3,$4,$5,$6,$7)`,
-          [
-            q.faculte || '',
-            q.module || '',
-            q.cours || '',
-            q.question || '',
-            JSON.stringify(q.options || []),
-            JSON.stringify(q.correct || []),
-            q.image || null
-          ]
-        );
-      }
-
-      // 🔸 MODIFICATION PAR TEXTE (question)
-      else if (q.state === 'changed') {
-        const oldQ = q.oldQuestion || (q.oldData ? q.oldData.question : null);
-        if (!oldQ) throw new Error('❌ Ancienne question manquante pour modification.');
-
-        const result = await client.query(
-          `UPDATE questions
-           SET faculte=$1, module=$2, cours=$3, question=$4, options=$5, correct=$6, image=$7
-           WHERE question=$8`,
-          [
-            q.faculte || '',
-            q.module || '',
-            q.cours || '',
-            q.question || '',
-            JSON.stringify(q.options || []),
-            JSON.stringify(q.correct || []),
-            q.image || null,
-            oldQ
-          ]
-        );
-
-        if (result.rowCount === 0) {
-          throw new Error(`⚠️ Aucune ligne trouvée pour question="${oldQ}"`);
-        }
-      }
-
-      // 🔸 SUPPRESSION PAR TEXTE
-      else if (q.state === 'deleted') {
-        const target = q.oldQuestion || (q.oldData ? q.oldData.question : q.question);
-        if (!target) throw new Error('❌ Question introuvable pour suppression.');
-
-        await client.query('DELETE FROM questions WHERE question=$1', [target]);
-      }
-    }
-
-    await client.query('COMMIT');
-    res.json({ success: true, message: '✅ Modifications sauvegardées avec succès' });
-
-  } catch (err) {
-    await client.query('ROLLBACK');
-    console.error('❌ Erreur /api/saveChanges :', err);
-    res.status(500).json({ success: false, message: err.message });
-  } finally {
-    client.release();
-  }
-});
-
-
-
-
-//************************************************************************************************* */
-
-
-
-
-
-
+// ─── FRONTEND ─────────────────────────────────────────────────────────────────
 const frontend = path.join(__dirname, '../FRONTEND');
 
-// Servir les fichiers statiques
 app.use(express.static(frontend));
 
-// Route racine
 app.get('/', (req, res) => {
   res.sendFile(path.join(frontend, 'ouverture2.html'));
 });
 
-// Fallback SPA (pour toutes les autres routes)
 app.get('*', (req, res) => {
   res.sendFile(path.join(frontend, 'ouverture2.html'));
 });
 
 
-
-
-
 const PORT = process.env.PORT || 3000;
-
 app.listen(PORT, () => {
   console.log(`🚀 Serveur lancé sur le port ${PORT}`);
 });

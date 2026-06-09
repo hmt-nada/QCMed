@@ -44,7 +44,7 @@ void document.getElementById('alert_erreur').offsetWidth; // forcer le recalcul 
  }
 
 
-    fetch("/api/utilisateur", {
+    fetch(`/api/utilisateur`, {
   method: "GET",
   credentials: "include" // 👈 envoie le cookie de session
 })
@@ -89,7 +89,7 @@ event.preventDefault();
   event.preventDefault();
   
 
-  fetch("/api/suppression", {
+  fetch(`/api/suppression`, {
     method: "DELETE",
     headers: {
       "Content-Type": "application/json"

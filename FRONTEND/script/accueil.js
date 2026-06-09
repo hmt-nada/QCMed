@@ -247,7 +247,7 @@ search.addEventListener('input', updateActiveState);
 window.addEventListener("DOMContentLoaded", () => {
 
 
-    fetch("/api/utilisateur", {
+    fetch(`/api/utilisateur`, {
   method: "GET",
   credentials: "include" // 👈 envoie le cookie de session
 })
@@ -319,7 +319,7 @@ function choisirmodule(moduleId, moduleNom){
   const data = { module: moduleId };
   console.log("DATA ENVOYÉ :", data); 
 
-  fetch("/api/choixmodule", {
+  fetch(`/api/choixmodule`, {
     method:"post",
     headers:{ "content-type":"application/json" },
     body:JSON.stringify(data),

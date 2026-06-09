@@ -134,15 +134,14 @@ setTimeout(() => {
   };
   console.log("DATA ENVOYÉ :", data); 
 //evoie une requête HTTP a cette address
-fetch("/api/pseudo",{
+fetch(`/api/pseudo`,{
   //préciser la méthode de l'envoie:post(pour l'accepter en backend on a fait post)
   method:"post",
   //on indique que les données sont en format json
-  headers:{
-    "content-type":"application/json"
-  },
-  //convertit l'objet data en format json pour que le backend le comprend 
-  body:JSON.stringify(data),
+  headers: { "content-type": "application/json" },
+  credentials: "include",  // ✅ important pour la session
+  body: JSON.stringify(data),
+  
 })
   //quand le serveur répond on transfère la réponse en objet js depuis json
    .then(response=>response.json())
@@ -150,8 +149,8 @@ fetch("/api/pseudo",{
    .then(result =>{
     //si succss est true(inscription reussie)
     if (result.success){   
-             sessionStorage.setItem("emailInscrit",email);
-             window.location.href = "attantevalidation.html";
+      sessionStorage.removeItem("emailInscrit");
+      window.location.href = "accueil.html";
     }else{
       sessionStorage.removeItem("emailInscrit");
       alert("erreur:"+result.message);
