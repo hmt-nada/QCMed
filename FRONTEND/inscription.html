@@ -4,22 +4,18 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800&family=Oleo+Script:wght@400;700&family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
-  <!-- Iconify -->
   <script src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js"></script>
 
-  <!-- Favicon -->
   <link rel="icon" type="image/png" href="logo/favicon-96x96.png" sizes="96x96">
   <link rel="icon" type="image/svg+xml" href="logo/favicon.svg">
   <link rel="shortcut icon" href="logo/favicon.ico">
   <link rel="apple-touch-icon" sizes="180x180" href="logo/apple-touch-icon.png">
   <link rel="manifest" href="logo/site.webmanifest">
 
-  <!-- CSS -->
   <link rel="stylesheet" href="css/global.css">
   <link rel="stylesheet" href="css/inscription.css">
 
@@ -28,27 +24,19 @@
 
 <body class="page-inscription">
 
-  <!-- ═══ PARTIE GAUCHE — Branding (desktop uniquement) ═══ -->
-  <div class="brand-side" aria-hidden="true">
-    <img class="brand-side__logo" src="logo/brain-name.png" alt="QCMed">
+  <!-- Alerte erreur globale -->
+  <div class="alert-box" id="alert" role="alert" aria-live="assertive">
+    Veuillez remplir tous les champs
   </div>
 
-  <!-- ═══ HEADER MOBILE ═══ -->
-  <header class="mobile-header">
-    <img class="mobile-header__logo" src="logo/brain-name.png" alt="QCMed">
-  </header>
-
-  <!-- ═══ PARTIE DROITE — Formulaire ═══ -->
   <main class="form-side">
+
+    <!-- Logo -->
+    <img class="mobile-header__logo" src="logo/brain-name.png" alt="QCMed" style="width:80px;height:80px;margin-bottom:16px;">
 
     <!-- Bandeau titre -->
     <div class="title-banner">
       <p class="title-banner__text slide-in-left" id="inscrivez">INSCRIVEZ-VOUS</p>
-    </div>
-
-    <!-- Alerte erreur globale -->
-    <div class="alert-box" id="alert" role="alert" aria-live="assertive">
-      Veuillez remplir tous les champs
     </div>
 
     <!-- Carte formulaire -->
@@ -82,7 +70,6 @@
               <path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 9l6 6 6-6"/>
             </svg>
           </div>
-          <!-- Champ "autre faculté" -->
           <input class="field" id="autreFaculte" type="text" placeholder="Entrez votre faculté" style="display:none; margin-top:8px;">
         </div>
 
@@ -117,11 +104,9 @@
           <div class="field-wrapper">
             <input class="field" id="password1" type="password" autocomplete="new-password">
             <span class="field-eye" id="eyeToggle1" aria-label="Afficher/masquer le mot de passe">
-              <!-- Œil fermé -->
               <svg id="eyeclose1" xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24">
                 <path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 9q-3.6 4-9 4T3 9m0 6l2.5-3.8M21 14.976L18.508 11.2M9 17l.5-4m5.5 4l-.5-4"/>
               </svg>
-              <!-- Œil ouvert (caché par défaut) -->
               <svg id="eyeopen1" style="display:none" xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 20 20">
                 <g fill="#000">
                   <path fill-rule="evenodd" d="M10 16c4.658 0 8.5-2.161 8.5-5S14.658 6 10 6s-8.5 2.161-8.5 5 3.842 5 8.5 5m0-9c4.179 0 7.5 1.868 7.5 4s-3.321 4-7.5 4-7.5-1.868-7.5-4 3.321-4 7.5-4" clip-rule="evenodd"/>
@@ -152,7 +137,7 @@
           </div>
         </div>
 
-      </form><!-- fin form -->
+      </form>
 
       <!-- Mentions légales -->
       <p class="form-instruction">
@@ -170,7 +155,6 @@
         </div>
       </button>
 
-      <!-- SVG filtre gooey -->
       <svg xmlns="http://www.w3.org/2000/svg" style="display:block;height:0;width:0;">
         <defs>
           <filter id="goo">
@@ -181,17 +165,15 @@
         </defs>
       </svg>
 
-      <!-- Lien connexion -->
       <p class="form-cta-link">
         Vous avez déjà un compte ?
         <a id="login" class="instruction02" href="connxion.html">connectez-vous</a>
       </p>
 
-    </div><!-- fin form-card -->
+    </div>
 
   </main>
 
-  <!-- Scripts -->
   <script src="config/config.js"></script>
   <script src="script/inscription.js"></script>
 
