@@ -1,91 +1,197 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fr">
 <head>
-  
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="style.css"/>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Oleo+Script:wght@400;700&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">    
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
   <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Nunito:ital,wght@0,200..1000;1,200..1000&family=Oleo+Script:wght@400;700&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">
-<script src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js"></script>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800&family=Oleo+Script:wght@400;700&family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js"></script>
 
-   <!------------------------------------l'image de favicon ----------------------------------------------->
+  <link rel="icon" type="image/png" href="logo/favicon-96x96.png" sizes="96x96">
+  <link rel="icon" type="image/svg+xml" href="logo/favicon.svg">
+  <link rel="shortcut icon" href="logo/favicon.ico">
+  <link rel="apple-touch-icon" sizes="180x180" href="logo/apple-touch-icon.png">
+  <link rel="manifest" href="logo/site.webmanifest">
 
-<link rel="icon" type="image/png" href="logo/favicon-96x96.png" sizes="96x96" />
-<link rel="icon" type="image/svg+xml" href="logo/favicon.svg" />
-<link rel="shortcut icon" href="logo/favicon.ico" />
-<link rel="apple-touch-icon" sizes="180x180" href="logo/apple-touch-icon.png" />
-<meta name="apple-mobile-web-app-title" content="QCMed" />
-<link rel="manifest" href="logo/site.webmanifest" />
+  <link rel="stylesheet" href="css/global.css">
+  <link rel="stylesheet" href="css/pseudo.css">
 
-<!----------------------------------------------------------------------------------------------------->
-    <title>Inscription - QCMed</title>
-
+  <title>Mon Profil — QCMed</title>
 </head>
-<body class="body3">
-   
-    <div class="header">
-          <div >
-               <div class="bordure">
-                <p class="expression4" id="inscrivez">Créer Mon Compte</p>
-               </div>
-               <div class="header">
-               <img class="vector" src="images/vector.svg"  />
-               <img  class="image3" src="logo/brain-name.png"/>
-            </div>
+
+<body class="page-pseudo">
+
+  <!-- Alertes — IDs conservés -->
+  <p class="alert-box alert-error"   id="alert"        aria-live="assertive">Veuillez entrer votre pseudo</p>
+  <p class="alert-box alert-success" id="alert_erreur" aria-live="assertive">Inscription effectuée</p>
+
+  <!-- ══ GAUCHE — Formulaire ══ -->
+  <main class="form-side">
+    <div class="form-inner">
+
+      <!-- En-tête -->
+      <div class="form-header">
+        <img src="logo/brain-name.png" alt="QCMed" class="form-logo">
+        <div>
+          <h1 class="form-title">Dernière étape !</h1>
+          <p class="form-subtitle">Choisis ton pseudo et ton avatar</p>
+        </div>
+      </div>
+
+      <!-- Avatar picker -->
+      <div class="avatar-section">
+
+        <!-- Avatar actuel + bouton + -->
+        <div class="avatar-current-wrap">
+          <div class="avatar-ring">
+            <img class="user0" id="user" src="images/user.svg" alt="Avatar choisi">
+          </div>
+          <button class="avatar-change-btn" id="plus" aria-label="Choisir un avatar" type="button">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+            </svg>
+          </button>
+        </div>
+
+        <p class="avatar-hint">Clique sur <strong>+</strong> pour choisir un avatar</p>
+
+        <!-- Palette — ID conservé -->
+        <div class="palette" id="palette">
+          <div class="avatars-row">
+            <img id="y1" class="pdp" src="images/Y1.svg" alt="Avatar Y1">
+            <img id="y2" class="pdp" src="images/Y2.svg" alt="Avatar Y2">
+            <img id="y3" class="pdp" src="images/Y3.svg" alt="Avatar Y3">
+            <img id="y4" class="pdp" src="images/Y4.svg" alt="Avatar Y4">
+          </div>
+          <div class="avatars-row">
+            <img id="x1" class="pdp" src="images/X1.svg" alt="Avatar X1">
+            <img id="x2" class="pdp" src="images/X2.svg" alt="Avatar X2">
+            <img id="x3" class="pdp" src="images/X3.svg" alt="Avatar X3">
+            <img id="x4" class="pdp" src="images/X4.svg" alt="Avatar X4">
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Pseudo -->
+      <div class="field-float">
+        <label class="float-label-static" for="nom">Pseudo <span class="req">*</span></label>
+        <input class="field nonvide" id="nom" type="text" autocomplete="nickname" placeholder="ex: DrMed2025">
+      </div>
+
+      <!-- Bouton — ID conservé -->
+      <button id="boutton" class="btn-signup c-button c-button--gooey">
+        Sauvegarder
+        <div class="c-button__blobs"><div></div><div></div><div></div></div>
+      </button>
+
+      <svg xmlns="http://www.w3.org/2000/svg" style="display:none">
+        <defs>
+          <filter id="goo">
+            <feGaussianBlur in="SourceGraphic" stdDeviation="10" result="blur"/>
+            <feColorMatrix in="blur" mode="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 18 -7" result="goo"/>
+            <feBlend in="SourceGraphic" in2="goo"/>
+          </filter>
+        </defs>
+      </svg>
+
+      <!-- Étape -->
+      <div class="step-indicator">
+        <div class="step done">
+          <span class="step-dot">
+            <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
+              <polyline points="2,5 4.5,7.5 8,2.5" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </span>
+          <span class="step-label">Compte créé</span>
+        </div>
+        <div class="step-line"></div>
+        <div class="step active">
+          <span class="step-dot"></span>
+          <span class="step-label">Profil</span>
+        </div>
+      </div>
+
     </div>
-          <div class="pseudo">
-            <p class="alert" id="alert"aria-live="assertive" >Veuillez entrer votre pseudo</p>
-            <p class="alert_erreur" id="alert_erreur"aria-live="assertive" >Inscription effectuée </p>
-            <img class="user0"id="user" src="images/user.svg"/>
- <img class="plus" id="plus" alt="Choisir un avatar" role="button" tabindex="0" src="images/plus.svg"/>
- 
+  </main>
 
-            <label class="title15">Pseudo</label><br>
-            <input class="input8 nonvide" id="nom"    />
+  <!-- ══ DROITE — Branding ══ -->
+  <aside class="brand-side" aria-hidden="true">
 
+    <div class="brand-top">
+      <span class="brand-already">Bienvenue sur QCMed</span>
+    </div>
 
-            <button onclick="this.disabled=true" id="boutton" class="c-button btn4  c-button--gooey"> Sauvegarder
-  <div class="c-button__blobs">
-  <div></div>
-  <div></div>
-  <div></div>
-  </div>
-</button>
-<svg xmlns="http://www.w3.org/2000/svg" version="1.1" style="display: block; height: 0; width: 0;">
-  <defs>
-    <filter id="goo">
-      <feGaussianBlur in="SourceGraphic" stdDeviation="10" result="blur"></feGaussianBlur>
-      <feColorMatrix in="blur" mode="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 18 -7" result="goo"></feColorMatrix>
-      <feBlend in="SourceGraphic" in2="goo"></feBlend>
-    </filter>
-  </defs>
-</svg>
-           
+    <div class="brand-center">
+      <div class="brand-illustration">
+        <svg viewBox="0 0 320 280" xmlns="http://www.w3.org/2000/svg" class="illus-svg">
+          <!-- blob fond -->
+          <ellipse cx="160" cy="155" rx="125" ry="108" fill="rgba(255,255,255,0.11)"/>
 
-<div class="palette "  id="palette">
-  <div class="avatars">
-<img id="y1" class="pdp" src="images/Y1.svg" />
-<img id="y2" class="pdp" src="images/Y2.svg" />
-<img  id="y3" class="pdp"src="images/Y3.svg" />
-<img  id="y4" class="pdp"src="images/Y4.svg" />
-</div>
-<div class="avatars">
-<img  id="x1" class="pdp"src="images/X1.svg" />
-<img  id="x2"class="pdp"src="images/X2.svg" />
-<img  id="x3"class="pdp"src="images/X3.svg" />
-<img  id="x4"class="pdp"src="images/X4.svg" />
-</div>
-</div>
-</div>
-   
-   <script src="script/pseudo.js"></script>
+          <!-- carte profil flottante -->
+          <rect x="88" y="100" width="144" height="108" rx="14" fill="white" opacity="0.95"/>
+          <!-- avatar cercle -->
+          <circle cx="160" cy="133" r="26" fill="#e8f4fd"/>
+          <circle cx="160" cy="125" r="11" fill="#0065F8" opacity="0.7"/>
+          <ellipse cx="160" cy="148" rx="17" ry="10" fill="#0065F8" opacity="0.5"/>
+          <!-- nom ligne -->
+          <rect x="128" y="163" width="64" height="5" rx="2.5" fill="#001087" opacity="0.4"/>
+          <!-- tag -->
+          <rect x="140" y="173" width="40" height="14" rx="7" fill="#0065F8" opacity="0.15"/>
+          <rect x="148" y="177" width="24" height="4" rx="2" fill="#0065F8" opacity="0.7"/>
+
+          <!-- étoiles de validation -->
+          <circle cx="230" cy="108" r="16" fill="white" opacity="0.92"/>
+          <polyline points="223,108 228,113 237,103" fill="none" stroke="#0065F8" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+
+          <!-- bulle chat -->
+          <rect x="72" y="108" width="56" height="34" rx="10" fill="white" opacity="0.9"/>
+          <polygon points="90,142 100,142 95,150" fill="white" opacity="0.9"/>
+          <rect x="80" y="117" width="30" height="3.5" rx="1.75" fill="#0065F8" opacity="0.6"/>
+          <rect x="80" y="125" width="22" height="3" rx="1.5" fill="#001087" opacity="0.3"/>
+
+          <!-- stéthoscope déco -->
+          <path d="M218 155 Q210 170 218 180 Q226 190 234 182" fill="none" stroke="rgba(255,255,255,0.55)" stroke-width="3" stroke-linecap="round"/>
+          <circle cx="234" cy="182" r="5" fill="rgba(255,255,255,0.5)"/>
+
+          <!-- déco points -->
+          <circle cx="88" cy="95"  r="3.5" fill="rgba(255,255,255,0.42)"/>
+          <circle cx="268" cy="90" r="4"   fill="rgba(255,255,255,0.38)"/>
+          <circle cx="255" cy="215" r="3"  fill="rgba(255,255,255,0.40)"/>
+          <circle cx="78"  cy="210" r="2.5" fill="rgba(255,255,255,0.36)"/>
+          <rect x="72"  y="175" width="7" height="7" rx="1.5" fill="rgba(255,255,255,0.26)" transform="rotate(18 72 175)"/>
+          <rect x="258" y="165" width="7" height="7" rx="1.5" fill="rgba(255,255,255,0.26)" transform="rotate(-12 258 165)"/>
+        </svg>
+      </div>
+
+      <h2 class="brand-title">Presque prêt !</h2>
+      <p class="brand-desc">Personnalise ton profil pour que tes camarades te reconnaissent.</p>
+
+      <div class="brand-stats">
+        <div class="stat"><span class="stat-num">5000+</span><span class="stat-label">QCMs</span></div>
+        <div class="stat-divider"></div>
+        <div class="stat"><span class="stat-num">3</span><span class="stat-label">Années</span></div>
+        <div class="stat-divider"></div>
+        <div class="stat"><span class="stat-num">100%</span><span class="stat-label">Gratuit</span></div>
+      </div>
+    </div>
+
+  </aside>
+
+  <script src="config/config.js"></script>
+  <script src="script/pseudo.js"></script>
+
+  <!-- Slide-in depuis inscription -->
+  <script>
+    if (sessionStorage.getItem('fromConnexion') || sessionStorage.getItem('fromInscription')) {
+      document.querySelector('.brand-side').classList.add('slide-from-right');
+      sessionStorage.removeItem('fromConnexion');
+      sessionStorage.removeItem('fromInscription');
+    }
+  </script>
+
 </body>
 </html>

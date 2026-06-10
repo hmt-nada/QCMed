@@ -1,0 +1,523 @@
+/* ═══════════════════════════════════════════════════════
+   PSEUDO.CSS — QCMed
+   Style cohérent avec connexion.css / inscription.css
+═══════════════════════════════════════════════════════ */
+
+/* ─── Layout split ───────────────────────────────────── */
+.page-pseudo {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: #f0f4ff;
+}
+
+/* ─── Gauche : formulaire ────────────────────────────── */
+.form-side {
+  width: 100%;
+  background: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 24px 48px;
+  min-height: 100vh;
+}
+
+.form-inner {
+  width: 100%;
+  max-width: 420px;
+}
+
+/* ─── En-tête ────────────────────────────────────────── */
+.form-header {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 36px;
+}
+
+.form-logo {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+  border: 2px solid #e8f0fe;
+}
+
+.form-title {
+  font-family: 'Poppins', sans-serif;
+  font-size: 1.75rem;
+  font-weight: 800;
+  color: #0a1628;
+  line-height: 1.1;
+  margin: 0;
+}
+
+.form-subtitle {
+  font-family: 'Nunito', sans-serif;
+  font-size: 0.85rem;
+  color: #6b7a99;
+  margin: 4px 0 0;
+}
+
+/* ─── Section avatar ─────────────────────────────────── */
+.avatar-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 28px;
+  position: relative;
+}
+
+.avatar-current-wrap {
+  position: relative;
+  width: 90px;
+  height: 90px;
+  margin-bottom: 10px;
+}
+
+.avatar-ring {
+  width: 90px;
+  height: 90px;
+  border-radius: 50%;
+  border: 2.5px solid #d4daf0;
+  background: #f8faff;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: border-color 0.25s;
+}
+
+.avatar-ring:has(img[src*="Y"]),
+.avatar-ring:has(img[src*="X"]) {
+  border-color: #0065F8;
+}
+
+.user0 {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s ease;
+}
+
+/* Classe profil ajoutée par le JS existant */
+.user0.profil {
+  transform: scale(1.05);
+}
+
+.avatar-change-btn {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: #0065F8;
+  color: #ffffff;
+  border: 2px solid #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.15s;
+  box-shadow: 0 2px 8px rgba(0,101,248,0.35);
+}
+
+.avatar-change-btn:hover {
+  background: #0052d4;
+  transform: scale(1.1);
+}
+
+/* ID "plus" ciblé par le JS — classe plusposition conservée */
+#plus.plusposition {
+  bottom: 2px;
+  right: 2px;
+}
+
+.avatar-hint {
+  font-family: 'Nunito', sans-serif;
+  font-size: 0.82rem;
+  color: #8a96b3;
+  margin-bottom: 14px;
+}
+
+.avatar-hint strong {
+  color: #0065F8;
+}
+
+/* ─── Palette ────────────────────────────────────────── */
+.palette {
+  display: none;
+  background: #ffffff;
+  border: 1.5px solid #d4daf0;
+  border-radius: 14px;
+  padding: 14px;
+  box-shadow: 0 8px 30px rgba(0,101,248,0.12);
+  margin-bottom: 4px;
+  animation: fadeDown 0.2s ease;
+}
+
+@keyframes fadeDown {
+  from { opacity: 0; transform: translateY(-8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.avatars-row {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.avatars-row:last-child {
+  margin-bottom: 0;
+}
+
+.pdp {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  border: 2px solid #e8f0fe;
+  cursor: pointer;
+  transition: border-color 0.2s, transform 0.18s, box-shadow 0.18s;
+  object-fit: cover;
+  background: #f8faff;
+}
+
+.pdp:hover {
+  border-color: #0065F8;
+  transform: scale(1.08);
+}
+
+/* Classe selected-avatar ajoutée par le JS existant */
+.pdp.selected-avatar {
+  border-color: #0065F8;
+  box-shadow: 0 0 0 3px rgba(0,101,248,0.18);
+  transform: scale(1.06);
+}
+
+/* ─── Champ pseudo ───────────────────────────────────── */
+.field-float {
+  position: relative;
+  margin-bottom: 24px;
+}
+
+.float-label-static {
+  display: block;
+  font-family: 'Poppins', sans-serif;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #6b7a99;
+  letter-spacing: 0.03em;
+  margin-bottom: 6px;
+}
+
+.field-float .field {
+  width: 100%;
+  height: 52px;
+  border: 1.5px solid #d4daf0;
+  border-radius: 10px;
+  background: #f8faff;
+  padding: 0 16px;
+  font-family: 'Poppins', sans-serif;
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: #0a1628;
+  outline: none;
+  transition: border-color 0.25s, box-shadow 0.25s, background 0.25s;
+}
+
+.field-float .field:focus {
+  border-color: #0065F8;
+  background: #ffffff;
+  box-shadow: 0 0 0 3px rgba(0,101,248,0.10);
+}
+
+/* Classe valide ajoutée par le JS existant */
+.field-float .field.valide {
+  border-color: #001087;
+  background: #f8faff;
+}
+
+/* ─── Bouton Sauvegarder ─────────────────────────────── */
+.btn-signup {
+  width: 100%;
+  height: 52px;
+  background: #0065F8;
+  color: #ffffff;
+  font-family: 'Poppins', sans-serif;
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: background 0.25s, transform 0.15s, box-shadow 0.25s;
+  box-shadow: 0 4px 18px rgba(0,101,248,0.30);
+  display: block;
+  text-align: center;
+  padding: 0;
+  position: relative;
+  z-index: 1;
+}
+
+.btn-signup:hover {
+  background: #0052d4;
+  box-shadow: 0 6px 22px rgba(0,101,248,0.38);
+  color: #ffffff;
+}
+
+.btn-signup:active { transform: scale(0.98); }
+
+/* ─── Indicateur d'étapes ────────────────────────────── */
+.step-indicator {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 28px;
+}
+
+.step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+}
+
+.step-dot {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 2px solid #d4daf0;
+  background: #f8faff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.step.done .step-dot {
+  background: #0065F8;
+  border-color: #0065F8;
+}
+
+.step.active .step-dot {
+  background: #ffffff;
+  border-color: #0065F8;
+  box-shadow: 0 0 0 3px rgba(0,101,248,0.15);
+}
+
+.step.active .step-dot::after {
+  content: '';
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #0065F8;
+  display: block;
+}
+
+.step-label {
+  font-family: 'Nunito', sans-serif;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #8a96b3;
+}
+
+.step.done .step-label,
+.step.active .step-label {
+  color: #0065F8;
+}
+
+.step-line {
+  flex: 1;
+  max-width: 60px;
+  height: 2px;
+  background: #0065F8;
+  border-radius: 1px;
+  margin-bottom: 18px;
+}
+
+/* ─── Req asterisk ───────────────────────────────────── */
+.req { color: #0065F8; font-size: 0.85em; }
+
+/* ─── Alertes ────────────────────────────────────────── */
+.alert-box {
+  position: fixed;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%) translateY(-30px);
+  font-family: 'Poppins', sans-serif;
+  font-weight: 600;
+  font-size: 0.92rem;
+  padding: 10px 24px;
+  border-radius: 10px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.35s ease, transform 0.35s ease;
+  z-index: 9999;
+  white-space: nowrap;
+}
+
+.alert-box.visible {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+.alert-error {
+  color: #cc0000;
+  background: #fff0f0;
+  border: 1.5px solid #ffcccc;
+  box-shadow: 0 4px 16px rgba(204,0,0,0.10);
+}
+
+.alert-success {
+  color: #0a6c2e;
+  background: #edfaf3;
+  border: 1.5px solid #a8e6c1;
+  box-shadow: 0 4px 16px rgba(0,130,60,0.10);
+}
+
+/* ─── Droite : branding ──────────────────────────────── */
+.brand-side {
+  display: none;
+  background: linear-gradient(145deg, #0065F8 0%, #001087 100%);
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 36px 40px 48px;
+  position: relative;
+  overflow: hidden;
+}
+
+.brand-side::before {
+  content: '';
+  position: absolute;
+  top: -40px; right: -40px;
+  width: 220px; height: 220px;
+  background-image: radial-gradient(circle, rgba(255,255,255,0.18) 1.5px, transparent 1.5px);
+  background-size: 20px 20px;
+  border-radius: 50%;
+}
+
+.brand-side::after {
+  content: '';
+  position: absolute;
+  bottom: -30px; left: -30px;
+  width: 180px; height: 180px;
+  background-image: radial-gradient(circle, rgba(255,255,255,0.12) 1.5px, transparent 1.5px);
+  background-size: 18px 18px;
+  border-radius: 50%;
+}
+
+/* Slide-in depuis inscription */
+.brand-side.slide-from-right {
+  animation: brandSlideFromRight 0.65s cubic-bezier(0.77,0,0.175,1) forwards;
+}
+
+@keyframes brandSlideFromRight {
+  from { transform: translateX(100%); opacity: 0.4; }
+  to   { transform: translateX(0);    opacity: 1; }
+}
+
+.brand-top {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 16px;
+  position: relative;
+  z-index: 1;
+}
+
+.brand-already {
+  font-family: 'Nunito', sans-serif;
+  font-size: 0.95rem;
+  color: rgba(255,255,255,0.8);
+}
+
+.brand-center {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  z-index: 1;
+  text-align: center;
+  gap: 16px;
+}
+
+.brand-illustration { width: 100%; max-width: 320px; }
+.illus-svg { width: 100%; height: auto; }
+
+.brand-title {
+  font-family: 'Poppins', sans-serif;
+  font-size: 2.2rem;
+  font-weight: 800;
+  color: #ffffff;
+  margin: 0;
+  letter-spacing: 0.02em;
+}
+
+.brand-desc {
+  font-family: 'Nunito', sans-serif;
+  font-size: 1rem;
+  color: rgba(255,255,255,0.78);
+  max-width: 280px;
+  line-height: 1.6;
+  margin: 0;
+}
+
+.brand-stats {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  background: rgba(255,255,255,0.12);
+  border-radius: 16px;
+  padding: 16px 28px;
+  margin-top: 8px;
+}
+
+.stat { display: flex; flex-direction: column; align-items: center; gap: 2px; }
+
+.stat-num {
+  font-family: 'Poppins', sans-serif;
+  font-size: 1.35rem;
+  font-weight: 800;
+  color: #ffffff;
+}
+
+.stat-label {
+  font-family: 'Nunito', sans-serif;
+  font-size: 0.78rem;
+  color: rgba(255,255,255,0.65);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.stat-divider {
+  width: 1px;
+  height: 36px;
+  background: rgba(255,255,255,0.25);
+}
+
+/* ═══ RESPONSIVE desktop ≥ 860px ════════════════════════ */
+@media (min-width: 860px) {
+  .page-pseudo {
+    flex-direction: row;
+  }
+
+  .form-side {
+    flex: 1;
+    min-height: 100vh;
+    overflow-y: auto;
+    padding: 48px 56px;
+  }
+
+  .brand-side {
+    display: flex;
+    flex: 1;
+    min-height: 100vh;
+    position: sticky;
+    top: 0;
+    height: 100vh;
+  }
+}

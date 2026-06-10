@@ -79,9 +79,9 @@ document.addEventListener("click", function (event) {
   // Si la palette est visible
   if (palette.style.display === "block") {
     // Si le clic ne se fait PAS sur la palette ni sur le bouton "+"
-    if (!palette.contains(event.target) && event.target !== plus) {
-      palette.style.display = "none"; // On cache la palette
-    }
+    if (!palette.contains(event.target) && !plus.contains(event.target)) {
+     palette.style.display = "none";
+  }
   }
 });
 
