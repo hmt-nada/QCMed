@@ -1,9 +1,4 @@
-/* ═══════════════════════════════════════════════════════════
-   accueil.css  —  styles propres à la page d'accueil QCMed
-   Responsive : mobile → tablette → desktop
-   ═══════════════════════════════════════════════════════════ */
 
-/* ── Base page ───────────────────────────────────────────── */
 .accueil-body {
   background-color: #EFEFEF;
   margin: 0;
@@ -13,7 +8,7 @@
   overflow-x: hidden;
 }
 
-/* ── Animation slide-in du hero ─────────────────────────── */
+/* ── Slide-in animation ── */
 #inscrivez {
   opacity: 0;
   transform: translateX(-60px);
@@ -24,26 +19,24 @@
   transform: translateX(0);
 }
 
-/* ════════════════════════════════════════════════════════════
+/* ════════════════════════════════════════════════
    HERO HEADER
-   ════════════════════════════════════════════════════════════ */
+   ════════════════════════════════════════════════ */
 .accueil-hero {
-  position: relative;
-  padding: 100px 5vw 28px;
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   gap: 16px;
-  min-height: 180px;
+  padding: 100px 5vw 28px;
 }
 
-/* ── Badge QUIZ TIME ─────────────────────────────────────── */
+/* ── Badge QUIZ TIME ── */
 .hero-badge {
-  display: flex;
-  align-items: center;
   background-color: #0065F8;
   border-radius: 50px;
   padding: 8px 20px;
+  display: flex;
+  align-items: center;
   gap: 6px;
   flex-shrink: 0;
 }
@@ -51,22 +44,22 @@
 .badge-quiz,
 .badge-time {
   font-family: 'Oleo Script', cursive;
-  font-size: clamp(1.2rem, 3vw, 2rem);
-  color: #000;
+  font-size: clamp(1.1rem, 2.5vw, 1.8rem);
+  color: #fff;
   transform: rotate(-45deg);
   display: inline-block;
   line-height: 1;
 }
 
-/* ── Texte bienvenue ─────────────────────────────────────── */
+/* ── Bienvenue ── */
 .hero-welcome {
-  flex: 1 1 200px;
+  flex: 1 1 180px;
   min-width: 0;
 }
 
 .hero-title {
   font-family: 'Oleo Script', cursive;
-  font-size: clamp(2rem, 6vw, 4.5rem);
+  font-size: clamp(2rem, 5vw, 4rem);
   color: #000;
   margin: 0;
   line-height: 1.1;
@@ -74,13 +67,13 @@
 
 .hero-pseudo {
   font-family: 'Oleo Script', cursive;
-  font-size: clamp(1.6rem, 5vw, 3.2rem);
+  font-size: clamp(1.5rem, 4vw, 3rem);
   color: #10175e;
   margin: 0;
   line-height: 1.1;
 }
 
-/* ── Barre de recherche ──────────────────────────────────── */
+/* ── Recherche ── */
 .hero-search-wrapper {
   display: flex;
   flex-direction: column;
@@ -91,14 +84,13 @@
 
 .search-label {
   font-family: 'Oleo Script', cursive;
-  font-size: clamp(0.9rem, 2vw, 1.2rem);
+  font-size: clamp(0.85rem, 1.8vw, 1.1rem);
   color: #000;
 }
 
 .search-box {
-  position: relative;
-  width: 52px;
-  height: 50px;
+  width: 50px;
+  height: 48px;
   display: flex;
   flex-direction: row-reverse;
   align-items: center;
@@ -112,33 +104,33 @@
 
 .search-box:hover,
 .search-box.active {
-  width: clamp(180px, 30vw, 250px);
+  width: clamp(170px, 28vw, 240px);
 }
 
 .search-icon-wrap {
-  padding-top: 4px;
-  flex-shrink: 0;
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 38px;
+  width: 36px;
+  flex-shrink: 0;
+  padding-top: 3px;
 }
 
 .search_icon {
   fill: white;
-  font-size: 1.2em;
+  font-size: 1.1em;
   pointer-events: none;
   display: block;
 }
 
 .search_input {
-  height: 100%;
   width: 0;
+  height: 100%;
   background: transparent;
   border: none;
   outline: none;
   padding-left: 10px;
-  font-size: 0.95rem;
+  font-size: 0.9rem;
   color: white;
   font-family: 'Poppins', sans-serif;
   transition: width 0.3s ease, opacity 0.3s ease;
@@ -147,139 +139,159 @@
 
 .search-box:hover .search_input,
 .search-box.active .search_input {
-  width: calc(100% - 48px);
+  width: calc(100% - 40px);
   opacity: 1;
 }
 
 .search_input::placeholder {
-  color: rgba(255,255,255,0.65);
+  color: rgba(255,255,255,0.6);
 }
 
-/* ════════════════════════════════════════════════════════════
+/* ════════════════════════════════════════════════
    GRILLE DES MODULES
-   ════════════════════════════════════════════════════════════ */
+   ════════════════════════════════════════════════ */
 .modules-section {
-  padding: 0 4vw 60px;
+  padding: 10px 4vw 60px;
 }
 
 .modules-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-  gap: 28px 20px;
-  justify-items: center;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 20px;
 }
 
+/* ── Carte module ── */
 .module-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 8px;
   cursor: pointer;
 }
 
-.module-img,
-.module-img2,
-.module-img02 {
-  width: clamp(110px, 18vw, 200px);
-  height: clamp(110px, 18vw, 200px);
-  object-fit: cover;
-  clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
-  transition: transform 0.25s ease, filter 0.25s ease;
-  display: block;
-}
-
-.module-img:hover,
-.module-img2:hover,
-.module-img02:hover,
-.module-img.hovering,
-.module-img2.hovering,
-.module-img02.hovering {
-  transform: scale(1.07);
-  filter: brightness(1.08);
-}
-
-.module-img:active,
-.module-img2:active,
-.module-img02:active {
-  transform: scale(0.96);
-}
-
-.module-name,
-.module-name2,
-.module-name3 {
-  background-color: #aeaeae;
-  border: 1px solid #888;
-  border-radius: 12px;
-  padding: 4px 12px;
-  text-align: center;
-  white-space: nowrap;
-  max-width: 100%;
+.module-card {
+  background: #fff;
+  border: 1px solid #ddd;
+  border-radius: 16px;
   overflow: hidden;
-  text-overflow: ellipsis;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  display: flex;
+  flex-direction: column;
+}
+
+.module-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 20px rgba(0,0,0,0.12);
+}
+
+.module-card:active {
+  transform: scale(0.97);
+}
+
+.module-card-img {
+  width: 100%;
+  aspect-ratio: 1;
+  overflow: hidden;
+  background: #0d1b2a;
+}
+
+.module-card-img .module-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.3s ease;
+}
+
+.module-card:hover .module-img {
+  transform: scale(1.06);
+}
+
+.module-card-body {
+  padding: 10px 12px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
 }
 
 .name-style {
   font-family: 'Poppins', sans-serif;
-  font-weight: 700;
-  font-size: clamp(0.75rem, 1.8vw, 1rem);
+  font-weight: 600;
+  font-size: clamp(0.78rem, 1.5vw, 0.95rem);
+  color: #111;
   margin: 0;
   line-height: 1.3;
 }
 
 .module-cours {
-  font-size: clamp(0.65rem, 1.4vw, 0.82rem);
-  color: #555;
+  font-size: clamp(0.68rem, 1.2vw, 0.78rem);
+  color: #666;
   font-weight: 500;
-  text-align: center;
-  margin-top: 2px;
 }
 
-.module-name.highlight,
-.module-name2.highlight,
-.module-name3.highlight {
-  border: 2px solid #0065F8;
-  box-shadow: 0 0 8px rgba(0,101,248,0.4);
+/* ── Highlight recherche ── */
+.module-card.highlight {
+  border-color: #0065F8;
+  box-shadow: 0 0 0 2px rgba(0,101,248,0.3);
 }
 
-/* ════════════════════════════════════════════════════════════
+.module-img.hovering {
+  transform: scale(1.06);
+}
+
+/* ════════════════════════════════════════════════
    BREAKPOINTS
-   ════════════════════════════════════════════════════════════ */
+   ════════════════════════════════════════════════ */
 
 @media (max-width: 480px) {
   .accueil-hero {
-    padding: 80px 4vw 20px;
+    padding: 80px 4vw 16px;
     flex-direction: column;
     align-items: flex-start;
-    gap: 12px;
-    min-height: auto;
+    gap: 10px;
   }
-  .hero-badge { padding: 6px 14px; gap: 4px; }
-  .hero-search-wrapper { align-items: flex-start; width: 100%; }
-  .search-box { width: 44px; height: 44px; }
+  .hero-search-wrapper {
+    align-items: flex-start;
+    width: 100%;
+  }
   .search-box:hover,
-  .search-box.active { width: 100%; max-width: 320px; }
-  .modules-grid { grid-template-columns: repeat(2, 1fr); gap: 20px 12px; }
-  .module-img,
-  .module-img2,
-  .module-img02 { width: clamp(90px, 38vw, 150px); height: clamp(90px, 38vw, 150px); }
+  .search-box.active {
+    width: min(100%, 280px);
+  }
+  .modules-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 14px;
+  }
 }
 
 @media (min-width: 481px) and (max-width: 767px) {
-  .accueil-hero { padding: 88px 5vw 24px; gap: 14px; }
-  .modules-grid { grid-template-columns: repeat(3, 1fr); gap: 24px 16px; }
+  .accueil-hero { padding: 86px 5vw 20px; }
+  .modules-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+  }
 }
 
 @media (min-width: 768px) and (max-width: 1023px) {
-  .accueil-hero { padding: 90px 5vw 28px; }
-  .modules-grid { grid-template-columns: repeat(3, 1fr); gap: 28px 20px; }
+  .modules-grid {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 18px;
+  }
 }
 
 @media (min-width: 1024px) {
-  .accueil-hero { padding: 100px 6vw 32px; flex-wrap: nowrap; justify-content: space-between; }
-  .modules-grid { grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 36px 24px; }
+  .accueil-hero {
+    flex-wrap: nowrap;
+    justify-content: space-between;
+    padding: 100px 6vw 32px;
+  }
+  .modules-grid {
+    grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+    gap: 22px;
+  }
 }
 
 @media (min-width: 1440px) {
-  .accueil-hero { max-width: 1600px; margin: 0 auto; }
-  .modules-grid { grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); max-width: 1600px; margin: 0 auto; }
+  .accueil-hero,
+  .modules-section {
+    max-width: 1500px;
+    margin-left: auto;
+    margin-right: auto;
+  }
 }

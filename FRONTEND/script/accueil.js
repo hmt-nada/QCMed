@@ -41,80 +41,43 @@ const modulesParAnnee = {
      ]
 };
 
-
- 
-   
-
 function afficherModules(anneeTexte) {
   const annee = parseInt(anneeTexte, 10);
   const modules = modulesParAnnee[annee] || [];
   const container = document.getElementById("modules-list");
   container.innerHTML = "";
 
-  let index = 0;
-  let nbParLigne = 3;
-  let ligneCount = 0;
+  modules.forEach(m => {
+    const card = document.createElement("div");
+    card.className = "module-container";
+    card.dataset.nom = m.nom;
+    card.dataset.module = m.id.trim().toLowerCase();
 
-  while (index < modules.length) {
-    ligneCount++;
-    const ligne = document.createElement("div");
-    ligne.className = "ligne";
-
-    for (let i = 0; i < nbParLigne && index < modules.length; i++, index++) {
-      const m = modules[index];
-      const moduleDiv = document.createElement("div");
-      moduleDiv.className = "module-container";
-      moduleDiv.dataset.nom = m.nom;
-      moduleDiv.dataset.module = m.id.trim().toLowerCase(); // ✅ normalisé
-
-      let imgClass = "module-img";
-      let nameClass = "module-name";
-
-      if (ligneCount % 2 === 0 && ligneCount >= 2) {
-        imgClass = i === 0 ? "module-img2" : "module-img02";
-        nameClass = i === 0 ? "module-name2" : "module-name3";
-      } else if (ligneCount === 3) {
-        imgClass = "module-img pos";
-      }
-
-      moduleDiv.innerHTML = `
-        <div class="module-tooltip-container">
-          <img 
-            class="${imgClass}" 
-            src="${m.img}" 
-            onclick="choisirmodule('${m.id}', '${m.nom}')" 
-            alt="${m.nom}"
-          >
-          <div class="${nameClass}">
-            <p class="name-style">${m.nom}</p>
-            <div class="module-cours">(0 cours)</div> <!-- ✅ afficher 0 dès le départ -->
-          </div>
+    card.innerHTML = `
+      <div class="module-card" onclick="choisirmodule('${m.id}', '${m.nom}')">
+        <div class="module-card-img">
+          <img src="${m.img}" alt="${m.nom}" class="module-img"/>
         </div>
-      `;
-      ligne.appendChild(moduleDiv);
-    }
+        <div class="module-card-body">
+          <p class="name-style">${m.nom}</p>
+          <div class="module-cours">(0 cours)</div>
+        </div>
+      </div>
+    `;
+    container.appendChild(card);
+  });
 
-    container.appendChild(ligne);
-    nbParLigne = nbParLigne === 3 ? 2 : 3;
-  }
-
-  // Charger les stats et mettre à jour
   fetch("/stats/cours-par-module")
     .then(res => res.json())
     .then(data => {
       data.forEach(item => {
-        const moduleElement = document.querySelector(`[data-module="${item.module.trim().toLowerCase()}"]`);
-        if (!moduleElement) {
-          console.warn("Module non trouvé :", item.module);
-          return;
-        }
-        const coursDiv = moduleElement.querySelector(".module-cours");
-        if (coursDiv) {
-          coursDiv.textContent = `( ${item.nombre_cours || 0} cours )`;
-        }
+        const el = document.querySelector(`[data-module="${item.module.trim().toLowerCase()}"]`);
+        if (!el) return;
+        const coursDiv = el.querySelector(".module-cours");
+        if (coursDiv) coursDiv.textContent = `( ${item.nombre_cours || 0} cours )`;
       });
     })
-    .catch(err => console.error("Erreur récupération stats :", err));
+    .catch(err => console.error("Erreur stats :", err));
 }
 
 function activerRecherche() {
@@ -154,28 +117,6 @@ function activerRecherche() {
   });
 }
 const titre= document.getElementById('inscrivez');
-
-const mainbox = document.getElementById('mainbox');
-
-function updateActiveState() {
-  if (search === document.activeElement || search.value.trim() !== "") {
-    mainbox.classList.add('active');
-  } else {
-    mainbox.classList.remove('active');
-  }
-}
-
-// Quand on clique dans la barre
-search.addEventListener('focus', updateActiveState);
-// Quand on quitte la barre
-search.addEventListener('blur', () => {
-  // délai court pour permettre le clic ailleurs avant de fermer
-  setTimeout(updateActiveState, 100);
-});
-
-// Quand on tape dedans
-search.addEventListener('input', updateActiveState);
-
 
 //afficher le pseudo et avatar 
 
