@@ -1,127 +1,220 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fr">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="style.css"/>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Oleo+Script:wght@400;700&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">    
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
   <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Nunito:ital,wght@0,200..1000;1,200..1000&family=Oleo+Script:wght@400;700&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">
-<script src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js"></script>
-  
-    <!------------------------------------l'image de favicon ----------------------------------------------->
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800&family=Oleo+Script:wght@400;700&family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js"></script>
 
-<link rel="icon" type="image/png" href="logo/favicon-96x96.png" sizes="96x96" />
-<link rel="icon" type="image/svg+xml" href="logo/favicon.svg" />
-<link rel="shortcut icon" href="logo/favicon.ico" />
-<link rel="apple-touch-icon" sizes="180x180" href="logo/apple-touch-icon.png" />
-<meta name="apple-mobile-web-app-title" content="QCMed" />
-<link rel="manifest" href="logo/site.webmanifest" />
+  <link rel="icon" type="image/png" href="logo/favicon-96x96.png" sizes="96x96">
+  <link rel="icon" type="image/svg+xml" href="logo/favicon.svg">
+  <link rel="shortcut icon" href="logo/favicon.ico">
+  <link rel="apple-touch-icon" sizes="180x180" href="logo/apple-touch-icon.png">
+  <link rel="manifest" href="logo/site.webmanifest">
 
-<!----------------------------------------------------------------------------------------------------->
-    <title>Connexion - QCMed</title>
+  <link rel="stylesheet" href="css/global.css">
+  <link rel="stylesheet" href="css/connexion.css">
 
+  <title>Connexion — QCMed</title>
 </head>
-<body class="body3">
-    
-    <div class="header">
-          <div >
-               <div class="bordure">
-                <p class="expression4"id="inscrivez">CONNECTEZ-VOUS</p>
-               </div>
-               <div class="header">
-               <img class="vector" src="images/vector.svg"  />
-               <img  class="image3" src="logo/brain-name.png"/>
-</div>
-          </div>
-          <div class="connexion">
-            <p class="alert_erreur poserror" id="alert_erreur"aria-live="assertive" >Connexion effectuée avec succès</p>
 
-            <p class="alert" id="alert"aria-live="assertive" >Veuillez remplir tous les champs</p>
+<body class="page-connexion">
 
-            
-            <div id="titrenormal">
-           <label class="title16">Addresse</label>
-          <label class="title17">E-</label> 
-           <label class="title017">mail</label> <br>
-</div>
-<div id="mailinvalide"  style =" display: none" >
+  <!-- Alertes (IDs conservés) -->
+  <p class="alert-box alert-success" id="alert_erreur" aria-live="assertive">Connexion effectuée avec succès</p>
+  <p class="alert-box alert-error"   id="alert"        aria-live="assertive">Veuillez remplir tous les champs</p>
 
-<label class="title016" >E-</label>
-<label class="title117">mail</label>
-<label class="title1117">invalide</label><br>
-</div>
-<div id="mailincorrect"style=" display: none"><label class="changtitremailinv3">E-mail incorrect</label><br></div>
- 
-   <input id="mailvalide" class="input9 title code-input"type="text"/>
-
-
-
-<!--------------------------------------password------------------------------------------------------------------>
-<div id="passrequest">
-<label class="title18" for="nom">Mot</label>
- <label class="title19" for="nom">De</label>
- <label class="title20" for="nom">Passe</label>
- </div>
- <input class="input10 title code-input" id="password1" type="password"><br>
-<span class="erreurchangepass pospass"id="missmatch" style="display:none">
-  Mot de passe incorrect</span>
-
-<svg class="eye2" id="eyeclose1" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 9q-3.6 4-9 4T3 9m0 6l2.5-3.8M21 14.976L18.508 11.2M9 17l.5-4m5.5 4l-.5-4"/></svg>
-
-<svg class="eye2" style="display:none" id="eyeopen1" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 20 20"><g fill="#000"><path fill-rule="evenodd" d="M10 16c4.658 0 8.5-2.161 8.5-5S14.658 6 10 6s-8.5 2.161-8.5 5s3.842 5 8.5 5m0-9c4.179 0 7.5 1.868 7.5 4s-3.321 4-7.5 4s-7.5-1.868-7.5-4S5.821 7 10 7" clip-rule="evenodd"/><path d="M9.5 3.5a.5.5 0 0 1 1 0v3a.5.5 0 0 1-1 0zm4.01.402a.5.5 0 0 1 .98.196l-.5 2.5a.5.5 0 0 1-.98-.196zm-7.02 0a.5.5 0 0 0-.98.196l.5 2.5a.5.5 0 0 0 .98-.196zM2.429 5.243a.5.5 0 0 0-.858.514l1.5 2.5a.5.5 0 0 0 .858-.514zm15.142 0a.5.5 0 1 1 .858.514l-1.5 2.5a.5.5 0 1 1-.858-.514zM13 10.5a3 3 0 1 1-6 0a3 3 0 0 1 6 0"/></g></svg>
-
-
-
-
- <!-- Modal -->
-<div id="adminModal" class="modal0">
-  <div class="modal-content">
-    <span class="close-btn">&times;</span>
-    <h2>Vous êtes un admin</h2>
-    <p>Voulez-vous vous connecter comme Admin ou Utilisateur normal ?</p>
-    <div class="modal-buttons">
-      <button id="admin-btn">Admin</button>
-      <button id="user-btn">Utilisateur</button>
+  <!-- Modal admin (conservé intact) -->
+  <div id="adminModal" class="modal0">
+    <div class="modal-content">
+      <span class="close-btn">&times;</span>
+      <h2>Vous êtes un admin</h2>
+      <p>Voulez-vous vous connecter comme Admin ou Utilisateur normal ?</p>
+      <div class="modal-buttons">
+        <button id="admin-btn">Admin</button>
+        <button id="user-btn">Utilisateur</button>
+      </div>
     </div>
   </div>
-</div>
-          
-            
 
-<!-------------------------------------------------------------------------------------------------------->
-<!---------------------------------------------boutton------------------------------------------------->
+  <!-- ══ GAUCHE — Formulaire ══ -->
+  <main class="form-side">
+    <div class="form-inner">
 
-<button id="boutton" class="c-button   c-button--gooey btn5"> Connexion
-  <div class="c-button__blobs">
-  <div></div>
-  <div></div>
-  <div></div>
-  </div>
-</button>
-<svg xmlns="http://www.w3.org/2000/svg" version="1.1" style="display: block; height: 0; width: 0;">
-  <defs>
-    <filter id="goo">
-      <feGaussianBlur in="SourceGraphic" stdDeviation="10" result="blur"></feGaussianBlur>
-      <feColorMatrix in="blur" mode="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 18 -7" result="goo"></feColorMatrix>
-      <feBlend in="SourceGraphic" in2="goo"></feBlend>
-    </filter>
-  </defs>
-</svg>
+      <!-- En-tête -->
+      <div class="form-header">
+        <img src="logo/brain-name.png" alt="QCMed" class="form-logo">
+        <div>
+          <h1 class="form-title">Bon retour !</h1>
+          <p class="form-subtitle">Connecte-toi pour reprendre tes révisions</p>
+        </div>
+      </div>
 
-<!------------------------------------------------------------------------------------------------------------->
-<p class="instruction03">
-    mot de passe oublié ?
-    <a href="recuperation.html" class="instruction04"> récuperer-le</a>
-</p>
-          </div> 
+      <!-- Email -->
+      <div class="field-float">
+        <!-- Labels (IDs conservés pour le JS) -->
+        <div id="titrenormal" class="float-label-group">
+          <label class="float-label" for="mailvalide">Adresse e-mail <span class="req">*</span></label>
+        </div>
+        <div id="mailinvalide" class="float-label-group" style="display:none;">
+          <label class="float-label float-label--error" for="mailvalide">E-mail invalide</label>
+        </div>
+        <div id="mailincorrect" class="float-label-group" style="display:none;">
+          <label class="float-label float-label--error" for="mailvalide">E-mail incorrect</label>
+        </div>
+        <input class="field code-input" id="mailvalide" type="text" autocomplete="email" placeholder=" ">
+      </div>
 
- <script src="script/connexion.js"></script>   
+      <!-- Mot de passe -->
+      <div class="field-float">
+        <div id="passrequest" class="float-label-group">
+          <label class="float-label" for="password1">Mot de passe <span class="req">*</span></label>
+        </div>
+        <div class="field-wrapper-eye">
+          <input class="field field--eye code-input" id="password1" type="password" autocomplete="current-password" placeholder=" ">
+          <!-- Œil fermé -->
+          <svg class="field-eye" id="eyeclose1" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/>
+            <line x1="1" y1="1" x2="23" y2="23"/>
+          </svg>
+          <!-- Œil ouvert -->
+          <svg class="field-eye" id="eyeopen1" style="display:none" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+            <circle cx="12" cy="12" r="3"/>
+          </svg>
+        </div>
+        <span class="field-error" id="missmatch" style="display:none">Mot de passe incorrect</span>
+      </div>
+
+      <!-- Lien mot de passe oublié -->
+      <p class="forgot-link">
+        <a href="recuperation.html">Mot de passe oublié ?</a>
+      </p>
+
+      <!-- Bouton -->
+      <button id="boutton" class="btn-signup c-button c-button--gooey">
+        Connexion
+        <div class="c-button__blobs"><div></div><div></div><div></div></div>
+      </button>
+
+      <svg xmlns="http://www.w3.org/2000/svg" style="display:none">
+        <defs>
+          <filter id="goo">
+            <feGaussianBlur in="SourceGraphic" stdDeviation="10" result="blur"/>
+            <feColorMatrix in="blur" mode="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 18 -7" result="goo"/>
+            <feBlend in="SourceGraphic" in2="goo"/>
+          </filter>
+        </defs>
+      </svg>
+
+      <!-- Lien inscription -->
+      <p class="form-login-link">
+        Pas encore de compte ?
+        <a href="inscription.html" class="instruction02">S'inscrire</a>
+      </p>
+
+    </div>
+  </main>
+
+  <!-- ══ DROITE — Branding ══ -->
+  <aside class="brand-side" aria-hidden="true">
+
+    <div class="brand-top">
+      <span class="brand-already">Pas encore inscrit ?</span>
+      <a href="inscription.html" class="brand-login-btn">S'inscrire</a>
+    </div>
+
+    <div class="brand-center">
+      <div class="brand-illustration">
+        <svg viewBox="0 0 320 280" xmlns="http://www.w3.org/2000/svg" class="illus-svg">
+          <!-- blob de fond -->
+          <ellipse cx="160" cy="155" rx="125" ry="108" fill="rgba(255,255,255,0.11)"/>
+
+          <!-- livre ouvert -->
+          <rect x="80" y="130" width="68" height="82" rx="6" fill="white" opacity="0.95"/>
+          <rect x="86" y="138" width="56" height="66" rx="4" fill="#e8f4fd"/>
+          <line x1="114" y1="130" x2="114" y2="212" stroke="#d0e8f8" stroke-width="1.5"/>
+          <!-- lignes de texte sur livre -->
+          <rect x="90" y="146" width="20" height="3" rx="1.5" fill="#0065F8" opacity="0.6"/>
+          <rect x="90" y="154" width="16" height="2.5" rx="1.2" fill="#001087" opacity="0.35"/>
+          <rect x="90" y="161" width="18" height="2.5" rx="1.2" fill="#001087" opacity="0.3"/>
+          <rect x="90" y="168" width="14" height="2.5" rx="1.2" fill="#001087" opacity="0.25"/>
+          <rect x="118" y="146" width="20" height="3" rx="1.5" fill="#0065F8" opacity="0.5"/>
+          <rect x="118" y="154" width="16" height="2.5" rx="1.2" fill="#001087" opacity="0.3"/>
+          <rect x="118" y="161" width="22" height="2.5" rx="1.2" fill="#001087" opacity="0.25"/>
+
+          <!-- checklist flottante -->
+          <rect x="158" y="108" width="82" height="94" rx="10" fill="white" opacity="0.93"/>
+          <rect x="165" y="118" width="40" height="4" rx="2" fill="#0065F8" opacity="0.7"/>
+          <!-- items checklist -->
+          <circle cx="170" cy="134" r="4" fill="#0065F8" opacity="0.85"/>
+          <polyline points="167,134 170,137 175,130" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <rect x="180" y="131" width="38" height="3" rx="1.5" fill="#001087" opacity="0.35"/>
+
+          <circle cx="170" cy="150" r="4" fill="#cee1f7" opacity="0.9"/>
+          <rect x="180" y="147" width="30" height="3" rx="1.5" fill="#001087" opacity="0.25"/>
+
+          <circle cx="170" cy="166" r="4" fill="#0065F8" opacity="0.85"/>
+          <polyline points="167,166 170,169 175,162" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <rect x="180" y="163" width="34" height="3" rx="1.5" fill="#001087" opacity="0.3"/>
+
+          <circle cx="170" cy="182" r="4" fill="#cee1f7" opacity="0.7"/>
+          <rect x="180" y="179" width="26" height="3" rx="1.5" fill="#001087" opacity="0.2"/>
+
+          <!-- personnage assis -->
+          <rect x="218" y="155" width="28" height="40" rx="11" fill="white" opacity="0.9"/>
+          <circle cx="232" cy="142" r="17" fill="white" opacity="0.95"/>
+          <circle cx="226" cy="140" r="2.2" fill="#0065F8"/>
+          <circle cx="238" cy="140" r="2.2" fill="#0065F8"/>
+          <path d="M226 147 Q232 151 238 147" fill="none" stroke="#0065F8" stroke-width="1.8" stroke-linecap="round"/>
+          <!-- bras pointant vers checklist -->
+          <line x1="218" y1="165" x2="202" y2="158" stroke="white" stroke-width="7" stroke-linecap="round" opacity="0.9"/>
+          <!-- stéthoscope -->
+          <path d="M196 158 Q188 168 196 176 Q204 183 210 176" fill="none" stroke="#cee1f7" stroke-width="3" stroke-linecap="round"/>
+          <circle cx="210" cy="176" r="5" fill="#cee1f7" opacity="0.9"/>
+          <!-- chapeau -->
+          <polygon points="232,122 252,130 232,137 212,130" fill="#001087" opacity="0.85"/>
+          <rect x="227" y="122" width="10" height="4" fill="#001087" opacity="0.85"/>
+          <line x1="252" y1="130" x2="254" y2="139" stroke="#001087" stroke-width="2" opacity="0.7"/>
+          <circle cx="254" cy="140" r="2.2" fill="#cee1f7"/>
+
+          <!-- déco -->
+          <circle cx="88" cy="108" r="3.5" fill="rgba(255,255,255,0.45)"/>
+          <circle cx="268" cy="95"  r="4"   fill="rgba(255,255,255,0.38)"/>
+          <circle cx="255" cy="210" r="3"   fill="rgba(255,255,255,0.42)"/>
+          <circle cx="78"  cy="215" r="2.5" fill="rgba(255,255,255,0.38)"/>
+          <rect x="72"  y="140" width="7" height="7" rx="1.5" fill="rgba(255,255,255,0.28)" transform="rotate(18 72 140)"/>
+          <rect x="262" y="170" width="7" height="7" rx="1.5" fill="rgba(255,255,255,0.28)" transform="rotate(-12 262 170)"/>
+        </svg>
+      </div>
+
+      <h2 class="brand-title">QCMed</h2>
+      <p class="brand-desc">Retrouve tes QCMs, ton historique et tes statistiques de révision.</p>
+
+      <div class="brand-stats">
+        <div class="stat"><span class="stat-num">5000+</span><span class="stat-label">QCMs</span></div>
+        <div class="stat-divider"></div>
+        <div class="stat"><span class="stat-num">3</span><span class="stat-label">Années</span></div>
+        <div class="stat-divider"></div>
+        <div class="stat"><span class="stat-num">100%</span><span class="stat-label">Gratuit</span></div>
+      </div>
+    </div>
+
+  </aside>
+
+  <script src="config/config.js"></script>
+  <script src="script/connexion.js"></script>
+<script>
+  if (sessionStorage.getItem('fromInscription')) {
+    document.querySelector('.brand-side').classList.add('slide-from-left');
+    sessionStorage.removeItem('fromInscription');
+  }
+  document.querySelectorAll('a[href="inscription.html"]').forEach(a =>
+    a.addEventListener('click', () => sessionStorage.setItem('fromConnexion', '1'))
+  );
+</script>
 </body>
 </html>

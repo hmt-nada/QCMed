@@ -1,294 +1,498 @@
 /* ═══════════════════════════════════════════════════════
-   INSCRIPTION.CSS — QCMed
-   Page d'inscription — responsive mobile/tablet/desktop
+   INSCRIPTION.CSS — QCMed (redesign)
 ═══════════════════════════════════════════════════════ */
 
-/* ─── Layout principal ───────────────────────────────── */
+/* ─── Layout split ───────────────────────────────────── */
 .page-inscription {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
+  background: #f0f4ff;
 }
 
-/* ─── Section gauche (branding) ─────────────────────── */
-.brand-side {
-  display: none; /* cachée sur mobile */
-  position: relative;
-  background: linear-gradient(135deg, var(--blue) 55%, var(--gray-bg) 55%);
-  flex: 1;
-  align-items: center;
+/* ─── Gauche : formulaire ────────────────────────────── */
+.form-side {
+  width: 100%;
+  background: #ffffff;
+  display: flex;
+  align-items: flex-start;
   justify-content: center;
+  padding: 40px 24px 48px;
   min-height: 100vh;
 }
 
-.brand-side__logo {
-  width: 220px;
-  height: 220px;
-  border-radius: 50%;
-  object-fit: cover;
-  position: relative;
-  z-index: 2;
-}
-
-/* ─── Header mobile ──────────────────────────────────── */
-.mobile-header {
-  background-color: var(--blue);
-  padding: 16px 20px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.mobile-header__logo {
-  width: 48px;
-  height: 48px;
-  border-radius: 50%;
-  object-fit: cover;
-}
-
-/* ─── Bandeau titre ──────────────────────────────────── */
-.title-banner {
-  background-color: var(--blue);
-  border-radius: 0 25px 25px 0;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0 32px;
-  height: 56px;
-  margin: 24px 0 0 0;
-  max-width: 90vw;
-}
-
-.title-banner__text {
-  font-family: var(--font-main);
-  font-weight: 800;
-  font-size: clamp(1.2rem, 4vw, 1.8rem);
-  color: var(--black);
-  letter-spacing: 0.04em;
-  -webkit-text-stroke: 0.04rem #000;
-  white-space: nowrap;
-}
-
-/* ─── Section droite (formulaire) ───────────────────── */
-.form-side {
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 24px 16px 40px;
-}
-
-/* ─── Carte formulaire ───────────────────────────────── */
-.form-card {
+.form-inner {
   width: 100%;
   max-width: 480px;
-  padding: 28px 24px 24px;
 }
 
-/* ─── Groupe de champ ────────────────────────────────── */
-.field-group {
+/* ─── En-tête formulaire ─────────────────────────────── */
+.form-header {
   display: flex;
-  flex-direction: column;
-  gap: 4px;
-  margin-bottom: 16px;
-  position: relative;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 32px;
 }
 
-.field-label {
-  font-family: var(--font-main);
-  font-weight: bold;
+.form-logo {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+  border: 2px solid #e8f0fe;
+}
+
+.form-title {
+  font-family: 'Poppins', sans-serif;
+  font-size: 1.75rem;
+  font-weight: 800;
+  color: #0a1628;
+  line-height: 1.1;
+  margin: 0;
+}
+
+.form-subtitle {
+  font-family: 'Nunito', sans-serif;
+  font-size: 0.85rem;
+  color: #6b7a99;
+  margin: 4px 0 0;
+}
+
+/* ─── Grille 2 colonnes ──────────────────────────────── */
+.field-row {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0;
+}
+
+/* ─── Champ avec label flottant ──────────────────────── */
+.field-float {
+  position: relative;
+  margin-bottom: 20px;
+}
+
+.field-float .field {
+  width: 100%;
+  height: 52px;
+  border: 1.5px solid #d4daf0;
+  border-radius: 10px;
+  background: #f8faff;
+  padding: 18px 16px 6px;
+  font-family: 'Poppins', sans-serif;
   font-size: 0.95rem;
-  color: var(--black);
-  padding-left: 4px;
+  font-weight: 500;
+  color: #0a1628;
+  outline: none;
+  transition: border-color 0.25s, box-shadow 0.25s, background 0.25s;
+  appearance: none;
+  -webkit-appearance: none;
 }
 
-.field-label--error {
-  color: var(--red);
+.field-float .field:focus {
+  border-color: #0065F8;
+  background: #ffffff;
+  box-shadow: 0 0 0 3px rgba(0, 101, 248, 0.10);
 }
 
-/* ─── Wrapper input (pour positionner l'œil) ────────── */
-.field-wrapper {
-  position: relative;
-  display: flex;
-  align-items: center;
+.field-float .field.valide {
+  border-color: #001087;
+  background: #f8faff;
 }
 
-.field-wrapper .field {
-  width: 100%;
-  padding-right: 48px;
+.field-float .field--eye {
+  padding-right: 46px;
 }
 
-.field-eye {
+/* Label flottant */
+.float-label {
   position: absolute;
-  right: 14px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  color: #555;
-  transition: color var(--transition);
+  left: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-family: 'Poppins', sans-serif;
+  font-size: 0.92rem;
+  font-weight: 500;
+  color: #8a96b3;
+  pointer-events: none;
+  transition: all 0.2s ease;
+  background: transparent;
 }
 
-.field-eye:hover { color: var(--blue); }
-
-/* ─── Message d'erreur inline ────────────────────────── */
-.field-error {
-  font-family: var(--font-main);
-  font-size: 0.82rem;
-  font-weight: bold;
-  color: var(--red);
-  padding-left: 4px;
-  display: none;
+.field-float .field:focus ~ .float-label,
+.field-float .field:not(:placeholder-shown) ~ .float-label {
+  top: 10px;
+  transform: translateY(0);
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: #0065F8;
+  letter-spacing: 0.03em;
 }
 
-.field-error.visible { display: block; }
-
-/* ─── Select — flèche custom ─────────────────────────── */
-.field-select-wrapper {
-  position: relative;
+.field-float .field.valide ~ .float-label {
+  color: #001087;
 }
 
-.field-select-wrapper .field {
-  width: 100%;
-  cursor: pointer;
+/* Label select (toujours en haut si valeur sélectionnée) */
+.float-label--select {
+  top: 10px;
+  transform: translateY(0);
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: #8a96b3;
+  letter-spacing: 0.03em;
+}
+
+.field-float--select .field {
+  padding-top: 22px;
+  padding-bottom: 4px;
   padding-right: 40px;
+  cursor: pointer;
 }
 
-.field-select-wrapper__arrow {
+.field-float--select .field:focus ~ .float-label--select {
+  color: #0065F8;
+}
+
+.select-arrow {
   position: absolute;
   right: 14px;
   top: 50%;
   transform: translateY(-50%);
   pointer-events: none;
-  color: #555;
+  color: #8a96b3;
 }
 
-/* ─── Textes instruction ─────────────────────────────── */
-.form-instruction {
-  font-family: var(--font-body);
-  font-weight: bold;
-  font-size: 0.9rem;
-  color: var(--black);
-  text-align: center;
-  margin: 12px 0 8px;
+/* ─── Œil mot de passe ───────────────────────────────── */
+.field-eye {
+  position: absolute;
+  right: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  cursor: pointer;
+  color: #8a96b3;
+  display: flex;
+  align-items: center;
+  transition: color 0.2s;
+}
+
+.field-eye:hover { color: #0065F8; }
+
+/* ─── Erreurs inline ─────────────────────────────────── */
+.field-error {
+  font-family: 'Poppins', sans-serif;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #cc0000;
+  padding-left: 4px;
+  margin-top: 4px;
+  display: none;
+}
+
+.field-error.visible { display: block; }
+
+/* Champ en erreur */
+.field-float .field[style*="red"],
+.field-float .field[style*="borderColor: red"] {
+  border-color: #cc0000 !important;
+}
+
+/* ─── Mention légale ─────────────────────────────────── */
+.form-legal {
+  font-family: 'Nunito', sans-serif;
+  font-size: 0.82rem;
+  color: #8a96b3;
   line-height: 1.5;
+  margin: 4px 0 20px;
 }
 
-.form-cta-link {
-  font-family: var(--font-body);
-  font-weight: bold;
-  font-size: 0.95rem;
-  color: var(--black);
+.form-legal a {
+  color: #0065F8;
+  text-decoration: underline;
+}
+
+/* ─── Bouton S'inscrire ───────────────────────────────── */
+.btn-signup {
+  width: 100%;
+  height: 52px;
+  background: #0065F8;
+  color: #ffffff;
+  font-family: 'Poppins', sans-serif;
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: background 0.25s, transform 0.15s, box-shadow 0.25s;
+  box-shadow: 0 4px 18px rgba(0, 101, 248, 0.30);
+}
+
+.btn-signup:hover {
+  background: #0052d4;
+  box-shadow: 0 6px 22px rgba(0, 101, 248, 0.38);
+}
+
+.btn-signup:active {
+  transform: scale(0.98);
+}
+
+/* ─── Lien connexion bas ─────────────────────────────── */
+.form-login-link {
+  font-family: 'Nunito', sans-serif;
+  font-size: 0.92rem;
+  color: #6b7a99;
   text-align: center;
+  margin-top: 18px;
+}
+
+.instruction02 {
+  color: #0065F8;
+  font-weight: 700;
+  text-decoration: underline;
+  font-family: 'Nunito', sans-serif;
+}
+
+.instruction02.zoom {
+  display: inline-block;
+  animation: zoomEffect 0.6s ease-in-out 3;
+}
+
+@keyframes zoomEffect {
+  0%   { transform: scale(1); }
+  50%  { transform: scale(1.25); color: #001087; }
+  100% { transform: scale(1); }
+}
+
+/* ─── Droite : branding ──────────────────────────────── */
+.brand-side {
+  display: none;
+  background: linear-gradient(145deg, #0065F8 0%, #001087 100%);
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 36px 40px 48px;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Motif points décoratif */
+.brand-side::before {
+  content: '';
+  position: absolute;
+  top: -40px;
+  right: -40px;
+  width: 220px;
+  height: 220px;
+  background-image: radial-gradient(circle, rgba(255,255,255,0.18) 1.5px, transparent 1.5px);
+  background-size: 20px 20px;
+  border-radius: 50%;
+}
+
+.brand-side::after {
+  content: '';
+  position: absolute;
+  bottom: -30px;
+  left: -30px;
+  width: 180px;
+  height: 180px;
+  background-image: radial-gradient(circle, rgba(255,255,255,0.12) 1.5px, transparent 1.5px);
+  background-size: 18px 18px;
+  border-radius: 50%;
+}
+
+/* Top bar connexion */
+.brand-top {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 16px;
+  position: relative;
+  z-index: 1;
+}
+
+.brand-already {
+  font-family: 'Nunito', sans-serif;
+  font-size: 0.95rem;
+  color: rgba(255,255,255,0.8);
+}
+
+.brand-login-btn {
+  font-family: 'Poppins', sans-serif;
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: #ffffff;
+  border: 2px solid rgba(255,255,255,0.6);
+  border-radius: 8px;
+  padding: 8px 24px;
+  text-decoration: none;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  transition: background 0.2s, border-color 0.2s;
+}
+
+.brand-login-btn:hover {
+  background: rgba(255,255,255,0.15);
+  border-color: #ffffff;
+}
+
+/* Centre branding */
+.brand-center {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  z-index: 1;
+  text-align: center;
+  gap: 16px;
+}
+
+.brand-illustration {
+  width: 100%;
+  max-width: 320px;
+}
+
+.illus-svg {
+  width: 100%;
+  height: auto;
+}
+
+.brand-title {
+  font-family: 'Poppins', sans-serif;
+  font-size: 2.2rem;
+  font-weight: 800;
+  color: #ffffff;
+  margin: 0;
+  letter-spacing: 0.02em;
+}
+
+.brand-desc {
+  font-family: 'Nunito', sans-serif;
+  font-size: 1rem;
+  color: rgba(255,255,255,0.78);
+  max-width: 280px;
+  line-height: 1.6;
+  margin: 0;
+}
+
+/* Stats */
+.brand-stats {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  background: rgba(255,255,255,0.12);
+  border-radius: 16px;
+  padding: 16px 28px;
   margin-top: 8px;
 }
 
-/* ─── Bouton inscription ─────────────────────────────── */
-.btn-inscription {
-  width: 180px;
-  padding: 0.55em 1.5em;
-  margin: 8px auto 0;
+.stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+
+.stat-num {
+  font-family: 'Poppins', sans-serif;
+  font-size: 1.35rem;
+  font-weight: 800;
+  color: #ffffff;
+}
+
+.stat-label {
+  font-family: 'Nunito', sans-serif;
+  font-size: 0.78rem;
+  color: rgba(255,255,255,0.65);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.stat-divider {
+  width: 1px;
+  height: 36px;
+  background: rgba(255,255,255,0.25);
+}
+
+/* ─── Alerte globale ─────────────────────────────────── */
+.alert-box {
+  position: fixed;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%) translateY(-30px);
+  font-family: 'Poppins', sans-serif;
+  font-weight: 600;
+  font-size: 0.92rem;
+  color: #cc0000;
+  background: #fff0f0;
+  border: 1.5px solid #ffcccc;
+  padding: 10px 24px;
+  border-radius: 10px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.35s ease, transform 0.35s ease;
+  z-index: 9999;
+  white-space: nowrap;
+  box-shadow: 0 4px 16px rgba(204,0,0,0.10);
+}
+
+.alert-box.visible {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+/* ─── Req asterisk ───────────────────────────────────── */
+.req {
+  color: #0065F8;
+  font-size: 0.85em;
 }
 
 /* ═══════════════════════════════════════════════════════
-   RESPONSIVE — Tablet (≥ 600px)
+   RESPONSIVE — Desktop ≥ 860px : split 50/50
 ═══════════════════════════════════════════════════════ */
-@media (min-width: 600px) {
-  .form-card {
-    max-width: 520px;
-    padding: 32px 36px 28px;
-  }
-
-  .field {
-    height: 52px;
-  }
-
-  .title-banner {
-    height: 62px;
-    padding: 0 40px;
-  }
-}
-
-/* ═══════════════════════════════════════════════════════
-   RESPONSIVE — Desktop (≥ 900px)
-   Split 50/50 : branding gauche + formulaire droite
-═══════════════════════════════════════════════════════ */
-@media (min-width: 900px) {
-
+@media (min-width: 860px) {
   .page-inscription {
     flex-direction: row;
-    min-height: 100vh;
   }
 
-  /* Afficher la partie gauche */
+  .form-side {
+    flex: 1;
+    min-height: 100vh;
+    overflow-y: auto;
+    padding: 48px 40px 48px;
+    align-items: center;
+  }
+
   .brand-side {
     display: flex;
     flex: 1;
+    min-height: 100vh;
     position: sticky;
     top: 0;
     height: 100vh;
-    overflow: hidden;
   }
 
-  /* Cacher le header mobile */
-  .mobile-header {
-    display: none;
-  }
-
-  /* Partie droite scrollable */
-  .form-side {
-    flex: 1;
-    max-width: 50vw;
-    overflow-y: auto;
-    justify-content: flex-start;
-    padding: 32px 40px 48px;
-    align-items: flex-start;
-  }
-
-  .title-banner {
-    margin-bottom: 24px;
-    margin-left: -40px; /* déborde sur le bord gauche */
-  }
-
-  .form-card {
-    width: 100%;
-    max-width: 460px;
-    padding: 32px 32px 28px;
-    align-self: center;
-    margin: 0 auto;
+  .field-row {
+    grid-template-columns: 1fr 1fr;
+    gap: 0 16px;
   }
 }
 
-/* ═══════════════════════════════════════════════════════
-   RESPONSIVE — Large Desktop (≥ 1200px)
-═══════════════════════════════════════════════════════ */
-@media (min-width: 1200px) {
+@media (min-width: 1100px) {
   .form-side {
-    padding: 40px 60px 60px;
+    padding: 56px 64px;
   }
 
-  .form-card {
+  .form-inner {
     max-width: 500px;
-    padding: 36px 36px 32px;
-  }
-
-  .field {
-    height: 52px;
-    font-size: 1rem;
   }
 }
-
-/* ─── Layout centré (sans panneau gauche) ─── */
-.page-inscription {
-  justify-content: center;
+.brand-side.slide-from-right {
+  animation: brandSlideFromRight 0.65s cubic-bezier(0.77,0,0.175,1) forwards;
 }
 
-.form-side {
-  align-items: center;
-  max-width: 520px;
-  margin: 0 auto;
-}
-
-.title-banner {
-  border-radius: 25px; /* arrondi des deux côtés */
-  margin-left: 0;      /* annule le -40px desktop */
+@keyframes brandSlideFromRight {
+  from { transform: translateX(100%); opacity: 0.4; }
+  to   { transform: translateX(0);    opacity: 1; }
 }
