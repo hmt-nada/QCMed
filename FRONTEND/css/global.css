@@ -1,0 +1,270 @@
+/* ═══════════════════════════════════════════════════════
+   GLOBAL.CSS — QCMed
+   Variables, reset, composants partagés
+═══════════════════════════════════════════════════════ */
+
+/* ─── Variables ─────────────────────────────────────── */
+:root {
+  --blue:        #0065F8;
+  --blue-dark:   #001087;
+  --blue-deep:   #0B2F9F;
+  --blue-light:  #cee1f7;
+  --blue-bg:     #ecfafc;
+  --gray-bg:     #EFEFEF;
+  --gray-input:  #e6e6e6;
+  --black:       #000000;
+  --red:         #cc0000;
+
+  --font-main:   'Poppins', sans-serif;
+  --font-title:  'Oleo Script', sans-serif;
+  --font-body:   'Nunito', sans-serif;
+
+  --radius-input: 25px;
+  --radius-card:  25px;
+  --radius-btn:   20px;
+
+  --shadow-card: 0 4px 24px rgba(0, 65, 200, 0.10);
+  --transition:  0.3s ease;
+}
+
+/* ─── Reset ─────────────────────────────────────────── */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  font-size: 16px;
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: var(--font-main);
+  background-color: var(--gray-bg);
+  color: var(--black);
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
+
+img {
+  max-width: 100%;
+  display: block;
+}
+
+input, select, textarea, button {
+  font-family: var(--font-main);
+  font-size: 1rem;
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
+/* ─── Champs de formulaire communs ──────────────────── */
+.field {
+  width: 100%;
+  height: 48px;
+  border-radius: var(--radius-input);
+  border: 2px solid var(--black);
+  background-color: var(--gray-input);
+  padding: 0 20px;
+  font-size: 1rem;
+  font-family: var(--font-main);
+  font-weight: 500;
+  color: #1e1d1d;
+  outline: none;
+  appearance: none;
+  -webkit-appearance: none;
+  transition: border var(--transition), box-shadow var(--transition);
+}
+
+.field:focus {
+  border: 2px solid #12B1D1;
+  box-shadow: 0 4px 10px -5px #4a83a2;
+}
+
+.field.valide {
+  border-inline: 4px solid var(--blue-dark);
+  box-shadow: 0 4px 10px -5px #03344f;
+}
+
+/* Cache l'icône native "œil" d'Edge/IE */
+input[type="password"]::-ms-reveal,
+input[type="password"]::-ms-clear {
+  display: none;
+}
+
+/* ─── Bouton Gooey ───────────────────────────────────── */
+.c-button {
+  display: block;
+  margin: 0 auto;
+  padding: 0.6em 2em;
+  font-family: var(--font-main);
+  font-weight: bold;
+  font-size: 1rem;
+  color: var(--black);
+  background-color: var(--blue-light);
+  text-decoration: none;
+  cursor: pointer;
+  position: relative;
+  z-index: 1;
+  border: none;
+  outline: none;
+}
+
+.c-button--gooey {
+  color: #043278;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  border: 4px solid var(--blue);
+  border-radius: var(--radius-btn);
+  transition: all 700ms ease;
+  text-align: center;
+}
+
+.c-button--gooey .c-button__blobs {
+  height: 100%;
+  filter: url(#goo);
+  overflow: hidden;
+  position: absolute;
+  border-radius: 15px;
+  top: 0; left: 0; bottom: -3px; right: -1px;
+  z-index: -1;
+}
+
+.c-button--gooey .c-button__blobs div {
+  background-color: var(--blue);
+  width: 34%;
+  height: 100%;
+  border-radius: 100%;
+  position: absolute;
+  transform: scale(1.4) translateY(125%) translateZ(0);
+  transition: all 700ms ease;
+}
+
+.c-button--gooey .c-button__blobs div:nth-child(1) { left: -5%; }
+.c-button--gooey .c-button__blobs div:nth-child(2) { left: 30%; transition-delay: 60ms; }
+.c-button--gooey .c-button__blobs div:nth-child(3) { left: 66%; transition-delay: 25ms; }
+
+.c-button--gooey:hover { color: #fff; }
+.c-button--gooey:hover .c-button__blobs div {
+  transform: scale(1.4) translateY(0) translateZ(0);
+}
+.c-button--gooey:active {
+  transform: scale(0.95);
+  box-shadow: inset 0 2px 6px rgba(0,0,0,0.2);
+}
+
+/* ─── Carte dégradée (formulaire) ───────────────────── */
+.card-gradient {
+  background:
+    linear-gradient(45deg, #ecfafc, #4584e2) padding-box,
+    linear-gradient(145deg, transparent 35%, #001087, #454d87) border-box,
+    linear-gradient(350deg, transparent 35%, #240086, #5e4cff) border-box;
+  border: 3px solid transparent;
+  border-radius: var(--radius-card);
+  transition: background var(--transition);
+}
+
+.card-gradient:hover {
+  background:
+    linear-gradient(45deg, #4584e2, #ecfafc) padding-box,
+    linear-gradient(350deg, transparent 35%, #001087, #454d87) border-box,
+    linear-gradient(145deg, transparent 35%, #240086, #5e4cff) border-box;
+  border: 3px solid transparent;
+}
+
+/* ─── Lien décoré ────────────────────────────────────── */
+.link {
+  color: #161D6F;
+  text-decoration: underline;
+}
+
+.instruction02 {
+  color: #161D6F;
+  text-decoration: underline;
+  font-size: 1rem;
+  font-family: var(--font-body);
+  font-weight: bold;
+}
+
+.instruction02.zoom {
+  display: inline-block;
+  transform-origin: center;
+  animation: zoomEffect 0.6s ease-in-out 3;
+}
+
+@keyframes zoomEffect {
+  0%   { transform: scale(1);   color: inherit; }
+  50%  { transform: scale(1.3); color: #5192c7; }
+  100% { transform: scale(1);   color: inherit; }
+}
+
+/* ─── Notification d'alerte ─────────────────────────── */
+.alert-box {
+  position: fixed;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%) translateY(-30px);
+  font-family: var(--font-main);
+  font-weight: bold;
+  font-size: 1rem;
+  color: var(--red);
+  background-color: #fae0e0;
+  padding: 10px 20px;
+  border-radius: 10px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.4s ease, transform 0.4s ease;
+  z-index: 9999;
+  white-space: nowrap;
+}
+
+.alert-box.visible {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+/* ─── Animation slide-in ────────────────────────────── */
+.slide-in-left {
+  opacity: 0;
+  transform: translateX(-60px);
+  transition: opacity 1s ease-out, transform 1s ease-out;
+}
+
+.slide-in-left.visible {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+/* ─── Sélection d'avatar ────────────────────────────── */
+.selected-avatar {
+  border: 3px solid var(--blue);
+  border-radius: 50%;
+}
+
+/* ─── Loader (spinner) ──────────────────────────────── */
+.spinner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+.dot1, .dot2, .dot3 {
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+  background: #2495ff;
+  animation: jump 1.6s linear infinite;
+}
+.dot2 { animation-delay: -0.16s; }
+.dot3 { animation-delay: 0s; }
+.dot1 { animation-delay: -0.32s; }
+
+@keyframes jump {
+  0%, 80%, 100% { transform: scale(0); }
+  40% { transform: scale(2); }
+}

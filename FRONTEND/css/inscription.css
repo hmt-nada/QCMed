@@ -1,0 +1,278 @@
+/* ═══════════════════════════════════════════════════════
+   INSCRIPTION.CSS — QCMed
+   Page d'inscription — responsive mobile/tablet/desktop
+═══════════════════════════════════════════════════════ */
+
+/* ─── Layout principal ───────────────────────────────── */
+.page-inscription {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ─── Section gauche (branding) ─────────────────────── */
+.brand-side {
+  display: none; /* cachée sur mobile */
+  position: relative;
+  background: linear-gradient(135deg, var(--blue) 55%, var(--gray-bg) 55%);
+  flex: 1;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+}
+
+.brand-side__logo {
+  width: 220px;
+  height: 220px;
+  border-radius: 50%;
+  object-fit: cover;
+  position: relative;
+  z-index: 2;
+}
+
+/* ─── Header mobile ──────────────────────────────────── */
+.mobile-header {
+  background-color: var(--blue);
+  padding: 16px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.mobile-header__logo {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+/* ─── Bandeau titre ──────────────────────────────────── */
+.title-banner {
+  background-color: var(--blue);
+  border-radius: 0 25px 25px 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 32px;
+  height: 56px;
+  margin: 24px 0 0 0;
+  max-width: 90vw;
+}
+
+.title-banner__text {
+  font-family: var(--font-main);
+  font-weight: 800;
+  font-size: clamp(1.2rem, 4vw, 1.8rem);
+  color: var(--black);
+  letter-spacing: 0.04em;
+  -webkit-text-stroke: 0.04rem #000;
+  white-space: nowrap;
+}
+
+/* ─── Section droite (formulaire) ───────────────────── */
+.form-side {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 24px 16px 40px;
+}
+
+/* ─── Carte formulaire ───────────────────────────────── */
+.form-card {
+  width: 100%;
+  max-width: 480px;
+  padding: 28px 24px 24px;
+}
+
+/* ─── Groupe de champ ────────────────────────────────── */
+.field-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: 16px;
+  position: relative;
+}
+
+.field-label {
+  font-family: var(--font-main);
+  font-weight: bold;
+  font-size: 0.95rem;
+  color: var(--black);
+  padding-left: 4px;
+}
+
+.field-label--error {
+  color: var(--red);
+}
+
+/* ─── Wrapper input (pour positionner l'œil) ────────── */
+.field-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.field-wrapper .field {
+  width: 100%;
+  padding-right: 48px;
+}
+
+.field-eye {
+  position: absolute;
+  right: 14px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  color: #555;
+  transition: color var(--transition);
+}
+
+.field-eye:hover { color: var(--blue); }
+
+/* ─── Message d'erreur inline ────────────────────────── */
+.field-error {
+  font-family: var(--font-main);
+  font-size: 0.82rem;
+  font-weight: bold;
+  color: var(--red);
+  padding-left: 4px;
+  display: none;
+}
+
+.field-error.visible { display: block; }
+
+/* ─── Select — flèche custom ─────────────────────────── */
+.field-select-wrapper {
+  position: relative;
+}
+
+.field-select-wrapper .field {
+  width: 100%;
+  cursor: pointer;
+  padding-right: 40px;
+}
+
+.field-select-wrapper__arrow {
+  position: absolute;
+  right: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
+  color: #555;
+}
+
+/* ─── Textes instruction ─────────────────────────────── */
+.form-instruction {
+  font-family: var(--font-body);
+  font-weight: bold;
+  font-size: 0.9rem;
+  color: var(--black);
+  text-align: center;
+  margin: 12px 0 8px;
+  line-height: 1.5;
+}
+
+.form-cta-link {
+  font-family: var(--font-body);
+  font-weight: bold;
+  font-size: 0.95rem;
+  color: var(--black);
+  text-align: center;
+  margin-top: 8px;
+}
+
+/* ─── Bouton inscription ─────────────────────────────── */
+.btn-inscription {
+  width: 180px;
+  padding: 0.55em 1.5em;
+  margin: 8px auto 0;
+}
+
+/* ═══════════════════════════════════════════════════════
+   RESPONSIVE — Tablet (≥ 600px)
+═══════════════════════════════════════════════════════ */
+@media (min-width: 600px) {
+  .form-card {
+    max-width: 520px;
+    padding: 32px 36px 28px;
+  }
+
+  .field {
+    height: 52px;
+  }
+
+  .title-banner {
+    height: 62px;
+    padding: 0 40px;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════
+   RESPONSIVE — Desktop (≥ 900px)
+   Split 50/50 : branding gauche + formulaire droite
+═══════════════════════════════════════════════════════ */
+@media (min-width: 900px) {
+
+  .page-inscription {
+    flex-direction: row;
+    min-height: 100vh;
+  }
+
+  /* Afficher la partie gauche */
+  .brand-side {
+    display: flex;
+    flex: 1;
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    overflow: hidden;
+  }
+
+  /* Cacher le header mobile */
+  .mobile-header {
+    display: none;
+  }
+
+  /* Partie droite scrollable */
+  .form-side {
+    flex: 1;
+    max-width: 50vw;
+    overflow-y: auto;
+    justify-content: flex-start;
+    padding: 32px 40px 48px;
+    align-items: flex-start;
+  }
+
+  .title-banner {
+    margin-bottom: 24px;
+    margin-left: -40px; /* déborde sur le bord gauche */
+  }
+
+  .form-card {
+    width: 100%;
+    max-width: 460px;
+    padding: 32px 32px 28px;
+    align-self: center;
+    margin: 0 auto;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════
+   RESPONSIVE — Large Desktop (≥ 1200px)
+═══════════════════════════════════════════════════════ */
+@media (min-width: 1200px) {
+  .form-side {
+    padding: 40px 60px 60px;
+  }
+
+  .form-card {
+    max-width: 500px;
+    padding: 36px 36px 32px;
+  }
+
+  .field {
+    height: 52px;
+    font-size: 1rem;
+  }
+}
