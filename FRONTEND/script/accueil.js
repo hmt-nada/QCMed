@@ -247,37 +247,23 @@ search.addEventListener('input', updateActiveState);
 window.addEventListener("DOMContentLoaded", () => {
 
 
-    fetch(`/api/utilisateur`, {
-  method: "GET",
-  credentials: "include" // 👈 envoie le cookie de session
-})
-      .then(response => response.json())
-      .then(result => {
-        if (result.success) {
-          
-          const user = result.utilisateur;
-          //année non validée 
-          /*if(user.validation_envoyee && !user.annee_validated){
-            window.location.href = "check-validation.html";  
-          }*/
-          //récupérer l'annee de letudiant
-          const annee=user.annee;
+   window.addEventListener("DOMContentLoaded", () => {
+  document.addEventListener('utilisateurCharge', (e) => {
+    const user = e.detail;
 
-          document.getElementById("avatar").src = user.avatar;
-          document.getElementById("pseudo").textContent = user.pseudo;
-          document.getElementById("pseudo2").textContent = user.pseudo;
-          //affichage des modules selon l'année 
-          afficherModules(annee);
-            //activer la recherche 
-          activerRecherche() ;
-             // Une fois prêt → cacher le loader et montrer la page
-      document.getElementById("loader").style.display = "none";
-      document.getElementById("content").style.display = "block";
-       setTimeout(() => {
-    titre.classList.add('slide-in');
-  }, 100); // 100ms suffit
-             // Vérifier si l'URL contient ?emailChanged=true
-  const urlParams = new URLSearchParams(window.location.search);
+    document.getElementById("pseudo2").textContent = user.pseudo;
+
+    afficherModules(user.annee);
+    activerRecherche();
+
+    document.getElementById("loader").style.display = "none";
+    document.getElementById("content").style.display = "block";
+
+    setTimeout(() => titre.classList.add('slide-in'), 100);
+
+    // emailChanged
+    const urlParams = new URLSearchParams(window.location.search);
+   
   if (urlParams.get('emailChanged') === 'true') {
     const alertBox = document.createElement('div');
     alertBox.innerText = "Votre adresse e-mail a bien été changée !";
@@ -302,11 +288,12 @@ window.addEventListener("DOMContentLoaded", () => {
       window.history.replaceState({}, document.title, "/");
     }, 5000);
   }
-        } else {
+         else {
           document.getElementById("pseudo").textContent = "Inconnu";
           document.getElementById("pseudo2").textContent = "Inconnu";
-        }
-      })
+      }
+  });
+})
       .catch(err => {
         console.error("Erreur récupération utilisateur :", err);
         document.getElementById("pseudo").textContent = "Erreur";

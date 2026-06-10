@@ -1,0 +1,120 @@
+
+<nav class="qcmed-nav">
+
+    <!-- Logo -->
+    <a href="/accueil.html" class="nav-logo">
+      <img src="logo/brain-cercle.png" alt="QCMed logo" class="nav-logo-img" />
+      <span class="nav-logo-text">QC<span>Med</span></span>
+    </a>
+
+    <!-- Liens de navigation -->
+    <div class="nav-links">
+
+      <a href="/accueil.html" class="nav-link" data-nav="accueil">
+        <span class="nav-link-icon-wrap">
+          <!-- Home -->
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>
+          </svg>
+        </span>
+        Accueil
+      </a>
+
+      <a href="/statistiques.html" class="nav-link" data-nav="statistiques">
+        <span class="nav-link-icon-wrap">
+          <!-- Stats -->
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/>
+          </svg>
+        </span>
+        Statistiques
+      </a>
+
+      <a href="/favoris.html" class="nav-link" data-nav="favoris">
+        <span class="nav-link-icon-wrap">
+          <!-- Heart -->
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+          </svg>
+          <span class="nav-badge" id="favBadge">12</span>
+        </span>
+        Favoris
+      </a>
+
+      <a href="/historique.html" class="nav-link" data-nav="historique">
+        <span class="nav-link-icon-wrap">
+          <!-- History -->
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="12 8 12 12 14 14"/><path d="M3.05 11a9 9 0 1 1 .5 4"/>
+            <polyline points="3 16 3 11 8 11"/>
+          </svg>
+        </span>
+        Historique
+      </a>
+
+      <a href="/classement.html" class="nav-link" data-nav="classement">
+        <span class="nav-link-icon-wrap">
+          <!-- Trophy -->
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="8 21 12 17 16 21"/><path d="M5 3H19L17 13H7L5 3z"/><path d="M5 3a2 2 0 0 0-2 2v1c0 1.1.9 2 2 2h1M19 3a2 2 0 0 1 2 2v1a2 2 0 0 1-2 2h-1"/>
+          </svg>
+        </span>
+        Classement
+      </a>
+
+    </div>
+
+    <!-- Droite : recherche + profil -->
+    <div class="nav-right">
+      <button class="nav-search-btn" aria-label="Rechercher" onclick="document.querySelector('.search-bar')?.focus()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+        </svg>
+      </button>
+
+      <div class="nav-profile" id="navProfileBtn" aria-haspopup="true" aria-expanded="false">
+        <div class="nav-avatar" id="navAvatar">
+          <img id="navAvatarImg" src="images/cercle.svg" alt="avatar" />
+        </div>
+        <span class="nav-username" id="navUsername">...</span>
+        <svg class="nav-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <polyline points="6 9 12 15 18 9"/>
+        </svg>
+      </div>
+    </div>
+
+    <!-- Dropdown profil -->
+    <div class="nav-dropdown" id="navDropdown" role="menu">
+      <a href="/profil.html" class="dropdown-item" role="menuitem">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        Mon profil
+      </a>
+      <a href="/parametres.html" class="dropdown-item" role="menuitem">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        Paramètres
+      </a>
+      <div class="dropdown-sep"></div>
+      <a href="/aide.html" class="dropdown-item" role="menuitem">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        FAQ &amp; Aide
+      </a>
+      <a href="/contact.html" class="dropdown-item" role="menuitem">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+        Contact
+      </a>
+      <div class="dropdown-sep"></div>
+      <a href="/logout" class="dropdown-item danger" role="menuitem">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        Déconnexion
+      </a>
+    </div>
+
+  </nav>
+  <!-- ════════════════════ FIN NAVBAR HTML ════════════════════ -->
+
+  <!-- Espacement automatique (à placer juste après la nav) -->
+  <div class="nav-spacer-top"></div>
+
+
+  <!-- Espacement bas mobile -->
+  <div class="nav-spacer-bottom"></div>

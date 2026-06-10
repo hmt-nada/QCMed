@@ -257,32 +257,13 @@ else{
 });
 
 //afficher le pseudo et avatar 
-window.addEventListener("DOMContentLoaded", () => {
+document.addEventListener('utilisateurCharge', (e) => {
+  const user = e.detail;
 
-   fetch(`/api/utilisateur`, {
-  method: "GET",
-  credentials: "include" // 👈 envoie le cookie de session
-})
-      .then(response => response.json())
-      .then(result => {
-        if (result.success) {
-          const user = result.utilisateur;
-          document.getElementById("avatar").src = user.avatar;
-          document.getElementById("pseudo").textContent = user.pseudo;
-            // Une fois prêt → cacher le loader et montrer la page
-      document.getElementById("loader").style.display = "none";
-      document.getElementById("content").style.display = "block";
-       setTimeout(() => {
-    titre.classList.add('slide-in');
-  }, 100); // 100ms suffit
-        } else {
-          document.getElementById("pseudo").textContent = "Inconnu";
-          
-        }
-      })
-      .catch(err => {
-        console.error("Erreur récupération utilisateur :", err);
-        document.getElementById("pseudo").textContent = "Erreur";
-        
-      });
-  });
+  afficherCours();
+
+  document.getElementById("loader").style.display = "none";
+  document.getElementById("content").style.display = "block";
+
+  setTimeout(() => titre.classList.add('slide-in'), 100);
+});

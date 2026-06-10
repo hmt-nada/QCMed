@@ -200,34 +200,13 @@ window.addEventListener('load', () => {
 // =======================
 // Récupération utilisateur et affichage des cours
 // =======================
-window.addEventListener("DOMContentLoaded", () => {
-  fetch(`/api/utilisateur`, {
-  method: "GET",
-  credentials: "include" // 👈 envoie le cookie de session
-})
-    .then(res => res.json())
-    .then(result => {
-      if(result.success){
-        const user = result.utilisateur;
-        document.getElementById("avatar").src = user.avatar;
-        document.getElementById("pseudo").textContent = user.pseudo;
-        afficherCours();
-        // Une fois prêt → cacher le loader et montrer la page
-      document.getElementById("loader").style.display = "none";
-      document.getElementById("content").style.display = "block";
-       setTimeout(() => {
-    titre.classList.add('slide-in');
-  }, 100); // 100ms suffit
+document.addEventListener('utilisateurCharge', (e) => {
+  const user = e.detail;
 
-      } else {
-        document.getElementById("pseudo").textContent = "Inconnu";
-      }
-    })
-    .catch(err => {
-      console.error(err);
-      document.getElementById("pseudo").textContent = "Erreur";
-      // Une fois prêt → cacher le loader et montrer la page
-      document.getElementById("loader").style.display = "block";
-      document.getElementById("content").style.display = "none";
-    });
+  afficherCours();
+
+  document.getElementById("loader").style.display = "none";
+  document.getElementById("content").style.display = "block";
+
+  setTimeout(() => titre.classList.add('slide-in'), 100);
 });

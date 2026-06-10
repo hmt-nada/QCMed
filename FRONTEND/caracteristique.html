@@ -3,7 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <link rel="stylesheet" href="style.css"/>
+    <link rel="stylesheet" href="css/navbar.css"/>
+
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">
@@ -39,31 +42,9 @@
 
 <!--content-->
 <div id="content" style="display:none;">
-    <div class="chapeau2"></div>
-
-    <div class="header">
-        <div class="info">
-        <img id="avatar" alt="avatar" class="profil" src="images/cercle.svg"/>        
-        <a href="mon-compte.html" class="profil-lien"><p id="pseudo" class="pseud">pseudo</p></a>     
-    </div>
-        <img class="logo" src="logo/brain-cercle.png"/>
-        <nav class="text" >
-           <div class="icones" >  
-              <svg class="icone0" xmlns="http://www.w3.org/2000/svg" width="35px" height="35px" viewBox="0 0 24 24"><path fill="currentColor" d="M10 19v-5h4v5c0 .55.45 1 1 1h3c.55 0 1-.45 1-1v-7h1.7c.46 0 .68-.57.33-.87L12.67 3.6c-.38-.34-.96-.34-1.34 0l-8.36 7.53c-.34.3-.13.87.33.87H5v7c0 .55.45 1 1 1h3c.55 0 1-.45 1-1"/></svg>
-               <svg class="icone1-2"  xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 24 24"><path fill="#000" fill-rule="evenodd" d="M12 2C6.477 2 2 6.477 2 12s4.477 10 10 10s10-4.477 10-10S17.523 2 12 2m0 14a1 1 0 0 0 1-1v-3a1 1 0 1 0-2 0v3a1 1 0 0 0 1 1m1-7a1 1 0 1 1-2 0a1 1 0 1 1 2 0" clip-rule="evenodd"/></svg>
-               <svg class="icone2-2" xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 24 24"><path fill="#000" d="m20 8l-8 5l-8-5V6l8 5l8-5m0-2H4c-1.11 0-2 .89-2 2v12a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2"/></svg>
-               <svg class="icone3-2 active" xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 24 24"><path fill="#000" fill-rule="evenodd" d="M12 2C6.477 2 2 6.477 2 12s4.477 10 10 10s10-4.477 10-10S17.523 2 12 2m0 7a1 1 0 0 0-1 1a1 1 0 1 1-2 0a3 3 0 1 1 4.44 2.633a1.4 1.4 0 0 0-.383.288a.3.3 0 0 0-.057.085v.494a1 1 0 1 1-2 0V13c0-.58.253-1.047.539-1.38c.281-.33.63-.572.94-.742A1 1 0 0 0 12 9m.999 4.011v-.004v.005zM12 15a1 1 0 1 0 0 2h.01a1 1 0 1 0 0-2z" clip-rule="evenodd"/></svg>        
-           </div>
-           
-           <div class="organisation2">
-              <a href="accueil.html"><p class="texte-anim">ACCUEIL</p></a>
-              <a href="apropos.html"><p class="texte-anim">À PROPOS</p></a>      
-              <a href="contact.html"><p class="texte-anim">CONTACT</p></a>
-              <a href="FAQ.html"><p class="texte-anim">FAQ</p></a>
-           </div>
-       </nav>   
-     
-</div>
+    
+<div id="navbar-container"></div>
+    
 <p class="expression04"id="nommodule">nom du module</p>
 <div class="titremodule">
 <div class="organisation02">
@@ -192,7 +173,7 @@
   </defs>
 </svg>
  </div>
-
+ <script src="script/navbar.js"></script>
  <script src="script/caracteristique.js"></script>   
    
 
