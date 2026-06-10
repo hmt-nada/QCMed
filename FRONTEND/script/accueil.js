@@ -153,74 +153,8 @@ function activerRecherche() {
     }
   });
 }
-
-
-
-const openmenu=document.getElementById('menuopen');
-const closemenu=document.getElementById('menuclose');
-const menu=document.getElementById('menu');
-const barre=document.getElementById('barre');
-
-openmenu.addEventListener('click',(e)=>{
-     e.stopPropagation();
-openmenu.style.display='none';
-closemenu.style.display='block';
-menu.style.display='block';
-barre.style.display='block';
-
-});
-closemenu.addEventListener('click',(e)=>{
-     e.stopPropagation();
-openmenu.style.display='block';
-closemenu.style.display='none';
-menu.style.display='none';
-barre.style.display='none';
-
-});
-
-document.addEventListener("click", function (event) {
-   // Si l menu est visible
-  if (menu.style.display === "block") {
-    
-    if (!barre.contains(event.target) && !menu.contains(event.target)&& !closemenu.contains(event.target) &&!openmenu.contains(event.target)) {
-      menu.style.display = "none"; 
-barre.style.display='none';
-openmenu.style.display='block';
-closemenu.style.display='none';
-    }
-  }
-});
 const titre= document.getElementById('inscrivez');
 
-  
-
-
-const modules=document.querySelectorAll('.module-container');
-  const search=document.getElementById('search');
-  const image=document.querySelectorAll('.module-img');
-  search.addEventListener('input',function(){
-    let trouve=false;
-    const valeur=search.value.toLowerCase();
-    
-  modules.forEach((module)=>{
-
-   const nom=module.getAttribute('data-nom');
-   const image=module.querySelector("img");
-  const name = module.querySelector(".module-name p");
-
-if(trouve || valeur == "" ){
-        name.classList.remove("highlight");
-        image.classList.remove('hovering');
-}
-   if((nom.includes(valeur)) && (valeur !== "")){
-      trouve=true;     
-      module.scrollIntoView({ behavior: "smooth", block: "center" });
-      name.classList.add("highlight"); // surbrillance temporaire
-      image.classList.add('hovering');      
-   }  
-  });
-  });
-  
 const mainbox = document.getElementById('mainbox');
 
 function updateActiveState() {
