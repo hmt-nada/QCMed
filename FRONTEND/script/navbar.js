@@ -30,6 +30,7 @@ fetch('navbar.html')
           if (usernameEl) usernameEl.textContent = user.pseudo;
           const event = new CustomEvent('utilisateurCharge', { detail: result.utilisateur });
 document.dispatchEvent(event);
+window._utilisateurChargeData = result.utilisateur;
         }
       })
       .catch(err => console.error('Navbar: erreur utilisateur', err));

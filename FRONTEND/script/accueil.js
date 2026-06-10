@@ -244,64 +244,41 @@ search.addEventListener('input', updateActiveState);
 
 
 //afficher le pseudo et avatar 
-window.addEventListener("DOMContentLoaded", () => {
 
+  function onUtilisateurCharge(user) {
+  document.getElementById("pseudo2").textContent = user.pseudo;
+  afficherModules(user.annee);
+  activerRecherche();
+  document.getElementById("loader").style.display = "none";
+  document.getElementById("content").style.display = "block";
+  setTimeout(() => titre.classList.add('slide-in'), 100);
 
-   window.addEventListener("DOMContentLoaded", () => {
-  document.addEventListener('utilisateurCharge', (e) => {
-    const user = e.detail;
-
-    document.getElementById("pseudo2").textContent = user.pseudo;
-
-    afficherModules(user.annee);
-    activerRecherche();
-
-    document.getElementById("loader").style.display = "none";
-    document.getElementById("content").style.display = "block";
-
-    setTimeout(() => titre.classList.add('slide-in'), 100);
-
-    // emailChanged
-    const urlParams = new URLSearchParams(window.location.search);
-   
+  const urlParams = new URLSearchParams(window.location.search);
   if (urlParams.get('emailChanged') === 'true') {
     const alertBox = document.createElement('div');
     alertBox.innerText = "Votre adresse e-mail a bien été changée !";
-    alertBox.style.position = "fixed";
-    alertBox.style.top = "0";
-    alertBox.style.left = "50%";
-    alertBox.style.transform = "translateX(-50%)";
-    alertBox.style.backgroundColor = "#28a745";
-    alertBox.style.color = "white";
-    alertBox.style.padding = "15px 25px";
-    alertBox.style.fontSize = "18px";
-    alertBox.style.fontWeight = "bold";
-    alertBox.style.borderRadius = "0 0 8px 8px";
-    alertBox.style.zIndex = "1000";
-    alertBox.style.boxShadow = "0 2px 6px rgba(0,0,0,0.2)";
+    alertBox.style.cssText = `
+      position:fixed; top:0; left:50%; transform:translateX(-50%);
+      background:#28a745; color:white; padding:15px 25px;
+      font-size:18px; font-weight:bold; border-radius:0 0 8px 8px;
+      z-index:1000; box-shadow:0 2px 6px rgba(0,0,0,0.2);
+    `;
     document.body.appendChild(alertBox);
-
-    // Masquer après 5 secondes
     setTimeout(() => {
       alertBox.remove();
-      // Supprimer le paramètre URL pour ne plus afficher l'alerte au reload
       window.history.replaceState({}, document.title, "/");
     }, 5000);
   }
-         else {
-          document.getElementById("pseudo").textContent = "Inconnu";
-          document.getElementById("pseudo2").textContent = "Inconnu";
-      }
+}
+
+if (window._utilisateurChargeData) {
+  onUtilisateurCharge(window._utilisateurChargeData);
+} else {
+  document.addEventListener('utilisateurCharge', (e) => {
+    onUtilisateurCharge(e.detail);
   });
-})
-      .catch(err => {
-        console.error("Erreur récupération utilisateur :", err);
-        document.getElementById("pseudo").textContent = "Erreur";
-        document.getElementById("pseudo2").textContent = "Erreur";
-         document.getElementById("loader").style.display = "none";
-      document.getElementById("content").style.display = "block";
-      });
-  });
+}
+
 function choisirmodule(moduleId, moduleNom){
   const data = { module: moduleId };
   console.log("DATA ENVOYÉ :", data); 
