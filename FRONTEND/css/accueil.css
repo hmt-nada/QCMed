@@ -1,338 +1,192 @@
-/* =============================================
-   accueil-responsive.css
-   À lier APRÈS style.css dans accueil.html :
-   <link rel="stylesheet" href="accueil-responsive.css"/>
-   Contient uniquement les classes utilisées
-   dans accueil.html, rendues responsive.
-   ============================================= */
+/* ═══════════════════════════════════════════════════════════
+   accueil.css  —  styles propres à la page d'accueil QCMed
+   Responsive : mobile → tablette → desktop
+   ═══════════════════════════════════════════════════════════ */
 
-/* ── BASE : reset des largeurs fixes globales ── */
-.body32 {
-  width: 100%;
-  min-height: 100vh;
-  overflow-x: hidden;
+/* ── Base page ───────────────────────────────────────────── */
+.accueil-body {
   background-color: #EFEFEF;
-  box-sizing: border-box;
-}
-
-/* ─────────────────────────────────────────────
-   CHAPEAU (barre du haut)
-───────────────────────────────────────────── */
-.chapeau2 {
-  position: fixed;          /* reste collée en haut au scroll */
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 70px;
-  background: linear-gradient(to top, #e1e1e6, #9bc6ff);
-  z-index: 500;
   margin: 0;
+  padding: 0;
+  min-height: 100vh;
+  font-family: 'Poppins', sans-serif;
+  overflow-x: hidden;
 }
 
-/* ─────────────────────────────────────────────
-   HEADER GÉNÉRAL
-───────────────────────────────────────────── */
-.header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  flex-wrap: wrap;
-  width: 100%;
-  box-sizing: border-box;
-  position: relative;
-}
-
-/* ─────────────────────────────────────────────
-   LOGO
-───────────────────────────────────────────── */
-.logo {
-  position: fixed;   /* reste visible au scroll */
-  top: -6px;
-  left: 15px;
-  width: 80px;
-  height: 80px;
-  z-index: 600;
-}
-
-/* ─────────────────────────────────────────────
-   INFO (avatar + pseudo en haut à droite)
-───────────────────────────────────────────── */
-.info {
-  position: fixed;
-  top: 10px;
-  right: 16px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  z-index: 600;
-}
-
-.profil {
-  width: 50px;
-  height: 50px;
-  border-radius: 50%;
-  margin-top: 0;
-}
-
-.pseud {
-  white-space: nowrap;
-  font-weight: bold;
-  font-size: clamp(13px, 1.5vw, 18px);
-  color: #161D6F;
-  background: #f0f0f0;
-  padding: 4px 10px;
-  border-radius: 20px;
-  text-decoration: none;
-  transition: all 0.3s ease;
-}
-
-/* ─────────────────────────────────────────────
-   NAV : icônes + liens
-───────────────────────────────────────────── */
-nav {
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-}
-
-.icones {
-  position: relative;
-  display: flex;
-  align-items: center;
-}
-
-/* Repositionnement relatif des icônes (pas d'absolute fixe en px) */
-.icone0,
-.icone1-2,
-.icone2-2,
-.icone3-2 {
-  position: static;
-  margin: 0 10px;
-}
-
-.organisation2 {
-  position: static;
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  margin-left: 0;
-}
-
-.organisation2 p {
-  margin: 6px 16px;
-  font-size: clamp(13px, 1.4vw, 20px);
-  padding: 10px 0;
-}
-
-/* ─────────────────────────────────────────────
-   BARRE DE BIENVENUE
-───────────────────────────────────────────── */
+/* ── Animation slide-in du hero ─────────────────────────── */
 #inscrivez {
   opacity: 0;
-  transform: translateX(-100px);
-  transition: all 1s ease-out;
-  display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  gap: 12px;
-  padding: 0 20px;
-  margin-top: 90px;  /* espace sous chapeau fixe */
+  transform: translateX(-60px);
+  transition: opacity 0.9s ease-out, transform 0.9s ease-out;
 }
-
 #inscrivez.slide-in {
   opacity: 1;
   transform: translateX(0);
 }
 
-.bigtitle {
-  font-family: 'Oleo Script', sans-serif;
-  font-weight: bold;
-  font-size: clamp(32px, 5vw, 64px);
-  color: #000;
-  margin: 0;
-  padding: 0;
-}
-
-.user {
-  font-family: 'Oleo Script', sans-serif;
-  font-weight: bold;
-  font-size: clamp(28px, 4vw, 50px);
-  color: #10175e;
-  position: static;
-  margin: 0;
-}
-
-/* ─────────────────────────────────────────────
-   ÉTIQUETTE QUIZ TIME + RECHERCHE
-───────────────────────────────────────────── */
-.etiqu {
+/* ════════════════════════════════════════════════════════════
+   HERO HEADER
+   ════════════════════════════════════════════════════════════ */
+.accueil-hero {
   position: relative;
+  padding: 100px 5vw 28px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 16px;
+  min-height: 180px;
+}
+
+/* ── Badge QUIZ TIME ─────────────────────────────────────── */
+.hero-badge {
   display: flex;
   align-items: center;
-  flex-wrap: wrap;
-  gap: 10px;
   background-color: #0065F8;
-  width: fit-content;
-  max-width: 100%;
-  height: auto;
-  min-height: 50px;
   border-radius: 50px;
-  padding: 6px 16px;
-  margin: 10px 0 10px 16px;
+  padding: 8px 20px;
+  gap: 6px;
+  flex-shrink: 0;
 }
 
-.quiz, .time {
-  font-family: 'Oleo Script', sans-serif;
-  font-weight: bold;
-  font-size: clamp(18px, 3vw, 36px);
+.badge-quiz,
+.badge-time {
+  font-family: 'Oleo Script', cursive;
+  font-size: clamp(1.2rem, 3vw, 2rem);
   color: #000;
   transform: rotate(-45deg);
-  margin: 0;
+  display: inline-block;
+  line-height: 1;
 }
 
-.recherche {
-  position: static;
-  font-family: 'Oleo Script', sans-serif;
-  font-size: clamp(14px, 1.8vw, 20px);
+/* ── Texte bienvenue ─────────────────────────────────────── */
+.hero-welcome {
+  flex: 1 1 200px;
+  min-width: 0;
+}
+
+.hero-title {
+  font-family: 'Oleo Script', cursive;
+  font-size: clamp(2rem, 6vw, 4.5rem);
   color: #000;
   margin: 0;
+  line-height: 1.1;
 }
 
-/* Barre de recherche */
-.container {
-  position: relative;
-  width: fit-content;
+.hero-pseudo {
+  font-family: 'Oleo Script', cursive;
+  font-size: clamp(1.6rem, 5vw, 3.2rem);
+  color: #10175e;
+  margin: 0;
+  line-height: 1.1;
 }
 
-.mainbox {
+/* ── Barre de recherche ──────────────────────────────────── */
+.hero-search-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.search-label {
+  font-family: 'Oleo Script', cursive;
+  font-size: clamp(0.9rem, 2vw, 1.2rem);
+  color: #000;
+}
+
+.search-box {
   position: relative;
-  width: 46px;
-  height: 46px;
+  width: 52px;
+  height: 50px;
   display: flex;
   flex-direction: row-reverse;
   align-items: center;
   justify-content: center;
   border-radius: 160px;
   background-color: #284775;
-  transition: all 0.3s ease;
+  transition: width 0.3s ease;
   overflow: hidden;
-  margin: 0;
+  cursor: pointer;
 }
 
-.mainbox:hover,
-.mainbox.active {
-  width: min(230px, 60vw);
+.search-box:hover,
+.search-box.active {
+  width: clamp(180px, 30vw, 250px);
+}
+
+.search-icon-wrap {
+  padding-top: 4px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+}
+
+.search_icon {
+  fill: white;
+  font-size: 1.2em;
+  pointer-events: none;
+  display: block;
 }
 
 .search_input {
   height: 100%;
   width: 0;
-  background-color: transparent;
+  background: transparent;
   border: none;
   outline: none;
   padding-left: 10px;
-  font-size: 1em;
+  font-size: 0.95rem;
   color: white;
-  transition: all 0.3s ease;
+  font-family: 'Poppins', sans-serif;
+  transition: width 0.3s ease, opacity 0.3s ease;
   opacity: 0;
 }
 
-.mainbox:hover .search_input,
-.mainbox.active .search_input {
-  width: 170px;
+.search-box:hover .search_input,
+.search-box.active .search_input {
+  width: calc(100% - 48px);
   opacity: 1;
 }
 
-/* ─────────────────────────────────────────────
-   MENU HAMBURGER (barre latérale)
-───────────────────────────────────────────── */
-.menu {
-  position: static;
-  color: #000;
-  cursor: pointer;
-  z-index: 100;
+.search_input::placeholder {
+  color: rgba(255,255,255,0.65);
 }
 
-.containerbar {
-  position: relative;
-}
-
-.bigbarre {
-  position: absolute;
-  top: 70px;
-  left: 0;
-  width: 180px;
-  background-color: #e1e1e2;
-  box-shadow: 0px 0px 6px 1px #383839;
-  z-index: 200;
-}
-
-#barre {
-  position: absolute;
-  left: 0;
-  top: 70px;
-  width: min(320px, 80vw);
-  height: 150px;
-  background-color: #e1e1e2;
-  border: 1px solid #0a103b;
-  box-shadow: 2px 0px 8px 1px #383839;
-  z-index: 200;
-  margin: 0;
-}
-
-.petitbar1 {
-  position: absolute;
-  width: 160px;
-  height: 45px;
-  background-color: #00000033;
-  border-radius: 20px;
-  border: 2px solid #383e45;
-  z-index: 300;
-  margin-top: 140px;
-  margin-left: 20px;
-}
-
-/* ─────────────────────────────────────────────
+/* ════════════════════════════════════════════════════════════
    GRILLE DES MODULES
-   On remplace le layout fixe par un flex/grid
-   responsive tout en gardant l'aspect hexagonal
-───────────────────────────────────────────── */
-#modules-list {
-  width: 100%;
-  padding: 20px 10px 40px;
-  box-sizing: border-box;
+   ════════════════════════════════════════════════════════════ */
+.modules-section {
+  padding: 0 4vw 60px;
 }
 
-.ligne {
-  display: flex;
-  justify-content: center;
-  flex-wrap: wrap;
-  gap: clamp(16px, 3vw, 40px);
-  margin-top: clamp(20px, 3vw, 40px);
+.modules-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 28px 20px;
+  justify-items: center;
 }
 
 .module-container {
-  text-align: center;
-  flex: 0 0 auto;
-}
-
-/* ── Images des modules (toutes variantes) ── */
-.module-img,
-.module-img2,
-.module-img02 {
-  width: clamp(120px, 18vw, 250px);
-  height: auto;
-  display: block;
-  margin: 0 auto;
-  transition: transform 0.3s ease;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
   cursor: pointer;
 }
 
-/* On annule les marges absolues fixes du style.css */
-.module-img  { margin-top: 0; margin-left: auto; margin-right: auto; }
-.module-img2 { margin-top: 0; margin-left: auto; }
-.module-img02{ margin-top: 0; margin-left: auto; margin-right: auto; }
-.pos         { margin-top: 0; }
+.module-img,
+.module-img2,
+.module-img02 {
+  width: clamp(110px, 18vw, 200px);
+  height: clamp(110px, 18vw, 200px);
+  object-fit: cover;
+  clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+  transition: transform 0.25s ease, filter 0.25s ease;
+  display: block;
+}
 
 .module-img:hover,
 .module-img2:hover,
@@ -340,7 +194,8 @@ nav {
 .module-img.hovering,
 .module-img2.hovering,
 .module-img02.hovering {
-  transform: scale(1.05);
+  transform: scale(1.07);
+  filter: brightness(1.08);
 }
 
 .module-img:active,
@@ -349,169 +204,82 @@ nav {
   transform: scale(0.96);
 }
 
-/* ── Labels sous les images ── */
 .module-name,
 .module-name2,
 .module-name3 {
-  display: block;
-  width: fit-content;
-  max-width: clamp(120px, 20vw, 260px);
-  margin: 4px auto 0;
-  text-align: center;
-  white-space: normal;         /* autorise le retour à la ligne sur petit écran */
-  padding: 5px 10px;
-  height: auto;
-  min-height: 38px;
   background-color: #aeaeae;
-  border: 1px solid black;
-  border-radius: 15px;
-}
-
-.module-name2,
-.module-name3 {
-  margin-left: auto;
+  border: 1px solid #888;
+  border-radius: 12px;
+  padding: 4px 12px;
+  text-align: center;
+  white-space: nowrap;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .name-style {
-  font-weight: bold;
   font-family: 'Poppins', sans-serif;
-  font-size: clamp(12px, 1.4vw, 20px);
-  margin: 4px 0 0;
+  font-weight: 700;
+  font-size: clamp(0.75rem, 1.8vw, 1rem);
+  margin: 0;
+  line-height: 1.3;
 }
 
 .module-cours {
-  margin-top: -4px;
-  font-size: clamp(10px, 1.1vw, 13px);
-  color: #666;
+  font-size: clamp(0.65rem, 1.4vw, 0.82rem);
+  color: #555;
   font-weight: 500;
   text-align: center;
+  margin-top: 2px;
 }
 
-/* ─────────────────────────────────────────────
-   SPINNER / LOADER
-───────────────────────────────────────────── */
-.spinner {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  justify-content: center;
-  min-height: 100vh;
+.module-name.highlight,
+.module-name2.highlight,
+.module-name3.highlight {
+  border: 2px solid #0065F8;
+  box-shadow: 0 0 8px rgba(0,101,248,0.4);
 }
 
-/* ═════════════════════════════════════════════
+/* ════════════════════════════════════════════════════════════
    BREAKPOINTS
-═════════════════════════════════════════════ */
+   ════════════════════════════════════════════════════════════ */
 
-/* ── Mobile ≤ 575px ── */
-@media (max-width: 575.98px) {
-
-  .chapeau2 { height: 60px; }
-
-  .logo { width: 56px; height: 56px; top: 2px; }
-
-  .info { top: 8px; right: 8px; }
-  .profil { width: 36px; height: 36px; }
-  .pseud { font-size: 12px; padding: 3px 8px; }
-
-  /* cache les liens nav texte, garde uniquement les icônes */
-  .organisation2 { display: none; }
-
-  /* icônes plus petites */
-  .icone0 svg,
-  .icone1-2 svg,
-  .icone2-2 svg,
-  .icone3-2 svg { width: 22px; height: 22px; }
-
-  #inscrivez { margin-top: 70px; padding: 0 12px; }
-  .bigtitle  { font-size: clamp(26px, 8vw, 40px); }
-  .user      { font-size: clamp(22px, 7vw, 36px); }
-
-  .etiqu { margin-left: 8px; padding: 4px 12px; min-height: 44px; }
-  .quiz, .time { font-size: clamp(14px, 4.5vw, 22px); }
-  .recherche   { font-size: 13px; }
-
-  /* 1 module par ligne sur très petit écran */
-  .ligne { gap: 12px; }
-
+@media (max-width: 480px) {
+  .accueil-hero {
+    padding: 80px 4vw 20px;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+    min-height: auto;
+  }
+  .hero-badge { padding: 6px 14px; gap: 4px; }
+  .hero-search-wrapper { align-items: flex-start; width: 100%; }
+  .search-box { width: 44px; height: 44px; }
+  .search-box:hover,
+  .search-box.active { width: 100%; max-width: 320px; }
+  .modules-grid { grid-template-columns: repeat(2, 1fr); gap: 20px 12px; }
   .module-img,
   .module-img2,
-  .module-img02 { width: clamp(100px, 70vw, 200px); }
-
-  .module-name,
-  .module-name2,
-  .module-name3 { max-width: clamp(100px, 70vw, 200px); }
-
-  .name-style { font-size: 13px; }
+  .module-img02 { width: clamp(90px, 38vw, 150px); height: clamp(90px, 38vw, 150px); }
 }
 
-/* ── Tablette 576px – 991px ── */
-@media (min-width: 576px) and (max-width: 991.98px) {
-
-  .chapeau2 { height: 65px; }
-
-  .logo { width: 64px; height: 64px; }
-
-  #inscrivez { margin-top: 80px; }
-  .bigtitle  { font-size: clamp(32px, 5vw, 52px); }
-  .user      { font-size: clamp(26px, 4vw, 42px); }
-
-  .organisation2 p { font-size: clamp(13px, 1.8vw, 18px); margin: 6px 10px; }
-
-  .etiqu { margin-left: 12px; }
-
-  /* 2 modules par ligne */
-  .ligne { gap: 24px; }
-
-  .module-img,
-  .module-img2,
-  .module-img02 { width: clamp(130px, 20vw, 200px); }
-
-  .module-name,
-  .module-name2,
-  .module-name3 { max-width: clamp(130px, 20vw, 200px); }
-
-  .name-style { font-size: clamp(13px, 1.6vw, 17px); }
+@media (min-width: 481px) and (max-width: 767px) {
+  .accueil-hero { padding: 88px 5vw 24px; gap: 14px; }
+  .modules-grid { grid-template-columns: repeat(3, 1fr); gap: 24px 16px; }
 }
 
-/* ── Grande tablette / petit bureau 992px – 1199px ── */
-@media (min-width: 992px) and (max-width: 1199.98px) {
-
-  #inscrivez { margin-top: 90px; }
-  .bigtitle  { font-size: clamp(40px, 4vw, 56px); }
-  .user      { font-size: clamp(34px, 3.5vw, 46px); }
-
-  .organisation2 p { font-size: clamp(15px, 1.6vw, 19px); margin: 6px 14px; }
-
-  .ligne { gap: 28px; }
-
-  .module-img,
-  .module-img2,
-  .module-img02 { width: clamp(160px, 16vw, 220px); }
-
-  .module-name,
-  .module-name2,
-  .module-name3 { max-width: clamp(160px, 16vw, 220px); }
+@media (min-width: 768px) and (max-width: 1023px) {
+  .accueil-hero { padding: 90px 5vw 28px; }
+  .modules-grid { grid-template-columns: repeat(3, 1fr); gap: 28px 20px; }
 }
 
-/* ── Grand écran ≥ 1200px  (très proche du design original) ── */
-@media (min-width: 1200px) {
+@media (min-width: 1024px) {
+  .accueil-hero { padding: 100px 6vw 32px; flex-wrap: nowrap; justify-content: space-between; }
+  .modules-grid { grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 36px 24px; }
+}
 
-  #inscrivez { margin-top: 100px; }
-  .bigtitle  { font-size: 64px; }
-  .user      { font-size: 50px; }
-
-  .organisation2 { margin-left: 120px; }
-  .organisation2 p { font-size: 20px; margin: 10px 30px; }
-
-  .ligne { gap: 40px; flex-wrap: nowrap; justify-content: center; }
-
-  .module-img,
-  .module-img2,
-  .module-img02 { width: 250px; }
-
-  .module-name,
-  .module-name2,
-  .module-name3 { max-width: 260px; }
-
-  .name-style { font-size: 20px; }
+@media (min-width: 1440px) {
+  .accueil-hero { max-width: 1600px; margin: 0 auto; }
+  .modules-grid { grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); max-width: 1600px; margin: 0 auto; }
 }
