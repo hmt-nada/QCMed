@@ -123,6 +123,8 @@ const titre= document.getElementById('inscrivez');
   function onUtilisateurCharge(user) {
   document.getElementById("pseudo2").textContent = user.pseudo;
   afficherModules(user.annee);
+  const mobUsername = document.getElementById("mobUsername");
+if (mobUsername) mobUsername.textContent = user.pseudo;
   activerRecherche();
   document.getElementById("loader").style.display = "none";
   document.getElementById("content").style.display = "block";

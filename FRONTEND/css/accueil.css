@@ -156,8 +156,8 @@
 
 .modules-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-  gap: 20px;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));  /* ← 200px min */
+  gap: 24px;
 }
 
 /* ── Carte module ── */
@@ -189,12 +189,16 @@
   aspect-ratio: 1;
   overflow: hidden;
   background: #0d1b2a;
+  display: flex;              /* ← AJOUT */
+  align-items: center;        /* ← AJOUT */
+  justify-content: center;    /* ← AJOUT */
 }
 
 .module-card-img .module-img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
+  width: 80%;                 /* ← au lieu de 100% */
+  height: 80%;
+  object-fit: contain;
+  object-position: center;
   display: block;
   transition: transform 0.3s ease;
 }
@@ -204,10 +208,10 @@
 }
 
 .module-card-body {
-  padding: 10px 12px 12px;
+  padding: 12px 12px 14px;
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 6px;                   /* ← un peu plus d'espace entre les deux lignes */
 }
 
 .name-style {
@@ -216,13 +220,15 @@
   font-size: clamp(0.78rem, 1.5vw, 0.95rem);
   color: #111;
   margin: 0;
-  line-height: 1.3;
+  line-height: 1.4;           /* ← était 1.3, légèrement augmenté */
 }
 
 .module-cours {
   font-size: clamp(0.68rem, 1.2vw, 0.78rem);
   color: #666;
   font-weight: 500;
+  line-height: 1.4;           /* ← AJOUT explicite */
+  margin: 0;                  /* ← AJOUT pour éviter tout margin parasite */
 }
 
 /* ── Highlight recherche ── */
@@ -240,15 +246,21 @@
    ════════════════════════════════════════════════ */
 
 @media (max-width: 480px) {
-  .accueil-hero {
-    padding: 80px 4vw 16px;
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 10px;
-  }
   .hero-search-wrapper {
     align-items: flex-start;
     width: 100%;
+  }
+   .accueil-hero {
+    padding: 16px 4vw 16px;   /* ← réduit le padding top (la top-bar fait 56px maintenant) */
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;                  /* ← réduit le gap */
+  }
+  .hero-welcome {
+    flex: 0 0 auto;            /* ← AJOUT : évite que le bloc s'étire */
+  }
+  .hero-badge {
+    margin-bottom: 0;
   }
   .search-box:hover,
   .search-box.active {
@@ -282,8 +294,9 @@
     padding: 100px 6vw 32px;
   }
   .modules-grid {
-    grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
-    gap: 22px;
+    grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+    max-width: 1150px;   /* ← empêche d'étaler sur toute la largeur */
+    gap: 26px;
   }
 }
 

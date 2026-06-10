@@ -1,3 +1,16 @@
+<!-- Top-bar visible uniquement sur mobile -->
+<div class="nav-mobile-topbar">
+  <a href="/accueil.html" class="mob-logo">
+    <img src="logo/brain-cercle.png" alt="QCMed" />
+    <span class="mob-logo-text">QC<span>Med</span></span>
+  </a>
+  <div class="mob-profile">
+    <span class="mob-username" id="mobUsername">...</span>
+    <div class="mob-avatar">
+      <img id="mobAvatarImg" src="images/cercle.svg" alt="avatar" />
+    </div>
+  </div>
+</div>
 
 <nav class="qcmed-nav">
 
@@ -66,12 +79,6 @@
 
     <!-- Droite : recherche + profil -->
     <div class="nav-right">
-      <button class="nav-search-btn" aria-label="Rechercher" onclick="document.querySelector('.search-bar')?.focus()">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
-        </svg>
-      </button>
-
       <div class="nav-profile" id="navProfileBtn" aria-haspopup="true" aria-expanded="false">
         <div class="nav-avatar" id="navAvatar">
           <img id="navAvatarImg" src="images/cercle.svg" alt="avatar" />
