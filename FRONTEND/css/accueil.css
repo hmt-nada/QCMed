@@ -190,15 +190,12 @@
   aspect-ratio: 1;
   overflow: hidden;
   background: #0d1b2a;
-  display: flex;              /* ← AJOUT */
-  align-items: center;        /* ← AJOUT */
-  justify-content: center;    /* ← AJOUT */
 }
 
 .module-card-img .module-img {
-  width: 80%;                 /* ← au lieu de 100% */
-  height: 80%;
-  object-fit: contain;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;        /* ← cover : remplit tout le carré */
   object-position: center;
   display: block;
   transition: transform 0.3s ease;

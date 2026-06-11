@@ -1,0 +1,592 @@
+/* ═══════════════════════════════════════════
+   caracteristique.css  —  QCMed · Paramètres QCM
+   ═══════════════════════════════════════════ */
+
+.body3 {
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+  font-family: 'Poppins', sans-serif;
+  background: #EFEFEF;
+  overflow-x: hidden;
+}
+
+/* ════════════════════════════════════════════
+   NOM DU MODULE
+════════════════════════════════════════════ */
+#nommodule {
+  position: static;
+  display: block;
+  text-align: center;
+  font-family: 'Poppins', sans-serif;
+  font-size: clamp(1.1rem, 2.8vw, 1.6rem);
+  font-weight: 700;
+  color: #161D6F;
+  letter-spacing: -0.02em;
+  margin: 28px auto 0;
+  padding: 0 5vw;
+  -webkit-text-stroke: unset;
+}
+
+/* ════════════════════════════════════════════
+   BARRE ÉTAPES
+════════════════════════════════════════════ */
+.titremodule {
+  position: static;
+  width: 100%;
+  box-sizing: border-box;
+  margin: 20px 0 0;
+  background: #161D6F;
+  height: auto;
+  padding: 0;
+  border-radius: 0;
+}
+
+.organisation02 {
+  display: flex;
+  align-items: stretch;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+.organisation02 p {
+  position: static;
+  flex: 1;
+  margin: 0;
+  padding: 14px 8px;
+  font-family: 'Poppins', sans-serif;
+  font-weight: 600;
+  font-size: clamp(0.65rem, 1.4vw, 0.85rem);
+  color: rgba(255,255,255,0.4);
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  border-bottom: 3px solid transparent;
+  cursor: default;
+}
+
+/* étapes complétées */
+.organisation02 p.fclt::before,
+.organisation02 p.crs::before {
+  content: '✓ ';
+  font-size: 0.75em;
+  opacity: 0.7;
+}
+
+.organisation02 p.fclt,
+.organisation02 p.crs {
+  color: rgba(255,255,255,0.55);
+}
+
+/* étape active */
+.organisation02 p.crctr {
+  color: #ffffff;
+  border-bottom: 3px solid #0065F8;
+  background: rgba(255,255,255,0.06);
+  border-left: 1px solid rgba(255,255,255,0.1);
+}
+
+.organisation02 p.crs {
+  border-left: 1px solid rgba(255,255,255,0.1);
+}
+
+/* ════════════════════════════════════════════
+   ZONE QUESTION (#inscrivez)
+════════════════════════════════════════════ */
+#inscrivez {
+  opacity: 0;
+  transform: translateX(-50px);
+  transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  max-width: 700px;
+  margin: 36px auto 0;
+  padding: 0 5vw;
+}
+
+#inscrivez.slide-in {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.symbol {
+  position: static;
+  flex-shrink: 0;
+  margin: 0;
+  width: 48px;
+  height: 48px;
+  background: #EEF3FF;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.symbol svg { display: block; }
+
+.phrase {
+  position: static;
+  margin: 0;
+  font-family: 'Poppins', sans-serif;
+  font-size: clamp(0.88rem, 2vw, 1.05rem);
+  font-weight: 600;
+  color: #1e2d3d;
+  line-height: 1.4;
+}
+
+/* ════════════════════════════════════════════
+   CARTES CARACTÉRISTIQUES
+   Chaque section = .caract1 / .caract2 / .caract3
+   + son toggle/select juste après
+════════════════════════════════════════════ */
+
+/* wrapper global pour centrer */
+.caract1, .caract2, .caract3 {
+  position: static;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  max-width: 620px;
+  margin: 32px auto 0;
+  padding: 0 5vw;
+}
+
+.caract1 svg, .caract2 svg, .caract3 svg {
+  flex-shrink: 0;
+}
+
+.petit {
+  position: static;
+  margin: 0;
+  font-family: 'Poppins', sans-serif;
+  font-size: clamp(0.88rem, 2vw, 1rem);
+  font-weight: 600;
+  color: #1e2d3d;
+}
+
+/* ── Toggle switch ── */
+.ajust3, .ajust2 {
+  position: static;
+  margin: 12px auto 0;
+  padding: 0 5vw;
+  max-width: 620px;
+  display: flex;
+  align-items: center;
+}
+
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 130px;
+  height: 38px;
+}
+
+.switch input { display: none; }
+
+.slider, .slider2 {
+  position: absolute;
+  cursor: pointer;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: #3C3C3C;
+  border-radius: 34px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 0 8px;
+  transition: background 0.4s;
+}
+
+.icon-container {
+  width: 26px;
+  height: 34px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.4s ease;
+}
+
+.svg-icon {
+  width: 24px;
+  height: 24px;
+  position: absolute;
+  transition: opacity 0.4s ease;
+}
+
+.heure-on { opacity: 0; }
+
+input:checked + .slider,
+input:checked + .slider2 {
+  background: #0065F8;
+  justify-content: flex-end;
+}
+
+input:checked + .slider .heure-on,
+input:checked + .slider2 .heure-on { opacity: 1; }
+
+input:checked + .slider .heure-off,
+input:checked + .slider2 .heure-off { opacity: 0; }
+
+.slider::after, .slider2::after {
+  color: white;
+  display: block;
+  position: absolute;
+  transform: translate(-50%, -50%);
+  top: 50%;
+  left: 60%;
+  font-size: 13px;
+  font-family: 'Poppins', sans-serif;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.slider::after  { content: 'ILLIMITÉ'; }
+.slider2::after { content: 'LIBRE'; }
+
+input:checked + .slider::after  { content: 'LIMITÉ'; left: 40%; }
+input:checked + .slider2::after { content: 'NOTÉ';   left: 40%; }
+
+/* ── Options correction (#choixcorr) ── */
+#choixcorr { max-width: 620px; margin: 0 auto; padding: 0 5vw; }
+
+.ajust4 {
+  position: static;
+  margin: 12px 0 0;
+  display: flex;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+.option01, .option02, .option03 {
+  position: static;
+  margin: 0;
+  flex: 1 1 140px;
+  min-height: 52px;
+  background: #ffffff;
+  border: 2px solid #D6E4FF;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 16px;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0,101,248,0.05);
+  transition: border-color 0.18s, background 0.18s, transform 0.15s;
+}
+
+.option01:hover, .option02:hover, .option03:hover {
+  border-color: #0065F8;
+  background: #F0F6FF;
+  transform: translateY(-2px);
+}
+
+.caroptions {
+  font-family: 'Poppins', sans-serif;
+  font-weight: 600;
+  font-size: clamp(0.82rem, 1.8vw, 0.92rem);
+  color: #1e2d3d;
+  margin: 0;
+  padding: 0;
+  user-select: none;
+}
+
+/* ── Checkbox checkmark2 (même style que checkmark) ── */
+.checkmark2 {
+  --clr: #0B2F9F;
+  position: relative;
+  display: block;
+  width: 22px;
+  height: 22px;
+  background: #ffffff;
+  border: 2px solid var(--clr);
+  border-radius: 6px;
+  flex-shrink: 0;
+  transition: background 0.2s, transform 0.15s;
+}
+
+.container2:hover .checkmark2 {
+  transform: scale(1.08);
+  border-color: #0065F8;
+}
+
+.container2 input.checkb:checked ~ .checkmark2 {
+  background: var(--clr);
+  animation: pulse 500ms ease-in-out;
+}
+
+.checkmark2::after {
+  content: "";
+  position: absolute;
+  display: none;
+  left: 6px;
+  top: 3px;
+  width: 5px;
+  height: 10px;
+  border: solid #ffffff;
+  border-width: 0 2.5px 2.5px 0;
+  transform: rotate(45deg);
+}
+
+.container2 input.checkb:checked ~ .checkmark2::after { display: block; }
+
+/* ── Timer (#time .postime) ── */
+.postime {
+  position: static;
+  margin: 12px auto 0;
+  max-width: 620px;
+  padding: 0 5vw;
+}
+
+.time-picker { font-family: 'Poppins', sans-serif; }
+
+.time-inputs {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.time-inputs input[type="number"] {
+  width: 64px;
+  height: 44px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  text-align: center;
+  border: 2px solid #D6E4FF;
+  border-radius: 12px;
+  outline: none;
+  background: #ffffff;
+  color: #161D6F;
+  font-family: 'Poppins', sans-serif;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.time-inputs input[type="number"]:focus {
+  border-color: #0065F8;
+  box-shadow: 0 0 0 3px rgba(0,101,248,0.15);
+}
+
+.separator {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: #0065F8;
+}
+
+/* ── Select nombre de questions ── */
+.caract3 { margin-top: 28px; }
+
+/* conteneur select + flèche */
+.caract3 + div {
+  position: static;
+  max-width: 620px;
+  margin: 12px auto 0;
+  padding: 0 5vw;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.number {
+  width: 120px;
+  height: 44px;
+  border-radius: 12px;
+  background: #ffffff;
+  border: 2px solid #D6E4FF;
+  padding: 0 16px;
+  font-family: 'Poppins', sans-serif;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #161D6F;
+  outline: none;
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  margin: 0;
+}
+
+.number:focus {
+  border-color: #0065F8;
+  box-shadow: 0 0 0 3px rgba(0,101,248,0.15);
+}
+
+.number3 {
+  width: 90px;
+  height: 44px;
+  border-radius: 12px;
+  background: #ffffff;
+  border: 2px solid #D6E4FF;
+  padding: 0 14px;
+  font-family: 'Poppins', sans-serif;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #161D6F;
+  outline: none;
+  margin: 0;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.number3:focus {
+  border-color: #0065F8;
+  box-shadow: 0 0 0 3px rgba(0,101,248,0.15);
+}
+
+.adjust2 {
+  position: static;
+  margin: 0;
+  color: #0065F8;
+  flex-shrink: 0;
+}
+
+/* ════════════════════════════════════════════
+   BOUTON LANCER
+════════════════════════════════════════════ */
+.c-button {
+  display: block;
+  font-family: 'Poppins', sans-serif;
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: #161D6F;
+  background: #EEF3FF;
+  border: none;
+  border-radius: 50px;
+  padding: 0.75em 2.5em;
+  cursor: pointer;
+  position: relative;
+  z-index: 1;
+  width: fit-content;
+}
+
+.lancer {
+  margin: 40px auto 56px;
+}
+
+.c-button--gooey {
+  color: #043278;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  border: 3px solid #0065F8;
+  border-radius: 20px;
+  transition: color 700ms ease;
+  text-align: center;
+}
+
+.c-button--gooey:hover  { color: #fff; }
+.c-button--gooey:active {
+  transform: scale(0.96);
+  box-shadow: inset 0 2px 6px rgba(0,0,0,0.2);
+}
+
+.c-button__blobs {
+  height: 100%;
+  filter: url(#goo);
+  overflow: hidden;
+  position: absolute;
+  border-radius: 15px;
+  top: 0; left: 0; bottom: -3px; right: -1px;
+  z-index: -1;
+}
+
+.c-button__blobs div {
+  background-color: #0065F8;
+  width: 34%;
+  height: 100%;
+  border-radius: 100%;
+  position: absolute;
+  transform: scale(1.4) translateY(125%) translateZ(0);
+  transition: all 700ms ease;
+}
+
+.c-button__blobs div:nth-child(1) { left: -5%; }
+.c-button__blobs div:nth-child(2) { left: 30%; transition-delay: 60ms; }
+.c-button__blobs div:nth-child(3) { left: 66%; transition-delay: 25ms; }
+
+.c-button--gooey:hover .c-button__blobs div {
+  transform: scale(1.4) translateY(0) translateZ(0);
+}
+
+/* ════════════════════════════════════════════
+   ANIMATIONS partagées
+════════════════════════════════════════════ */
+@keyframes pulse {
+  0%   { box-shadow: 0 0 0 #0b346e90; rotate: 4deg; }
+  50%  { rotate: -4deg; }
+  75%  { box-shadow: 0 0 0 8px #0b2c6e50; }
+  100% { box-shadow: 0 0 0 12px #0b2c6e00; rotate: 0; }
+}
+
+.checkmark.shake, .checkmark2.shake {
+  animation: shake-alert 0.4s ease;
+  box-shadow: 0 0 0 3px rgba(220,38,38,0.35);
+}
+
+@keyframes shake-alert {
+  0%   { transform: scale(1) rotate(0deg); }
+  25%  { transform: scale(1.1) rotate(-4deg); }
+  50%  { transform: scale(1.1) rotate(4deg); }
+  75%  { transform: scale(1.05) rotate(-2deg); }
+  100% { transform: scale(1) rotate(0deg); }
+}
+
+/* ════════════════════════════════════════════
+   RESPONSIVE
+════════════════════════════════════════════ */
+@media (max-width: 480px) {
+  #nommodule    { font-size: 1rem; margin-top: 18px; }
+  .titremodule  { margin-top: 14px; }
+
+  .organisation02 p {
+    font-size: 0.58rem;
+    padding: 11px 3px;
+  }
+
+  #inscrivez    { margin-top: 22px; gap: 10px; }
+  .symbol       { width: 38px; height: 38px; }
+  .phrase       { font-size: 0.85rem; }
+
+  .caract1, .caract2, .caract3 { margin-top: 24px; }
+  .petit        { font-size: 0.85rem; }
+
+  .ajust3, .ajust2 { margin-top: 10px; }
+
+  .switch { width: 110px; height: 34px; }
+
+  .ajust4 { gap: 10px; }
+
+  .option01, .option02, .option03 {
+    min-height: 48px;
+    padding: 0 12px;
+    border-radius: 12px;
+    flex: 1 1 120px;
+  }
+
+  .time-inputs input[type="number"] {
+    width: 54px;
+    height: 40px;
+    font-size: 1rem;
+  }
+
+  .number, .number3 {
+    height: 40px;
+    font-size: 0.88rem;
+  }
+
+  .lancer { margin-bottom: 90px; }
+}
+
+@media (min-width: 481px) and (max-width: 767px) {
+  .caract1, .caract2, .caract3,
+  .ajust3, .ajust2,
+  #choixcorr, .postime,
+  .caract3 + div { max-width: 500px; }
+
+  .lancer { margin-bottom: 72px; }
+}
+
+@media (min-width: 1024px) {
+  #nommodule    { margin-top: 32px; }
+  #inscrivez    { margin-top: 40px; }
+  .caract1      { margin-top: 40px; }
+}

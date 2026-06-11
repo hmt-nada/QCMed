@@ -18,6 +18,15 @@ fetch('navbar.html')
     });
     document.addEventListener('click', () => dropdown?.classList.remove('open'));
 
+    // Dropdown mobile (topbar)
+const mobProfileBtn = document.getElementById('mobProfileBtn');
+if (mobProfileBtn) {
+  mobProfileBtn.addEventListener('click', function(e) {
+    e.stopPropagation();
+    dropdown.classList.toggle('open');
+  });
+}
+
     // Fetch utilisateur → avatar + pseudo
     fetch('/api/utilisateur', { method: 'GET', credentials: 'include' })
       .then(r => r.json())
@@ -33,7 +42,7 @@ fetch('navbar.html')
     const mobUsername  = document.getElementById('mobUsername');
     if (mobAvatarImg) mobAvatarImg.src         = user.avatar;
     if (mobUsername)  mobUsername.textContent  = user.pseudo;
-    
+
           const event = new CustomEvent('utilisateurCharge', { detail: result.utilisateur });
 document.dispatchEvent(event);
 window._utilisateurChargeData = result.utilisateur;

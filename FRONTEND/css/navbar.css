@@ -275,11 +275,24 @@
       }
 
       /* Dropdown vers le haut sur mobile */
+      
       .nav-dropdown {
-        top: auto;
-        bottom: calc(var(--nav-height-mob) + 8px);
-        right: 8px;
-      }
+    top: calc(56px + 4px); /* juste sous la top-bar mobile */
+    bottom: auto;          /* ← annule le bottom du code précédent */
+    right: 8px;
+    z-index: 1002;
+  }
+
+  /* rendre le bouton profil cliquable visuellement */
+  .mob-profile {
+    cursor: pointer;
+    border-radius: 99px;
+    padding: 4px 8px 4px 4px;
+    transition: background 0.15s;
+  }
+  .mob-profile:hover {
+    background: var(--nav-blue-light);
+  }
     }
 
     /* Espace pour que le contenu ne soit pas caché sous la navbar */
