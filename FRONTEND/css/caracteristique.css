@@ -459,10 +459,43 @@ input:checked + .slider2::after { content: 'NOTÉ';   left: 40%; }
   width: fit-content;
 }
 
-.lancer {
-  margin: 40px auto 56px;
+/* Barre fixe en bas */
+.bottom-bar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;
+  background: rgba(239, 239, 239, 0.85);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-top: 1px solid rgba(0, 101, 248, 0.12);
+  padding: 12px 5vw;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
 }
 
+/* Espace pour que le contenu ne se cache pas derrière */
+.select-wrapper {
+  padding-bottom: 0;
+}
+
+.body3 #content {
+  padding-bottom: 90px;
+}
+
+@media (max-width: 480px) {
+  .bottom-bar {
+    justify-content: center;
+    padding: 10px 5vw 20px;
+  }
+
+  .bottom-bar .c-button {
+    width: 100%;
+    text-align: center;
+  }
+}
 .c-button--gooey {
   color: #043278;
   text-transform: uppercase;
@@ -633,6 +666,67 @@ input:checked + .slider2::after { content: 'NOTÉ';   left: 40%; }
 }
 
 .btn-retour:hover {
+  background: #161D6F;
+  color: white;
+}
+.container2 input.checkb {
+  position: absolute;
+  opacity: 0;
+  cursor: pointer;
+  height: 0;
+  width: 0;
+}
+.select-wrapper {
+  position: static;
+  max-width: 620px;
+  margin: 12px auto 0;
+  padding: 0 5vw;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* Force le dropdown vers le bas */
+.number {
+  width: 120px;
+  height: 44px;
+  border-radius: 12px;
+  background: #ffffff;
+  border: 2px solid #D6E4FF;
+  padding: 0 16px;
+  font-family: 'Poppins', sans-serif;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #161D6F;
+  outline: none;
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  margin: 0;
+  /* Force vers le bas */
+  position: relative;
+  bottom: auto;
+  top: auto;
+}
+
+.btn-retour-select {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: 2px solid #161D6F;
+  color: #161D6F;
+  padding: 6px;
+  border-radius: 50%;
+  width: 34px;
+  height: 34px;
+  flex-shrink: 0;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+}
+
+.btn-retour-select:hover {
   background: #161D6F;
   color: white;
 }

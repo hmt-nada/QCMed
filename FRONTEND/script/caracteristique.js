@@ -34,22 +34,33 @@ for (let i = 0; i < rempli.length; i++) {
 }
 
   const selectnumber = document.getElementById("number");
-  const champAutre = document.getElementById("autrenumber");
-  const fleche=document.getElementById("fleche");
+const champAutre = document.getElementById("autrenumber");
+const fleche = document.getElementById("fleche");
+const btnRetourSelect = document.getElementById("btnRetourSelect");
 
-  selectnumber.addEventListener("change", () => {
-    if (selectnumber.value === "autre") {
-       champAutre.style.display = "block";
-       selectnumber.style.display = "none";     // afficher si "autre"
-       champAutre.focus();         
-       champAutre.required = true;
-       fleche.style.display = "none";  
-       
-    } else {
-      
-      champAutre.required = false;
-     
-    }   
+selectnumber.addEventListener("change", () => {
+  if (selectnumber.value === "autre") {
+    // Cacher le select et la flèche, montrer l'input + bouton retour
+    champAutre.style.display = "block";
+    selectnumber.style.display = "none";
+    fleche.style.display = "none";
+    btnRetourSelect.style.display = "flex";
+    champAutre.focus();
+    champAutre.required = true;
+  } else {
+    champAutre.required = false;
+  }
+});
+
+// Retour aux choix prédéfinis
+btnRetourSelect.addEventListener("click", () => {
+  champAutre.style.display = "none";
+  btnRetourSelect.style.display = "none";
+  selectnumber.style.display = "block";
+  fleche.style.display = "block";
+  selectnumber.value = "";         // remet le select vide
+  champAutre.value = "";
+  champAutre.required = false;
 });
 
 const switche = document.getElementById('tempsToggle');

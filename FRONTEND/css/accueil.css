@@ -164,7 +164,6 @@
 /* ── Carte module ── */
 .module-container {
   cursor: pointer;
-  height: 100%;          /* ← AJOUTE ça */
 }
 
 .module-card {
@@ -175,7 +174,6 @@
   transition: transform 0.2s ease, box-shadow 0.2s ease;
   display: flex;
   flex-direction: column;
-  height: 100%;          /* ← AJOUTE ça */
 }
 
 .module-card:hover {
@@ -189,22 +187,20 @@
 
 .module-card-img {
   width: 100%;
-  aspect-ratio: 1;
+  height: 180px;          /* ← hauteur fixe, simple et fiable */
   overflow: hidden;
   background: #0d1b2a;
-  flex: 1;               /* ← prend tout l'espace disponible dans la carte */
-  min-height: 0;         /* ← évite que le flex déborde */
+  flex-shrink: 0;         /* ← ne rétrécit pas */
 }
 
 .module-card-img .module-img {
   width: 100%;
   height: 100%;
-  object-fit: cover;        /* ← cover : remplit tout le carré */
+  object-fit: contain;    /* ← toute l'image visible */
   object-position: center center;
   display: block;
   transition: transform 0.3s ease;
 }
-
 .module-card:hover .module-img {
   transform: scale(1.06);
 }
@@ -272,6 +268,7 @@
     grid-template-columns: repeat(2, 1fr);
     gap: 14px;
   }
+  .module-card-img { height: 130px; }
 }
 
 @media (min-width: 481px) and (max-width: 767px) {
@@ -280,6 +277,7 @@
     grid-template-columns: repeat(3, 1fr);
     gap: 16px;
   }
+  .module-card-img { height: 150px; }
 }
 
 @media (min-width: 768px) and (max-width: 1023px) {
