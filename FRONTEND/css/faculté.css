@@ -411,6 +411,9 @@
 @media (min-width: 481px) and (max-width: 767px) {
   .ajust { max-width: 460px; }
   .suivant { margin-bottom: 72px; }
+  .header-row {
+    margin-top: 18px;
+  }
 }
 
 @media (min-width: 768px) {
@@ -431,20 +434,41 @@
   .ajust     { margin-top: 32px; }
 }
 
+/* Conteneur flèche + titre alignés */
+.header-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  max-width: 600px;
+  margin: 28px auto 0;
+  padding: 0 5vw;
+}
+
+#nommodule {
+  margin: 0;          /* ← retire le margin auto précédent */
+  padding: 0;
+  font-family: 'Poppins', sans-serif;
+  font-size: clamp(1.1rem, 2.8vw, 1.6rem);
+  font-weight: 700;
+  color: #161D6F;
+  letter-spacing: -0.02em;
+}
+
 .btn-retour {
   display: flex;
   align-items: center;
-  gap: 8px;
+  justify-content: center;
   background: none;
   border: 2px solid #161D6F;
   color: #161D6F;
-  padding: 8px 18px;
-  border-radius: 20px;
-  font-family: 'Poppins', sans-serif;
-  font-size: 14px;
+  padding: 6px;
+  border-radius: 50%;     /* ← rond, juste une flèche */
+  width: 36px;
+  height: 36px;
+  flex-shrink: 0;
   cursor: pointer;
-  margin: 15px 20px;
   transition: background 0.2s, color 0.2s;
+  margin: 0;              /* ← retire l'ancien margin */
 }
 
 .btn-retour:hover {

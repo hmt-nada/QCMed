@@ -44,14 +44,15 @@
 <div id="content" style="display:none;">
   <div id="navbar-container"></div>
 
+ <div class="header-row">
   <button class="btn-retour" onclick="history.back()">
-  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24">
-    <path fill="currentColor" d="M19 11H7.83l4.88-4.88a1 1 0 0 0-1.42-1.42l-6.59 6.59a1 1 0 0 0 0 1.42l6.59 6.59a1 1 0 0 0 1.42-1.42L7.83 13H19a1 1 0 0 0 0-2z"/>
-  </svg>
-  Retour
-</button>
+    <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24">
+      <path fill="currentColor" d="M19 11H7.83l4.88-4.88a1 1 0 0 0-1.42-1.42l-6.59 6.59a1 1 0 0 0 0 1.42l6.59 6.59a1 1 0 0 0 1.42-1.42L7.83 13H19a1 1 0 0 0 0-2z"/>
+    </svg>
+  </button>
+  <p id="nommodule" class="expression04">nom du module</p>
+</div>
 
-<p class="expression04" id="nommodule">nom du module</p>
 <div class="titremodule">
 <div class="organisation02">
               <p class="fclt">Choix  Du Faculté</p>
@@ -82,13 +83,6 @@
 
 
 </div>
-<button id="boutton" class="c-button suivant2 c-button--gooey"> Suivant
-  <div class="c-button__blobs">
-  <div></div>
-  <div></div>
-  <div></div>
-  </div>
-</button>
 <svg xmlns="http://www.w3.org/2000/svg" version="1.1" style="display: block; height: 0; width: 0;">
   <defs>
     <filter id="goo">
@@ -98,6 +92,15 @@
     </filter>
   </defs>
 </svg>
+<div class="bottom-bar">
+  <button id="boutton" class="c-button c-button--gooey">
+    Suivant
+    <div class="c-button__blobs">
+      <div></div><div></div><div></div>
+    </div>
+  </button>
+</div>
+
 </div>
  <script src="script/navbar.js"></script>
  <script src="script/cours.js"></script>   
