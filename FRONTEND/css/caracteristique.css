@@ -622,6 +622,16 @@ input:checked + .slider2::after { content: 'NOTÉ';   left: 40%; }
   .lancer { margin-bottom: 72px; }
 }
 
+@media (max-width: 768px) {
+  .bottom-bar {
+    bottom: calc(68px + env(safe-area-inset-bottom, 0px));
+  }
+
+  .body3 #content {
+    padding-bottom: calc(90px + 68px); /* barre bouton + navbar */
+  }
+}
+
 @media (min-width: 1024px) {
   #nommodule    { margin-top: 32px; }
   #inscrivez    { margin-top: 40px; }

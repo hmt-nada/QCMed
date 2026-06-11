@@ -437,10 +437,13 @@
 }
 
 @media (min-width: 768px) {
-  .ajust { max-width: 640px; }
+  .bottom-bar {
+    bottom: calc(68px + env(safe-area-inset-bottom, 0px));
+    padding-bottom: 0; /* le safe-area est déjà dans le bottom */
+  }
 
-  .ajust > div:not(.toutselect):hover {
-    transform: translateX(6px);
+  .ajust {
+    padding-bottom: 170px; /* 90px barre + 68px navbar + marge */
   }
 }
 

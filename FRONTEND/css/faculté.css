@@ -407,10 +407,17 @@
     margin-bottom: 90px; /* espace nav bottom mobile */
   }
 }
+@media (max-width: 480px) {
+  .suivant {
+    margin-bottom: calc(68px + 24px);
+  }
+}
 
 @media (min-width: 481px) and (max-width: 767px) {
   .ajust { max-width: 460px; }
-  .suivant { margin-bottom: 72px; }
+  .suivant {
+    margin-bottom: calc(68px + 24px); /* navbar + marge */
+  }
   .header-row {
     margin-top: 18px;
   }
@@ -421,6 +428,7 @@
     max-width: 520px;
     grid-template-columns: 1fr 1fr;
   }
+  
 
   /* "Tout sélectionner" prend toute la largeur */
   .toutselect2 {
