@@ -419,3 +419,24 @@
   #inscrivez { margin-top: 40px; }
   .ajust     { margin-top: 32px; }
 }
+
+.btn-retour {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: none;
+  border: 2px solid #161D6F;
+  color: #161D6F;
+  padding: 8px 18px;
+  border-radius: 20px;
+  font-family: 'Poppins', sans-serif;
+  font-size: 14px;
+  cursor: pointer;
+  margin: 15px 20px;
+  transition: background 0.2s, color 0.2s;
+}
+
+.btn-retour:hover {
+  background: #161D6F;
+  color: white;
+}

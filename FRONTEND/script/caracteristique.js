@@ -259,9 +259,6 @@ else{
 //afficher le pseudo et avatar 
 document.addEventListener('utilisateurCharge', (e) => {
   const user = e.detail;
-
-  afficherCours();
-
   document.getElementById("loader").style.display = "none";
   document.getElementById("content").style.display = "block";
 
