@@ -27,7 +27,8 @@
   flex-wrap: wrap;
   align-items: center;
   gap: 16px;
-  padding: 100px 5vw 28px;
+  padding: 30px 5vw 28px; 
+  
 }
 
 /* ── Badge QUIZ TIME ── */
@@ -273,7 +274,7 @@
 }
 
 @media (min-width: 481px) and (max-width: 767px) {
-  .accueil-hero { padding: 86px 5vw 20px; }
+  .accueil-hero { padding: 20px 5vw 20px; }
   .modules-grid {
     grid-template-columns: repeat(3, 1fr);
     gap: 16px;
@@ -291,11 +292,12 @@
   .accueil-hero {
     flex-wrap: nowrap;
     justify-content: space-between;
-    padding: 100px 6vw 32px;
+    padding: 30px 6vw 32px; 
   }
   .modules-grid {
     grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
     max-width: 1150px;   /* ← empêche d'étaler sur toute la largeur */
+    margin: 0 auto; 
     gap: 26px;
   }
 }

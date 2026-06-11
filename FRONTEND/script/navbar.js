@@ -28,6 +28,12 @@ fetch('navbar.html')
           const usernameEl = document.getElementById('navUsername');
           if (avatarImg)  avatarImg.src         = user.avatar;
           if (usernameEl) usernameEl.textContent = user.pseudo;
+
+          const mobAvatarImg = document.getElementById('mobAvatarImg');
+    const mobUsername  = document.getElementById('mobUsername');
+    if (mobAvatarImg) mobAvatarImg.src         = user.avatar;
+    if (mobUsername)  mobUsername.textContent  = user.pseudo;
+    
           const event = new CustomEvent('utilisateurCharge', { detail: result.utilisateur });
 document.dispatchEvent(event);
 window._utilisateurChargeData = result.utilisateur;
