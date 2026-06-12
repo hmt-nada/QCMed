@@ -645,8 +645,11 @@ const btnFaute = document.getElementById("btnfaute");
   const extraMsg = document.getElementById("extraMsg");
 
   // Ouvrir le modal
-  btnFaute.onclick = () =>
-    modal.style.display = "block";
+   btnFaute.onclick = () => {
+  modal.style.display = "flex";
+  modal.style.justifyContent = "center";
+  modal.style.alignItems = "center";
+};
     
    
   // Fermer le modal (croix)
