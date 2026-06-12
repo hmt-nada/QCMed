@@ -531,7 +531,7 @@ fetch(`/api/submit-qcm`,{
     //si succss est true(module rçu)
     if (result.success){   
        //ici il faut un redirection vars la page de la note 
-       window.location.href = `noteqcm.html?note=${note}`;
+       window.location.href = `note.html?note=${note}`;
     }else{
       alert("erreur:"+result.message);
     }

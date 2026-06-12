@@ -179,7 +179,7 @@ fetch(`/api/choixcaract`,{
     //si succss est true(module rçu)
     if (result.success){  
        localStorage.setItem("selectedTime", times);        
-       window.location.href ="qcm.html"; 
+       window.location.href="qcm.html?mode=normal"; 
     }else{
       alert("erreur:"+result.message);
     }

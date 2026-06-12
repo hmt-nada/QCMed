@@ -107,7 +107,7 @@ function closePopup() {
   btnAll.addEventListener("click", () => {
     popup.style.display = "none";
     // Ici tu mets ton code pour afficher le corrigé complet
-    window.location.href ="corrigetous.html";
+    window.location.href ="corrigetous.html?mode=tous";
   });
 
   // Corrigé seulement des fausses
@@ -117,7 +117,7 @@ function closePopup() {
     if (fullmark) {
         showPopup(); // déjà toutes correctes
     } else {
-        window.location.href = "corrigefausse.html";
+        window.location.href = "corrigefausse.html?mode=faux";
     }
 });
 
@@ -133,7 +133,7 @@ function closePopup() {
         if (currentNote !== null) {
             sessionStorage.setItem("noteAvant", JSON.stringify({ note: currentNote }));
         }
-        window.location.href = "tentativefaux.html";
+        window.location.href="qcm.html?mode=retry";
     }
 });
   

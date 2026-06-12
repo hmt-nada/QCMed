@@ -417,9 +417,18 @@
     border-radius: 12px;
   }
 
+  .header-row { margin-top: 18px; }
+}
+
+@media (min-width: 481px) and (max-width: 767px) {
+  .ajust { max-width: 500px; }
+}
+
+@media (max-width: 768px) {
   .bottom-bar {
+    bottom: calc(68px + env(safe-area-inset-bottom, 0px));
     justify-content: center;
-    padding: 10px 5vw 20px;   /* 20px extra pour le safe-area iOS */
+    padding: 10px 5vw 20px;
   }
 
   .bottom-bar .c-button {
@@ -427,22 +436,18 @@
     text-align: center;
   }
 
-  .header-row {
-    margin-top: 18px;
+  .ajust {
+    padding-bottom: calc(90px + 68px); /* barre bouton + navbar */
   }
-}
-
-@media (min-width: 481px) and (max-width: 767px) {
-  .ajust { max-width: 500px; }
 }
 
 @media (min-width: 768px) {
   .bottom-bar {
-    bottom: 0;   /* navbar latérale/haute → pas besoin de décaler */
+    bottom: 0;
   }
 
   .ajust {
-    padding-bottom: 90px; /* même valeur que mobile, juste la barre */
+    padding-bottom: 90px;
   }
 }
 

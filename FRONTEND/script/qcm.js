@@ -11,13 +11,28 @@ function getNomModule(coursId) {
   return coursMap[coursId.toLowerCase()] || coursId;
 }
 
+const params = new URLSearchParams(window.location.search);
+
+const mode = params.get("mode") || "normal";
+
+console.log("Mode QCM :", mode);
+
 //récupération du temps 
 const temps = localStorage.getItem("selectedTime");
 
-const introData = [
-  { chiffre: "3", texte: "Prépare-toi..." },
-  { chiffre: "2", texte: "Concentre-toi..." },
-  { chiffre: "1", texte: "C'est parti !" }
+const introData = mode==="retry"
+?
+[
+ {chiffre:"3",texte:"Reprise du QCM"},
+ {chiffre:"2",texte:"Questions ratées"},
+ {chiffre:"1",texte:"Bonne chance"}
+]
+
+:
+[
+ {chiffre:"3",texte:"Prépare-toi"},
+ {chiffre:"2",texte:"Concentre-toi"},
+ {chiffre:"1",texte:"C'est parti"}
 ];
 
 const messageDiv = document.getElementById('message');
@@ -42,7 +57,11 @@ function parseDisplayToSeconds(text) {
 }
 
 let questions = [];
+let results=[];
 let indexActuel = 0;
+
+
+
 let questionsChargees = false;
 let reponsesUtilisateur = []; 
 let modeCorrection="";
@@ -116,9 +135,25 @@ function getResponseBoxes() {
     return document.querySelectorAll('.eachresponse');
   }
 }
+// prépare chaque question avec les champs nécessaires
+function prepareQuestion(q){
+
+  return {
+    ...q,
+    userAnswer:null,
+    isCorrect:false,
+    errorType:null,
+    correctionAffichee:false,
+    score:0,
+    validerclick:false,
+    tempsRestant:null,
+    signalement:false
+  };
+}
+
 //récupération du tableau des records des QCMs
 
-function chargerQuestions() {
+/*function chargerQuestions() {
   fetch(`/api/questions`)
     .then(r => r.json())
     .then(data => {
@@ -145,6 +180,29 @@ function chargerQuestions() {
      
    })
     .catch(err => console.error(err));
+}*/
+function chargerQuestions(){
+
+if(mode==="retry"){
+  fetch(`/api/tentative-faux`)
+  .then(res=>res.json())
+  .then(data=>{
+    results = data.results;            // ← sauvegarder TOUT
+    questions = data.results
+      .filter(q=>!q.isCorrect)
+      .map(prepareQuestion);
+    questionsChargees=true;
+    modeCorrection = data.correction;  // ← ne pas oublier
+  });
+}
+else{
+fetch(`/api/questions`)
+.then(res=>res.json())
+.then(data=>{
+questions = data.questions.map(prepareQuestion);
+questionsChargees=true;
+});
+}
 }
 
 // starttimer: démarre/relance le timer pour la question targetIndex (défaut = indexActuel)
@@ -592,12 +650,17 @@ const annuler = document.getElementById("annulerSoumission");
    confirmer.addEventListener("click", () => {
     popup.style.display = "none";
     //calculer la note finale 
-   const note= calculerNoteFinale(questions);
+   if(mode === "retry"){
+  questions.forEach(q => {
+    const idx = results.findIndex(r => r.question === q.question);
+    if(idx !== -1) results[idx] = q;
+  });
+}
 
-    const data ={
-   note:note,
-   questions:questions
-  };
+const sourceFinale = mode === "retry" ? results : questions;
+const note = calculerNoteFinale(sourceFinale);
+const data = { note, questions: sourceFinale };
+
   console.log("DATA ENVOYÉ :", data); 
 //evoie une requête HTTP a cette address
 fetch(`/api/submit-qcm`,{
@@ -618,7 +681,7 @@ fetch(`/api/submit-qcm`,{
     //si succss est true(module rçu)
     if (result.success){   
        //ici il faut un redirection vars la page de la note 
-       window.location.href = "noteqcm.html";
+       window.location.href = "note.html";
     }else{
       alert("erreur:"+result.message);
     }

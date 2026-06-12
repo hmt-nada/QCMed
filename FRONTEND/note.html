@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/png" href="logo/favicon-96x96.png" sizes="96x96" />
+  <link rel="icon" type="image/svg+xml" href="logo/favicon.svg" />
+  <link rel="shortcut icon" href="logo/favicon.ico" />
+  <link rel="apple-touch-icon" sizes="180x180" href="logo/apple-touch-icon.png" />
+  <meta name="apple-mobile-web-app-title" content="QCMed" />
+  <link rel="manifest" href="logo/site.webmanifest" />
+
+  <!-- CSS modulaire -->
+  <link rel="stylesheet" href="css/note.css" />
+
+  <title>Évaluation — QCMed</title>
+</head>
+<body class="body-qcm">
+
+  <!-- ===== HEADER ===== -->
+  <div class="header">
+    <img class="logo2" src="logo/brain-cercle.png" alt="QCMed logo" />
+
+    <div class="quitter2 texte-anim2">
+      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 512 512" aria-hidden="true">
+        <path fill="currentColor" d="M469.3 469.3H42.7V42.7H256L298.7 0h-256C19.1 0 0 19.1 0 42.7v426.7C0 492.9 19.1 512 42.7 512h426.7c23.6 0 42.7-19.1 42.7-42.7V320l-42.7 42.7v106.6zm-384-42.6C149.1 255.7 234.7 256 362.7 256v85.3L512 192L362.7 42.7V128C85.3 128 85.1 341.1 85.3 426.7"/>
+      </svg>
+      <a href="accueil.html" class="nonlien">
+        <p class="ajustquitter">Retour à l'accueil</p>
+      </a>
+    </div>
+  </div>
+
+  <!-- ===== CONTENU PRINCIPAL ===== -->
+  <main class="result-page">
+
+    <!-- Titre haut de page -->
+    <p class="bigtitle postit">Bravo&nbsp;! Vous êtes arrivé(e) au bout de ce QCM</p>
+
+    <!-- Carte résultat -->
+    <div class="result-card">
+
+      <!-- Note textuelle injectée par JS (ex : "14 / 20") -->
+      <p class="bigtitlenote" id="lanote"></p>
+
+      <!-- Cercle de score visuel — affiché/masqué + rempli par JS -->
+      <div class="note" id="note" style="display: none;"></div>
+
+      <!-- Appréciation (titre) -->
+      <p class="bigtitlemark" id="remark2"></p>
+
+      <!-- Badge appréciation détaillée -->
+      <p class="bigtitlemark2" id="remark"></p>
+
+    </div>
+
+    <!-- Boutons d'action -->
+    <div class="actions-row">
+
+      <div class="buttcorr">
+        <button class="button" id="btnCorrige">
+          <span class="shadow"></span>
+          <span class="edge"></span>
+          <div class="front">
+            <span style="font-family:'Poppins',sans-serif;">Afficher le corrigé du QCM</span>
+          </div>
+        </button>
+      </div>
+
+      <div class="buttrefais" id="btnrefais">
+        <button class="button">
+          <span class="shadow"></span>
+          <span class="edge"></span>
+          <div class="front">
+            <span style="font-family:'Poppins',sans-serif;">Nouvelle tentative sur les questions ratées</span>
+          </div>
+        </button>
+      </div>
+
+    </div>
+
+  </main>
+
+  <!-- ===== POPUP — choix corrigé ===== -->
+  <div class="popup2-overlay" id="popup">
+    <div class="popup2">
+      <h2>Quel corrigé voulez-vous voir&nbsp;?</h2>
+      <button class="btn-all"    id="corrigeAll">Tout le QCM</button>
+      <button class="btn-false"  id="corrigeFalse">Seulement les fausses</button>
+      <br/>
+      <button class="btn-cancel" id="cancel">Annuler</button>
+    </div>
+  </div>
+
+  <!-- ===== POPUP SUCCÈS (toutes réponses justes) ===== -->
+  <div id="popupSucces" class="popup-succes">
+    <span class="popup-close" onclick="closePopup()">&times;</span>
+    <div class="popup-content">
+      <h3>Bravo&nbsp;!</h3>
+      <p>Toutes vos réponses sont correctes. Aucune question ratée&nbsp;!</p>
+    </div>
+  </div>
+
+  <script src="script/nteqcm.js"></script>
+
+</body>
+</html>
