@@ -204,3 +204,25 @@ if (overlay) {
     if (e.target === overlay) overlay.style.display = 'none';
   });
 }
+// ── Swipe tactile ──────────────────────────────────────
+let touchStartX = 0;
+let touchStartY = 0;
+
+document.addEventListener('touchstart', (e) => {
+  touchStartX = e.touches[0].clientX;
+  touchStartY = e.touches[0].clientY;
+}, { passive: true });
+
+document.addEventListener('touchend', (e) => {
+  const deltaX = e.changedTouches[0].clientX - touchStartX;
+  const deltaY = e.changedTouches[0].clientY - touchStartY;
+
+  if (Math.abs(deltaX) < Math.abs(deltaY)) return;
+  if (Math.abs(deltaX) < 50) return;
+
+  if (deltaX < 0) {
+    document.getElementById('next').click();
+  } else {
+    document.getElementById('prev').click();
+  }
+}, { passive: true });

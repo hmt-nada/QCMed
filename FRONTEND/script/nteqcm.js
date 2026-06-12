@@ -89,23 +89,46 @@ btnrefais.addEventListener("click", () => {
 });
 
 function showPopupAmelioration(oldNote, newNote, mark) {
-    const popupDiv = document.createElement("div");
-    popupDiv.style.position = "fixed";
-    popupDiv.style.bottom = "20px";
-    popupDiv.style.left = "50%";
-    popupDiv.style.transform = "translateX(-50%)";
-    popupDiv.style.background = "#2e7d32";
-    popupDiv.style.color = "white";
-    popupDiv.style.padding = "10px 20px";
-    popupDiv.style.borderRadius = "8px";
-    popupDiv.style.fontSize = "0.9rem";
-    popupDiv.style.zIndex = "2000";
-    
-    if (mark === "true") {
-        popupDiv.innerHTML = `Progression ! Ta note est passée de <b>${oldNote}/20</b> à <b>${newNote}/20</b> 🚀`;
-    } else {
-        popupDiv.innerHTML = `Bravo ! Tu avances très bien 🚀`;
-    }
-    document.body.appendChild(popupDiv);
-    setTimeout(() => popupDiv.remove(), 3500);
+  const popupDiv = document.createElement("div");
+  popupDiv.style.cssText = `
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #2e7d32;
+    color: white;
+    padding: 12px 40px 12px 20px;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    z-index: 2000;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+    white-space: nowrap;
+  `;
+
+  if (mark === "true") {
+    popupDiv.innerHTML = `Progression ! Ta note est passée de <b>${oldNote}/20</b> à <b>${newNote}/20</b> 🚀`;
+  } else {
+    popupDiv.innerHTML = `Bravo ! Tu avances très bien 🚀`;
+  }
+
+  // Bouton ✕ pour fermer manuellement
+  const closeBtn = document.createElement("span");
+  closeBtn.textContent = "✕";
+  closeBtn.style.cssText = `
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    cursor: pointer;
+    font-size: 1rem;
+    opacity: 0.8;
+  `;
+  closeBtn.onclick = () => popupDiv.remove();
+  popupDiv.appendChild(closeBtn);
+
+  document.body.appendChild(popupDiv);
+  // ← plus de setTimeout, le popup reste jusqu'au clic sur ✕
 }
