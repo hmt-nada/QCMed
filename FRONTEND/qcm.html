@@ -4,8 +4,15 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Lexend:wght@600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/qcm.css"/>
+  <script>
+    /* applique le thème avant le premier rendu → pas de flash */
+    (function(){
+      const saved = localStorage.getItem('qcmed-theme');
+      if (saved) document.documentElement.setAttribute('data-theme', saved);
+    })();
+  </script>
   <title>QCM — QCMed</title>
 </head>
 <body class="body-qcm">
@@ -18,12 +25,27 @@
     </div>
   </div>
 
-  <!-- HEADER -->
+  <!-- HEADER (fixe, hors scroll) -->
   <header class="header">
     <div class="header-brand">
       <img class="logo2" src="logo/brain-cercle.png" alt="QCMed Logo"/>
       <span class="brand-name">QCMed</span>
     </div>
+
+    <!-- TOGGLE CLAIR / SOMBRE -->
+    <button class="theme-toggle" id="themeToggle" aria-label="Basculer le thème" title="Mode clair / sombre">
+      <!-- Soleil (mode clair actif → cliquer passe en sombre) -->
+      <svg class="icon-sun" xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/>
+        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+        <line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/>
+        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+      </svg>
+      <!-- Lune (mode sombre actif → cliquer passe en clair) -->
+      <svg class="icon-moon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+      </svg>
+    </button>
 
     <div class="header-center">
       <div class="coursename">
@@ -32,41 +54,133 @@
         <p class="numquestion" id="numero-question">Question 1 / 10</p>
       </div>
     </div>
-
     <div class="quitter texte-anim2" id="quitterlien">
-      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 512 512" aria-hidden="true"><path fill="currentColor" d="M469.3 469.3H42.7V42.7H256L298.7 0h-256C19.1 0 0 19.1 0 42.7v426.7C0 492.9 19.1 512 42.7 512h426.7c23.6 0 42.7-19.1 42.7-42.7V320l-42.7 42.7v106.6zm-384-42.6C149.1 255.7 234.7 256 362.7 256v85.3L512 192L362.7 42.7V128C85.3 128 85.1 341.1 85.3 426.7"/></svg>
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 512 512" aria-hidden="true"><path fill="currentColor" d="M469.3 469.3H42.7V42.7H256L298.7 0h-256C19.1 0 0 19.1 0 42.7v426.7C0 492.9 19.1 512 42.7 512h426.7c23.6 0 42.7-19.1 42.7-42.7V320l-42.7 42.7v106.6zm-384-42.6C149.1 255.7 234.7 256 362.7 256v85.3L512 192L362.7 42.7V128C85.3 128 85.1 341.1 85.3 426.7"/></svg>
       <span>Quitter</span>
     </div>
   </header>
 
-  <!-- PROGRESS BAR -->
+  <!-- PROGRESS BAR (fixe, hors scroll) -->
   <div class="progress-wrap">
     <div class="progress-bar" id="progress-bar" style="width: 10%"></div>
   </div>
 
-  <!-- TIMER -->
-  <div class="timer-zone">
-    <svg id="horloge" class="horlog" xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 36 36" aria-hidden="true">
-      <path fill="#ffcc4d" d="M20 6.042c0 1.112-.903 2.014-2 2.014s-2-.902-2-2.014V2.014C16 .901 16.903 0 18 0s2 .901 2 2.014z"/>
-      <path fill="#536eff" d="M34.015 19.385c0 8.898-7.115 16.111-15.894 16.111c-8.777 0-15.893-7.213-15.893-16.111c0-8.9 7.116-16.113 15.893-16.113c8.778-.001 15.894 7.213 15.894 16.113"/>
-      <path fill="#e6e7e8" d="M30.041 19.385c0 6.674-5.335 12.084-11.92 12.084c-6.583 0-11.919-5.41-11.919-12.084C6.202 12.71 11.538 7.3 18.121 7.3c6.585-.001 11.92 5.41 11.92 12.085"/>
-      <path fill="#414042" d="M23 20h-5a1 1 0 0 1-1-1v-9a1 1 0 0 1 2 0v8h4a1 1 0 1 1 0 2"/>
-    </svg>
-    <p class="count2" id="compteur">00:00</p>
-  </div>
+  <!-- ZONE SCROLLABLE -->
+  <div class="qcm-scroll">
 
-  <!-- ALERT SIGNALEMENT -->
-  <p class="alert_erreur poserror" id="alert_erreur" aria-live="assertive">
-    ✓ Signalement envoyé, merci !
-  </p>
+    <!-- META : timer + bouton signaler sur la même ligne -->
+    <div class="qcm-meta">
+      <div class="timer-zone">
+        <svg id="horloge" class="horlog" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 36 36" aria-hidden="true">
+          <path fill="#ffcc4d" d="M20 6.042c0 1.112-.903 2.014-2 2.014s-2-.902-2-2.014V2.014C16 .901 16.903 0 18 0s2 .901 2 2.014z"/>
+          <path fill="#536eff" d="M34.015 19.385c0 8.898-7.115 16.111-15.894 16.111c-8.777 0-15.893-7.213-15.893-16.111c0-8.9 7.116-16.113 15.893-16.113c8.778-.001 15.894 7.213 15.894 16.113"/>
+          <path fill="#e6e7e8" d="M30.041 19.385c0 6.674-5.335 12.084-11.92 12.084c-6.583 0-11.919-5.41-11.919-12.084C6.202 12.71 11.538 7.3 18.121 7.3c6.585-.001 11.92 5.41 11.92 12.085"/>
+          <path fill="#414042" d="M23 20h-5a1 1 0 0 1-1-1v-9a1 1 0 0 1 2 0v8h4a1 1 0 1 1 0 2"/>
+        </svg>
+        <p class="count2" id="compteur">00:00</p>
+      </div>
+      <div class="buttfaute" id="btnfaute">
+        <button class="btn-ghost" type="button">
+          <i class="fa-regular fa-flag"></i>
+          Signaler une erreur
+        </button>
+      </div>
+    </div>
 
-  <!-- BOUTON SIGNALER -->
-  <div class="buttfaute" id="btnfaute">
-    <button class="btn-ghost" type="button">
-      <i class="fa-regular fa-flag"></i>
-      Signaler une erreur dans la question
-    </button>
-  </div>
+    <!-- IMAGE QCM (flottante à droite sur desktop) -->
+    <div class="qcm-img-wrap">
+      <img id="qcm-img" class="img-qcm" style="display:none; cursor:pointer;" src="" alt="Illustration de la question">
+      <button id="zoom" class="btn-zoom" style="display:none" aria-label="Agrandir l'image">
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" aria-hidden="true">
+          <path fill="currentColor" d="M6.4 19H8q.425 0 .713.288T9 20t-.288.713T8 21H4q-.425 0-.712-.288T3 20v-4q0-.425.288-.712T4 15t.713.288T5 16v1.6l2.4-2.4q.275-.275.7-.275t.7.275t.275.7t-.275.7zm11.2 0l-2.4-2.4q-.275-.275-.275-.7t.275-.7t.7-.275t.7.275l2.4 2.4V16q0-.425.288-.712T20 15t.713.288T21 16v4q0 .425-.288.713T20 21h-4q-.425 0-.712-.288T15 20t.288-.712T16 19zM5 6.4V8q0 .425-.288.713T4 9t-.712-.288T3 8V4q0-.425.288-.712T4 3h4q.425 0 .713.288T9 4t-.288.713T8 5H6.4l2.4 2.4q.275.275.275.7t-.275.7t-.7.275t-.7-.275zm14 0l-2.4 2.4q-.275.275-.7.275t-.7-.275t-.275-.7t.275-.7L17.6 5H16q-.425 0-.712-.287T15 4t.288-.712T16 3h4q.425 0 .713.288T21 4v4q0 .425-.288.713T20 9t-.712-.288T19 8z"/>
+        </svg>
+        Zoom
+      </button>
+    </div>
+
+    <!-- CONTENU PRINCIPAL -->
+    <main class="qcm-main">
+
+      <!-- QUESTION -->
+      <div id="question" class="question question-card">
+        <div class="question-badge">Question</div>
+        <p class="questioncontent" id="texte-question">Le texte de la question apparaît ici.</p>
+      </div>
+
+      <!-- RÉPONSES -->
+      <div class="responsebox">
+        <div class="eachresponse" data-choice="A">
+          <span class="choice-letter">A</span>
+          <p class="ajust0">Réponse 1</p>
+        </div>
+        <div class="eachresponse" data-choice="B">
+          <span class="choice-letter">B</span>
+          <p class="ajust0">Réponse 2</p>
+        </div>
+        <div class="eachresponse" data-choice="C">
+          <span class="choice-letter">C</span>
+          <p class="ajust0">Réponse 3</p>
+        </div>
+        <div class="eachresponse" data-choice="D">
+          <span class="choice-letter">D</span>
+          <p class="ajust0">Réponse 4</p>
+        </div>
+        <div class="eachresponse" data-choice="E">
+          <span class="choice-letter">E</span>
+          <p class="ajust0">Réponse 5</p>
+        </div>
+      </div>
+
+      <!-- MESSAGES D'ÉTAT -->
+      <p id="expresscorr" class="info-msg ordre" style="display:none">Vous pouvez encore modifier vos réponses avant d'afficher la correction.</p>
+      <p id="repfigcorr" class="info-msg warn ordre2" style="display:none">Les réponses sont figées.</p>
+      <p id="expressval" class="info-msg ordre3" style="display:none">Vous pouvez changer vos réponses jusqu'à validation ou fin du temps.</p>
+
+      <!-- NAVIGATION -->
+      <div class="nav-actions">
+        <div class="nav-left">
+          <div class="buttprecedent" id="btnprec">
+            <button class="btn-nav btn-secondary" type="button">
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M15 18l-6-6 6-6"/></svg>
+              Précédent
+            </button>
+          </div>
+        </div>
+        <div class="nav-center">
+          <div class="buttcorrection" id="btncorr">
+            <button class="btn-nav btn-outline" type="button">
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+              Correction
+            </button>
+          </div>
+          <div id="btnvalider" class="buttval">
+            <button class="btn-nav btn-outline" type="button">
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+              Valider
+            </button>
+          </div>
+        </div>
+        <div class="nav-right">
+          <div id="btnsuivant" class="buttsuivant">
+            <button class="btn-nav btn-primary" type="button">
+              Suivant
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 18l6-6-6-6"/></svg>
+            </button>
+          </div>
+          <div id="btnenvoyer" class="buttsoumettre">
+            <button class="btn-nav btn-submit" type="button">
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+              Soumettre
+            </button>
+          </div>
+        </div>
+      </div>
+
+    </main>
+  </div><!-- fin .qcm-scroll -->
+
+  <!-- ALERT -->
+  <p class="alert_erreur poserror" id="alert_erreur" aria-live="assertive">✓ Signalement envoyé, merci !</p>
 
   <!-- MODAL SIGNALEMENT -->
   <div id="reportModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
@@ -86,107 +200,17 @@
     </div>
   </div>
 
-  <!-- IMAGE QCM -->
-  <div class="qcm-img-wrap">
-    <img id="qcm-img" class="img-qcm" style="display:none; cursor:pointer;" src="" alt="Illustration de la question">
-    <button id="zoom" class="btn-zoom" style="display:none" aria-label="Agrandir l'image">
-      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
-        <path fill="currentColor" d="M6.4 19H8q.425 0 .713.288T9 20t-.288.713T8 21H4q-.425 0-.712-.288T3 20v-4q0-.425.288-.712T4 15t.713.288T5 16v1.6l2.4-2.4q.275-.275.7-.275t.7.275t.275.7t-.275.7zm11.2 0l-2.4-2.4q-.275-.275-.275-.7t.275-.7t.7-.275t.7.275l2.4 2.4V16q0-.425.288-.712T20 15t.713.288T21 16v4q0 .425-.288.713T20 21h-4q-.425 0-.712-.288T15 20t.288-.712T16 19zM5 6.4V8q0 .425-.288.713T4 9t-.712-.288T3 8V4q0-.425.288-.712T4 3h4q.425 0 .713.288T9 4t-.288.713T8 5H6.4l2.4 2.4q.275.275.275.7t-.275.7t-.7.275t-.7-.275zm14 0l-2.4 2.4q-.275.275-.7.275t-.7-.275t-.275-.7t.275-.7L17.6 5H16q-.425 0-.712-.287T15 4t.288-.712T16 3h4q.425 0 .713.288T21 4v4q0 .425-.288.713T20 9t-.712-.288T19 8z"/>
-      </svg>
-      Zoomer
-    </button>
-  </div>
-
   <!-- OVERLAY ZOOM -->
   <div id="img-overlay" role="dialog" aria-modal="true" aria-label="Image agrandie">
     <img id="zoomed-img" src="" alt="Image agrandie">
     <button id="zoom2" class="btn-overlay-close" aria-label="Fermer">
-      <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" aria-hidden="true">
+      <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" viewBox="0 0 24 24" aria-hidden="true">
         <path fill="white" d="M18.3 5.71L12 12.01l-6.3-6.3L4.29 7.11 10.59 13.4l-6.3 6.3 1.41 1.41L12 14.81l6.3 6.3 1.41-1.41-6.3-6.3 6.3-6.3z"/>
       </svg>
     </button>
   </div>
 
-  <!-- QUESTION -->
-  <main class="qcm-main">
-    <div id="question" class="question question-card">
-      <div class="question-badge">Question</div>
-      <p class="questioncontent" id="texte-question">Le texte de la question apparaît ici.</p>
-    </div>
-
-    <!-- RÉPONSES -->
-    <div class="responsebox">
-      <div class="eachresponse" data-choice="A">
-        <span class="choice-letter">A</span>
-        <p class="ajust0">Réponse 1</p>
-      </div>
-      <div class="eachresponse" data-choice="B">
-        <span class="choice-letter">B</span>
-        <p class="ajust0">Réponse 2</p>
-      </div>
-      <div class="eachresponse" data-choice="C">
-        <span class="choice-letter">C</span>
-        <p class="ajust0">Réponse 3</p>
-      </div>
-      <div class="eachresponse" data-choice="D">
-        <span class="choice-letter">D</span>
-        <p class="ajust0">Réponse 4</p>
-      </div>
-      <div class="eachresponse" data-choice="E">
-        <span class="choice-letter">E</span>
-        <p class="ajust0">Réponse 5</p>
-      </div>
-    </div>
-
-    <!-- MESSAGES D'ÉTAT -->
-    <p id="expresscorr" class="info-msg ordre" style="display:none">Vous pouvez encore modifier vos réponses avant d'afficher la correction.</p>
-    <p id="repfigcorr" class="info-msg warn ordre2" style="display:none">Les réponses sont figées.</p>
-    <p id="expressval" class="info-msg ordre3" style="display:none">Vous pouvez changer vos réponses jusqu'à validation ou fin du temps.</p>
-
-    <!-- ACTIONS -->
-    <div class="nav-actions">
-      <div class="nav-left">
-        <div class="buttprecedent" id="btnprec">
-          <button class="btn-nav btn-secondary" type="button">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>
-            Précédent
-          </button>
-        </div>
-      </div>
-
-      <div class="nav-center">
-        <div class="buttcorrection" id="btncorr">
-          <button class="btn-nav btn-outline" type="button">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-            Afficher la correction
-          </button>
-        </div>
-        <div id="btnvalider" class="buttval">
-          <button class="btn-nav btn-outline" type="button">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
-            Valider
-          </button>
-        </div>
-      </div>
-
-      <div class="nav-right">
-        <div id="btnsuivant" class="buttsuivant">
-          <button class="btn-nav btn-primary" type="button">
-            Suivant
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg>
-          </button>
-        </div>
-        <div id="btnenvoyer" class="buttsoumettre">
-          <button class="btn-nav btn-submit" type="button">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
-            Soumettre
-          </button>
-        </div>
-      </div>
-    </div>
-  </main>
-
-  <!-- POPUP SOUMETTRE -->
+  <!-- POPUPS -->
   <div id="popup-confirmation" class="popup" role="dialog" aria-modal="true">
     <div class="popup-content">
       <div class="popup-icon">📋</div>
@@ -199,7 +223,6 @@
     </div>
   </div>
 
-  <!-- POPUP QUITTER -->
   <div id="popup-quitter" class="popup" role="dialog" aria-modal="true">
     <div class="popup-content">
       <div class="popup-icon">⚠️</div>
@@ -211,6 +234,26 @@
       </div>
     </div>
   </div>
+
+  <script>
+  /* ── THEME TOGGLE ── */
+  (function(){
+    const btn = document.getElementById('themeToggle');
+    const root = document.documentElement;
+    function getTheme(){
+      const saved = localStorage.getItem('qcmed-theme');
+      if (saved) return saved;
+      return window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+    }
+    function applyTheme(t){
+      root.setAttribute('data-theme', t);
+      localStorage.setItem('qcmed-theme', t);
+    }
+    btn.addEventListener('click', function(){
+      applyTheme(getTheme() === 'dark' ? 'light' : 'dark');
+    });
+  })();
+  </script>
 
   <script>
   (function(){

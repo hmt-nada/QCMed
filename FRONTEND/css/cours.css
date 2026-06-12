@@ -438,12 +438,11 @@
 
 @media (min-width: 768px) {
   .bottom-bar {
-    bottom: calc(68px + env(safe-area-inset-bottom, 0px));
-    padding-bottom: 0; /* le safe-area est déjà dans le bottom */
+    bottom: 0;   /* navbar latérale/haute → pas besoin de décaler */
   }
 
   .ajust {
-    padding-bottom: 170px; /* 90px barre + 68px navbar + marge */
+    padding-bottom: 90px; /* même valeur que mobile, juste la barre */
   }
 }
 
