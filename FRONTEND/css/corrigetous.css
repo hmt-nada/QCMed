@@ -16,6 +16,8 @@
     --bg-correct: #e8f5e9;
     --color-wrong: #c62828;
     --bg-wrong: #ffebee;
+    --color-missed: #f57c00;
+    --bg-missed: #fff3e0;
 }
 
 * {
@@ -128,7 +130,7 @@ body {
 }
 
 /* ==========================================================================
-   4. LES RÉPONSES
+   4. LES RÉPONSES & ETATS DE CORRECTION
    ========================================================================== */
 .responsebox {
     display: flex;
@@ -137,7 +139,7 @@ body {
 }
 
 /* Style de base d'une réponse */
-.eachresponse {
+.eachresponse, .eachresponse2 {
     display: flex;
     align-items: center;
     gap: 15px;
@@ -148,7 +150,7 @@ body {
     transition: var(--transition);
 }
 
-.eachresponse svg {
+.eachresponse svg, .eachresponse2 svg {
     flex-shrink: 0;
 }
 
@@ -157,26 +159,40 @@ body {
     font-weight: 500;
 }
 
-/* CLASSE ACTIVE / MODIFIÉE PAR JS POUR LA CORRECTION (.eachresponse2)
-   Vous pouvez adapter ces classes selon la logique de votre script */
-.eachresponse2.correct {
-    background-color: var(--bg-correct);
-    border-color: var(--color-correct);
-    color: var(--color-correct);
+/* --------------------------------------------------------------------------
+   CLASSES DE CORRECTION (Générées par le JavaScript)
+   -------------------------------------------------------------------------- */
+
+/* STYLES DES RÉPONSES CORRECTES (Sélectionnées par l'utilisateur et vraies) */
+.eachresponse.correct, .eachresponse2.correct {
+    background-color: var(--bg-correct) !important;
+    border-color: var(--color-correct) !important;
+    color: var(--color-correct) !important;
 }
-.eachresponse2.correct svg path {
-    fill: var(--color-correct);
+.eachresponse.correct svg path, .eachresponse2.correct svg path {
+    fill: var(--color-correct) !important;
 }
 
-.eachresponse2.wrong {
-    background-color: var(--bg-wrong);
-    border-color: var(--color-wrong);
-    color: var(--color-wrong);
+/* STYLES DES RÉPONSES FAUSSES (Sélectionnées par l'utilisateur alors qu'elles sont fausses) */
+.eachresponse.wrong, .eachresponse2.wrong {
+    background-color: var(--bg-wrong) !important;
+    border-color: var(--color-wrong) !important;
+    color: var(--color-wrong) !important;
 }
-.eachresponse2.wrong svg path {
-    fill: var(--color-wrong);
+.eachresponse.wrong svg path, .eachresponse2.wrong svg path {
+    fill: var(--color-wrong) !important;
 }
 
+/* STYLES DES RÉPONSES RATÉES (Vraies, mais oubliées/non-cochées par l'utilisateur) */
+.eachresponse.missed, .eachresponse2.missed {
+    background-color: var(--bg-missed) !important;
+    border-color: var(--color-missed) !important;
+    color: var(--color-missed) !important;
+    border-style: dashed; /* Optionnel : contour en tirets pour montrer l'oubli */
+}
+.eachresponse.missed svg path, .eachresponse2.missed svg path {
+    fill: var(--color-missed) !important;
+}
 
 /* ==========================================================================
    5. NAVIGATION (BOUTONS PREV / NEXT) GAUCHE / DROITE

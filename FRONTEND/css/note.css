@@ -4,14 +4,13 @@
    ============================================================ */
 
 /* ---- Google Fonts ---- */
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;900&family=Oleo+Script:wght@700&display=swap');
+/* ==========================================================================
+   VARIABLES & FONTS (Conservées & Nettoyées)
+   ========================================================================== */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Oleo+Script:wght@700&display=swap');
 
-/* ---- Reset minimal ---- */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-/* ============================================================
-   BODY — fond animé existant conservé
-   ============================================================ */
 .body-qcm {
   font-family: 'Poppins', sans-serif;
   min-height: 100vh;
@@ -30,365 +29,189 @@
   100% { background-position: 0% 50%; }
 }
 
-/* ============================================================
-   HEADER
-   ============================================================ */
+/* ==========================================================================
+   HEADER (Discret)
+   ========================================================================== */
 .header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0.75rem 1.5rem;
-  background: rgba(0, 0, 0, 0.25);
+  padding: 0.6rem 1.2rem;
+  background: rgba(0, 0, 0, 0.2);
   backdrop-filter: blur(8px);
-  border-bottom: 1px solid rgba(255,255,255,0.08);
+  border-bottom: 1px solid rgba(255,255,255,0.05);
   position: sticky;
   top: 0;
   z-index: 100;
 }
 
 .logo2 {
-  width: 56px;
-  height: 56px;
+  width: 42px;
+  height: 42px;
   border-radius: 50%;
   object-fit: cover;
-  object-position: center;
-  flex-shrink: 0;
 }
 
-/* Bouton retour */
 .quitter2 {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.4rem;
   cursor: pointer;
-  color: white;
-  font-weight: 600;
-  font-size: 0.95rem;
-  text-decoration: none;
-  padding: 0.4rem 0.9rem;
+  padding: 0.4rem 0.8rem;
   border-radius: 20px;
-  border: 1px solid rgba(255,255,255,0.25);
-  transition: background 0.2s ease, transform 0.15s ease;
-  position: relative;
+  border: 1px solid rgba(255,255,255,0.15);
+  transition: background 0.2s, transform 0.15s;
 }
-
-.quitter2::after {
-  content: "";
-  position: absolute;
-  width: 100%;
-  height: 2px;
-  background-color: #ffffff;
-  left: 0;
-  bottom: 4px;
-  transform: scaleX(0);
-  transform-origin: center;
-  transition: transform 0.3s ease-out;
-}
-
-.quitter2:hover {
-  background: rgba(255,255,255,0.12);
-  transform: translateY(-1px);
-}
-.quitter2:hover::after { transform: scaleX(1); height: 2px; }
-.quitter2:active { transform: scale(0.97); }
-
-.ajustquitter {
-  color: white;
-  font-family: 'Poppins', sans-serif;
-  font-weight: 600;
-  font-size: 0.95rem;
-}
-
+.quitter2:hover { background: rgba(255,255,255,0.1); transform: translateY(-1px); }
+.ajustquitter { color: white; font-weight: 500; font-size: 0.85rem; }
 .nonlien { text-decoration: none; color: inherit; }
 
-/* ============================================================
-   CONTENU PRINCIPAL — carte résultat
-   ============================================================ */
+/* ==========================================================================
+   CONTENU PRINCIPAL — CARTE ALLÉGÉE (FINIE & SUBTILE)
+   ========================================================================== */
 .result-page {
   flex: 1;
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: flex-start;
-  padding: 2.5rem 1rem 3rem;
-  gap: 1.5rem;
+  justify-content: center; /* Centre verticalement pour éviter l'effet "vide" */
+  padding: 1.5rem 1rem;
+  gap: 1.2rem;
 }
 
-/* Titre "Bravo" */
+/* Titre supérieur plus petit */
 .bigtitle.postit {
-  font-family: 'Oleo Script', cursive;
-  font-size: clamp(1.4rem, 4vw, 2.4rem);
+  font-size: 1.25rem;
+  font-weight: 500;
   color: #a1d2f8;
   text-align: center;
-  line-height: 1.3;
-  max-width: 700px;
-  text-shadow: 0 2px 12px rgba(0, 150, 255, 0.25);
+  max-width: 500px;
+  opacity: 0.9;
 }
 
-/* Carte résultat centrale */
+/* La carte centrale : plus étroite, moins haute, rembourrage fin */
 .result-card {
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  border-radius: 24px;
-  backdrop-filter: blur(12px);
-  padding: 2.5rem 2rem;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  backdrop-filter: blur(16px);
+  padding: 1.75rem 2rem;
   width: 100%;
-  max-width: 560px;
+  max-width: 440px; /* Plus petit pour un rendu minimaliste */
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 1.25rem;
-  box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+  gap: 0.8rem;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.2);
 }
 
-/* Note textuelle (ex : "14/20") */
+/* Texte informatif du mode de correction */
 .bigtitlenote {
-  font-family: 'Oleo Script', cursive;
-  font-size: clamp(2.2rem, 8vw, 4rem);
-  color: #a1d2f8;
+  font-size: 0.95rem;
+  font-weight: 400;
+  color: #b0cddb;
   text-align: center;
-  line-height: 1;
-  letter-spacing: -0.5px;
 }
 
-/* Cercle de score visuel */
-.note {
-  width: clamp(110px, 25vw, 170px);
-  height: clamp(110px, 25vw, 170px);
-  border-radius: 50%;
-  background: conic-gradient(#4cafef var(--deg, 0deg), rgba(255,255,255,0.1) 0deg);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: clamp(1.6rem, 5vw, 3rem);
+/* SUPPRESSION DU CERCLE : Affichage direct, sobre et épuré de la note */
+.note-directe {
+  font-family: 'Poppins', sans-serif;
+  font-size: 2.8rem; /* Grand mais sans excès */
   font-weight: 700;
   color: #ffffff;
-  box-shadow: 0 0 30px rgba(76, 175, 239, 0.4), inset 0 0 20px rgba(0,0,0,0.2);
-  position: relative;
-  flex-shrink: 0;
+  text-shadow: 0 0 15px rgba(79, 172, 254, 0.4);
+  margin: 0.2rem 0;
 }
 
-/* Appréciation (titre) */
+/* Titre appréciation ("Évaluation de ton travail") */
 .bigtitlemark {
-  font-family: 'Oleo Script', cursive;
-  font-size: clamp(1.3rem, 4vw, 2rem);
+  font-size: 1rem;
+  font-weight: 500;
   color: #ffffff;
-  text-align: center;
-  line-height: 1.2;
+  opacity: 0.85;
 }
 
-/* Badge appréciation détaillée */
+/* Conteneur de la remarque de score */
 .bigtitlemark2 {
-  background: rgba(134, 172, 181, 0.25);
-  border: 1px solid rgba(134, 172, 181, 0.4);
-  border-radius: 12px;
-  padding: 0.5rem 1.2rem;
-  font-family: 'Oleo Script', cursive;
-  font-size: clamp(1rem, 3.5vw, 1.6rem);
+  background: rgba(134, 172, 181, 0.12);
+  border: 1px solid rgba(134, 172, 181, 0.25);
+  border-radius: 8px;
+  padding: 0.5rem 1rem;
+  font-size: 0.9rem;
+  font-weight: 400;
   color: #d4eef5;
   text-align: center;
-  max-width: 90%;
+  line-height: 1.4;
+  width: 100%;
 }
 
-/* ============================================================
-   BOUTONS D'ACTION — DESIGN PRO
-   ============================================================ */
-
+/* ==========================================================================
+   BOUTONS D'ACTION ÉPURÉS
+   ========================================================================== */
 .actions-row {
   display: flex;
-  gap: 1rem;
+  gap: 0.8rem;
   justify-content: center;
-  align-items: center;
-  flex-wrap: wrap;
   width: 100%;
-  max-width: 750px;
+  max-width: 440px;
 }
 
+.buttcorr, .buttrefais { width: 100%; }
 
-/* suppression ancien effet 3D */
-.buttcorr,
-.buttrefais {
-  position: static;
-  margin: 0;
-}
-
-
-/* bouton principal */
 .button {
   border: none;
   cursor: pointer;
   font-family: 'Poppins', sans-serif;
-  border-radius: 14px;
-  overflow: hidden;
-  transition: all 0.25s ease;
-  min-width: 260px;
-  height: 55px;
-  padding: 0;
+  border-radius: 10px;
+  width: 100%;
+  height: 46px; /* Moins haut */
   background: transparent;
 }
 
-
-/* cacher les anciennes couches */
-.button .shadow,
-.button .edge {
-  display: none;
-}
-
-
 .button .front {
-
   height: 100%;
   width: 100%;
-
   display: flex;
   justify-content: center;
   align-items: center;
-
-  padding: 0 1.5rem;
-
-  border-radius: 14px;
-
-  font-size: 0.95rem;
+  padding: 0 1rem;
+  border-radius: 10px;
+  font-size: 0.85rem;
   font-weight: 600;
-
   color: white;
-
-  background: rgba(255,255,255,0.12);
-
-  border: 1px solid rgba(255,255,255,0.25);
-
-  backdrop-filter: blur(10px);
-
-  transform: none;
-
-  transition: all 0.25s ease;
+  transition: all 0.2s ease;
 }
 
+#btnCorrige .front { background: linear-gradient(135deg, #4facfe, #0072ff); box-shadow: 0 4px 15px rgba(0,114,255,0.2); }
+#btnrefais .front { background: linear-gradient(135deg, #43e97b, #11998e); box-shadow: 0 4px 15px rgba(17,153,142,0.2); }
 
-/* bouton corrigé */
-#btnCorrige .front {
+.button:hover .front { transform: translateY(-2px); filter: brightness(1.05); }
+.button:active .front { transform: translateY(0); }
 
-  background: linear-gradient(
-    135deg,
-    #4facfe,
-    #0072ff
-  );
-
-  border: none;
-
-  box-shadow:
-  0 8px 25px rgba(0,114,255,0.25);
+@media(max-width: 480px) {
+  .actions-row { flex-direction: column; gap: 0.6rem; }
+  .result-card { padding: 1.25rem 1.5rem; }
+  .note-directe { font-size: 2.4rem; }
 }
 
-
-/* bouton nouvelle tentative */
-#btnrefais .front {
-
-  background: linear-gradient(
-    135deg,
-    #43e97b,
-    #11998e
-  );
-
-  border: none;
-
-  box-shadow:
-  0 8px 25px rgba(17,153,142,0.25);
-}
-
-
-
-/* hover */
-.button:hover .front {
-
-  transform: translateY(-3px);
-
-  filter: brightness(1.08);
-
-}
-
-
-.button:active .front {
-
-  transform: scale(0.97);
-
-}
-
-
-/* mobile */
-@media(max-width:600px){
-
-  .button {
-
-    width: 100%;
-    min-width: unset;
-
-  }
-
-  .actions-row {
-
-    flex-direction: column;
-
-  }
-
-}
-/* ============================================================
-   POPUP CHOIX CORRIGÉ
-   ============================================================ */
+/* ==========================================================================
+   POPUPS (Modifications mineures d'échelle)
+   ========================================================================== */
 .popup2-overlay {
   position: fixed;
-  top: 0; left: 0;
-  width: 100%; height: 100%;
-  background: rgba(0,0,0,0.65);
-  display: none;
-  justify-content: center;
-  align-items: center;
-  z-index: 1000;
-  backdrop-filter: blur(4px);
+  top: 0; left: 0; width: 100%; height: 100%;
+  background: rgba(0,0,0,0.5); backdrop-filter: blur(4px);
+  display: none; justify-content: center; align-items: center; z-index: 1000;
 }
-
 .popup2 {
-  background: rgba(25, 45, 80, 0.92);
-  border: 1px solid rgba(255,255,255,0.2);
-  padding: 2rem 1.75rem;
-  border-radius: 18px;
-  text-align: center;
-  max-width: 420px;
-  width: 90%;
-  box-shadow: 0 16px 40px rgba(0,0,0,0.5);
-  animation: popIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  background: #152540; border: 1px solid rgba(255,255,255,0.15);
+  padding: 1.5rem; border-radius: 12px; text-align: center; max-width: 340px; width: 90%;
 }
-
-@keyframes popIn {
-  from { transform: scale(0.85); opacity: 0; }
-  to   { transform: scale(1);    opacity: 1; }
-}
-
-.popup2 h2 {
-  font-size: 1.15rem;
-  font-weight: 600;
-  color: #e2eaf5;
-  margin-bottom: 1.5rem;
-  line-height: 1.4;
-}
-
-.popup2 button {
-  margin: 0.4rem;
-  padding: 0.65rem 1.2rem;
-  border: none;
-  border-radius: 10px;
-  cursor: pointer;
-  font-family: 'Poppins', sans-serif;
-  font-size: 0.9rem;
-  font-weight: 700;
-  transition: opacity 0.2s, transform 0.15s;
-}
-.popup2 button:hover  { opacity: 0.88; transform: scale(1.04); }
-.popup2 button:active { transform: scale(0.97); }
-
-.btn-all    { background: #52bd56; color: #012401; }
-.btn-false  { background: #f44336; color: #1a0000; }
-.btn-cancel { background: rgba(255,255,255,0.15); color: #e0e0e0; border: 1px solid rgba(255,255,255,0.2) !important; }
+.popup2 h2 { font-size: 1rem; color: #e2eaf5; margin-bottom: 1.2rem; font-weight: 500; }
+.popup2 button { margin: 0.3rem; padding: 0.5rem 1rem; border: none; border-radius: 6px; cursor: pointer; font-size: 0.85rem; font-weight: 600; }
+.btn-all { background: #4caf50; color: white; }
+.btn-false { background: #f44336; color: white; }
+.btn-cancel { background: rgba(255,255,255,0.1); color: #ccc; }
 
 /* ============================================================
    POPUP SUCCÈS (toutes réponses justes)
