@@ -13,12 +13,20 @@ function getNomModule(coursId) {
 
 //récupération du temps 
 const temps = localStorage.getItem("selectedTime");
+const params = new URLSearchParams(window.location.search);
+const mode = params.get("mode") || "normal";
 
-const introData = [
-  { chiffre: "3", texte: "Prépare-toi..." },
-  { chiffre: "2", texte: "Concentre-toi..." },
-  { chiffre: "1", texte: "C'est parti !" }
-];
+const introData = mode === "retry"
+  ? [
+      { chiffre: "3", texte: "Reprise du QCM" },
+      { chiffre: "2", texte: "Questions ratées" },
+      { chiffre: "1", texte: "Bonne chance" }
+    ]
+  : [
+      { chiffre: "3", texte: "Prépare-toi..." },
+      { chiffre: "2", texte: "Concentre-toi..." },
+      { chiffre: "1", texte: "C'est parti !" }
+    ];
 
 const messageDiv = document.getElementById('message');
 const chiffreDiv = document.getElementById('chiffre');
@@ -32,6 +40,7 @@ let intervale; // pour pouvoir le clear
 //variables globales 
 
 let questions = [];
+let results = [];
 let indexActuel = 0;
 let questionsChargees = false;
 let reponsesUtilisateur = []; 
@@ -53,30 +62,40 @@ function getResponseBoxes() {
 }
 //récupération du tableau des records des QCMs
 
+function prepareQuestion(q) {
+  return {
+    ...q,
+    userAnswer: null,
+    isCorrect: false,
+    errorType: null,
+    correctionAffichee: false,
+    score: 0
+  };
+}
+
 function chargerQuestions() {
-  fetch(`/api/questions`)
-    .then(r => r.json())
-    .then(data => {
-      if (!data.success) throw new Error(data.error || "Erreur API");
-
-      //questions = data.questions;
-    
-      // enrichir chaque question avec les variables supplémentaires
-      questions = data.questions.map(q => ({
-        ...q,                   // garder les champs envoyés par le backend
-        userAnswer: null,       // par défaut aucune réponse choisie
-        isCorrect: false,       // par défaut considéré faux
-        errorType: null ,        // facultatif : peut contenir une explication du type d’erreur
-        correctionAffichee: false,
-        score:0 
-      }));
-      questionsChargees = true;
-
-     // Le mode de correction    
-     modeCorrection = data.correction;
-     
-   })
-    .catch(err => console.error(err));
+  if (mode === "retry") {
+    fetch(`/api/tentative-faux`)
+      .then(res => res.json())
+      .then(data => {
+        results = data.results;
+        questions = data.results
+          .filter(q => !q.isCorrect)
+          .map(prepareQuestion);
+        questionsChargees = true;
+        modeCorrection = data.correction;
+      });
+  } else {
+    fetch(`/api/questions`)
+      .then(r => r.json())
+      .then(data => {
+        if (!data.success) throw new Error(data.error || "Erreur API");
+        questions = data.questions.map(prepareQuestion);
+        questionsChargees = true;
+        modeCorrection = data.correction;
+      })
+      .catch(err => console.error(err));
+  }
 }
 
 function starttimer(){
@@ -498,12 +517,18 @@ const annuler = document.getElementById("annulerSoumission");
    confirmer.addEventListener("click", () => {
     popup.style.display = "none";
     //calculer la note finale 
-   const note= calculerNoteFinale(questions);
+   // APRÈS
+if (mode === "retry") {
+  questions.forEach(q => {
+    const idx = results.findIndex(r => r.question === q.question);
+    if (idx !== -1) results[idx] = q;
+  });
+}
 
-    const data ={
-   note:note,
-   questions:questions
-  };
+const sourceFinale = mode === "retry" ? results : questions;
+const note = calculerNoteFinale(sourceFinale);
+const data = { note, questions: sourceFinale };
+
   console.log("DATA ENVOYÉ :", data); 
 //evoie une requête HTTP a cette address
 fetch(`/api/submit-qcm`,{
