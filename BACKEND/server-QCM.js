@@ -26,7 +26,7 @@ app.use(session({
 }));
 
 app.use(cors({
-  origin: ["https://qcmed-1x7m.onrender.com"],
+  origin: ["https://qcmed-1x7m.onrender.com", "http://localhost:3000", "http://127.0.0.1:3000"],
   credentials: true
 }));
 
@@ -435,7 +435,13 @@ app.get('/', (req, res) => {
   res.sendFile(path.join(frontend, 'ouverture2.html'));
 });
 
+// Route catch-all pour les pages HTML uniquement (pas les fichiers statiques)
 app.get('*', (req, res) => {
+  // Ne pas capturer les requêtes avec une extension de fichier statique
+  const ext = path.extname(req.path);
+  if (['.js', '.css', '.png', '.jpg', '.jpeg', '.gif', '.svg', '.webp', '.ico', '.woff', '.woff2', '.ttf', '.json'].includes(ext)) {
+    return res.status(404).send('Not Found');
+  }
   res.sendFile(path.join(frontend, 'ouverture2.html'));
 });
 

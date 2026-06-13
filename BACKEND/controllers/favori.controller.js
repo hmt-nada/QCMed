@@ -69,14 +69,14 @@ exports.getFavoris = async (req, res) => {
         q.choix_d, q.choix_e, q.choix_f
       ].filter(c => c !== null && c.trim() !== '');
 
-      const bonneLettre  = (q.bonne_reponse || '').toUpperCase();
-      const indiceCorrect = lettres.indexOf(bonneLettre);
+      const bonnesLettres = (q.bonne_reponse || '').split(',').map(l => l.trim().toUpperCase());
+const corrects = bonnesLettres.map(l => lettres.indexOf(l)).filter(i => i >= 0);
 
       return {
         id:          q.id,
         question:    q.enonce,
         reponses:    reponses,
-        corrects:    indiceCorrect >= 0 ? [indiceCorrect] : [],
+        corrects: corrects,
         explication: q.explication,
         cours:       q.cours_titre,
         module:      q.module_nom,

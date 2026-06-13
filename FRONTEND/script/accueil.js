@@ -1,46 +1,3 @@
-// Dictionnaire des modules par année
-const modulesParAnnee = {
-  1: [
-    { id: "anatomie", nom: "Anatomie", img: "images/anatomie.svg" },
-    { id: "biochimie", nom: "Biochimie", img: "images/biochimie.svg" },
-    { id: "biophysique", nom: "Biophysique", img: "images/biophysique1.svg" },
-    { id: "biostatistique1", nom: "Biostatistique", img: "images/statique.svg" },
-    { id: "chimie1", nom: "Chimie", img: "images/chimie.svg" },
-    { id: "cytologie1", nom: "Cytologie", img: "images/cytologie.svg" },
-    { id: "embryologie1", nom: "Embryologie", img: "images/embrio1.svg" },
-    { id: "histologie1", nom: "Histologie", img: "images/histo.svg" },
-    { id: "physiologie1", nom: "Physiologie", img: "images/physio.svg" },
-    { id: "ssh1", nom: "Santé,Société et Humanité", img: "images/ssh1.svg" }
-  ],
-  2: [
-    { id: "physiologie2", nom: "Physiologie", img: "images/physio.svg" },
-    { id: "anatomie2", nom: "Anatomie", img: "images/anatomie.svg" },
-    { id: "biochimie2", nom: "Biochimie", img: "images/biochimie.svg" },
-    { id: "biophysique2", nom: "Biophysique", img: "images/biophysique1.svg" },
-    { id: "genetique2", nom: "Génétique", img: "images/genetic.svg" },
-    { id: "genetiquediagest2", nom: "Génétique - Diagest", img: "images/diagest.svg" },
-    { id: "histologie2", nom: "Histologie", img: "images/histo.svg" },
-    { id: "immunologie2", nom: "Immunologie", img: "images/immunologie.svg" }
-  ],
-  3: [
-    { id: "immunologie3", nom: "Immunologie", img: "images/immunologie.svg" },
-    { id: "anapath3", nom: "Anatomie Pathologique", img: "images/anapath.svg" },
-    { id: "diagest3", nom: "Anatomie Pathologique - Diagest", img: "images/diagest.svg" },
-    { id: "bioch3", nom: "Biochimie", img: "images/biochimie.svg" },
-    { id: "hyperqcm3", nom: "HyperQcm", img: "images/hyperqcm.svg" },
-    { id: "immunologiediagest3", nom: "Immunologie - Diagest", img: "images/immunologiediagest.svg" },
-    { id: "microbio3", nom: "Microbiologie", img: "images/microbiologie.svg" },
-    { id: "microbiodiagest3", nom: "Microbiologie - Diagest", img: "images/microbiologiediagest.svg" },
-    { id: "parasitologiemycologie3", nom: "Parasitologie - Mycologie", img: "images/parasitologiemycologie.svg" },
-    { id: "pharmacologie3", nom: "Pharmacologie", img: "images/pharmacologie.svg" },
-    { id: "pharmacologiediagest3", nom: "Pharmacologie - Diagest", img: "images/pharmacologiediagest.svg" },
-    { id: "physiopatologie3", nom: "Physiopatologie", img: "images/physiopatologie.svg" },
-    { id: "psychologiemedicale3", nom: "Psychologie Médicale", img: "images/psychologiemedicale.svg" },
-    { id: "radiologie3", nom: "Radiologie", img: "images/radiologie.svg" },
-    { id: "semiologie3", nom: "Sémiologie", img: "images/semiologie.svg" }     
-     ]
-};
-
 // ─── Charger les modules depuis la BDD ────────────────────────────
 function afficherModules() {
   const container = document.getElementById("modules-list");
@@ -92,6 +49,9 @@ function afficherModules() {
           });
         })
         .catch(err => console.error("Erreur stats :", err));
+
+      // ✅ Activer la recherche après chargement
+      activerRecherche();
 
     })
     .catch(err => console.error('Erreur modules :', err));

@@ -238,14 +238,14 @@ exports.getQuestions = async (req, res) => {
 
       // Convertir bonne_reponse "A" → indice 0, "B" → 1, etc.
       const lettres = ['A', 'B', 'C', 'D', 'E', 'F'];
-      const bonneLettre = (q.bonne_reponse || '').toUpperCase();
-      const indiceCorrect = lettres.indexOf(bonneLettre);
+      const bonnesLettres = (q.bonne_reponse || '').split(',').map(l => l.trim().toUpperCase());
+      const corrects = bonnesLettres.map(l => lettres.indexOf(l)).filter(i => i >= 0);
 
       return {
         id:          q.id,
         question:    q.enonce,
         reponses:    reponses,
-        corrects:    indiceCorrect >= 0 ? [indiceCorrect] : [],
+        corrects: corrects,
         explication: q.explication,
         cours:       q.cours_titre,
         image:       q.image_url || null
