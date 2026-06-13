@@ -5,33 +5,14 @@ const db = require("./config/db");
 const bcrypt = require("bcrypt");
 const cron = require("node-cron");
 const crypto = require("crypto");
+const path = require('path');
 require('dotenv').config();
 
-const authRoutes = require('./routes/auth.routes');
-app.use('/api', authRoutes);
-
-const profilRoutes = require('./routes/profil.routes');
-app.use('/api', profilRoutes);
-
-const qcmRoutes = require('./routes/qcm.routes');
-app.use('/api', qcmRoutes);
-
-const contactRoutes = require('./routes/contact.routes');
-app.use('/api', contactRoutes);
-
-const favoriRoutes = require('./routes/favori.routes');
-app.use('/api', favoriRoutes);
-
-const {
-  envoyerEmailsignalemet,
-  envoyerEmailMerciUtilisateur,
-  envoyerEmailValidation,
-  envoyermailcontact
-} = require("./email");
-
+// ─── CRÉATION DE L'APP (doit être avant tout app.use) ────────────────────────
 const app = express();
 app.set("trust proxy", 1);
 
+// ─── MIDDLEWARES ──────────────────────────────────────────────────────────────
 app.use(session({
   secret: process.env.SESSION_SECRET || "hamitouchenada",
   resave: false,
@@ -40,7 +21,7 @@ app.use(session({
     secure: false,
     httpOnly: true,
     sameSite: "lax",
-    maxAge: 24 * 60 * 60 * 1000, // 24h
+    maxAge: 24 * 60 * 60 * 1000,
   },
 }));
 
@@ -51,43 +32,55 @@ app.use(cors({
 
 app.use(express.json());
 
-const path = require('path');
 app.use(express.static(path.join(__dirname, "../frontend")));
 app.use("/images", express.static(path.join(__dirname, "../frontend/images")));
 
+// ─── ROUTES (après app.use middlewares) ──────────────────────────────────────
+const authRoutes    = require('./routes/auth.routes');
+const profilRoutes  = require('./routes/profil.routes');
+const qcmRoutes     = require('./routes/qcm.routes');
+const contactRoutes = require('./routes/contact.routes');
+const favoriRoutes  = require('./routes/favori.routes');
 
-// ─── ENVOI CODE (récupération de compte) ──────────────────────────────────────
-// MODIFIÉ : suppression du filtre AND email_active = TRUE.
-//           Tous les utilisateurs existants peuvent récupérer leur compte.
+app.use('/api', authRoutes);
+app.use('/api', profilRoutes);
+app.use('/api', qcmRoutes);
+app.use('/api', contactRoutes);
+app.use('/api', favoriRoutes);
+
+// ─── EMAIL ────────────────────────────────────────────────────────────────────
+const {
+  envoyerEmailsignalemet,
+  envoyerEmailMerciUtilisateur,
+  envoyerEmailValidation,
+  envoyermailcontact
+} = require("./email");
+
+// ─── ENVOI CODE (récupération de compte) ─────────────────────────────────────
 app.post('/api/envoyer-code', async (req, res) => {
   const { email } = req.body;
   const code = Math.floor(100000 + Math.random() * 900000).toString();
   const expiration = new Date(Date.now() + 90_000);
 
   try {
-    const userQuery = `SELECT * FROM utilisateurs WHERE email = $1`;
-    const userResult = await db.query(userQuery, [email]);
+    const userResult = await db.query(`SELECT * FROM utilisateurs WHERE email = $1`, [email]);
 
     if (userResult.rowCount === 0) {
       return res.status(404).json({ error: "Utilisateur introuvable" });
     }
 
-    const checkQuery = `SELECT * FROM verifications_email WHERE email = $1`;
-    const checkResult = await db.query(checkQuery, [email]);
+    const checkResult = await db.query(`SELECT * FROM verifications_email WHERE email = $1`, [email]);
 
     if (checkResult.rowCount > 0) {
-      const updateQuery = `
-        UPDATE verifications_email
-        SET code = $1, codeexpiration = $2
-        WHERE email = $3
-      `;
-      await db.query(updateQuery, [code, expiration, email]);
+      await db.query(
+        `UPDATE verifications_email SET code = $1, codeexpiration = $2 WHERE email = $3`,
+        [code, expiration, email]
+      );
     } else {
-      const insertQuery = `
-        INSERT INTO verifications_email (email, code, codeexpiration)
-        VALUES ($1, $2, $3)
-      `;
-      await db.query(insertQuery, [email, code, expiration]);
+      await db.query(
+        `INSERT INTO verifications_email (email, code, codeexpiration) VALUES ($1, $2, $3)`,
+        [email, code, expiration]
+      );
     }
 
     const { envoyerEmailConfirmationcode } = require("./email");
@@ -101,15 +94,12 @@ app.post('/api/envoyer-code', async (req, res) => {
   }
 });
 
-
-// ─── VÉRIFICATION CODE (récupération de compte) ───────────────────────────────
-// NON MODIFIÉ : cette route sert à la récupération de mot de passe, on la garde intacte.
+// ─── VÉRIFICATION CODE ────────────────────────────────────────────────────────
 app.post('/api/verifier-code', async (req, res) => {
   const { email, code } = req.body;
 
   try {
-    const query = `SELECT * FROM verifications_email WHERE email = $1`;
-    const result = await db.query(query, [email]);
+    const result = await db.query(`SELECT * FROM verifications_email WHERE email = $1`, [email]);
 
     if (result.rowCount === 0) {
       return res.status(404).json({ success: false, message: "Utilisateur introuvable." });
@@ -121,10 +111,7 @@ app.post('/api/verifier-code', async (req, res) => {
       return res.json({ success: false, message: "Code incorrect." });
     }
 
-    const expirationDate = new Date(user.codeexpiration);
-    const maintenant = new Date();
-
-    if (maintenant > expirationDate) {
+    if (new Date() > new Date(user.codeexpiration)) {
       await db.query(
         `UPDATE verifications_email SET code = NULL, codeexpiration = NULL WHERE email = $1`,
         [email]
@@ -145,12 +132,7 @@ app.post('/api/verifier-code', async (req, res) => {
   }
 });
 
-
-
-
-
-
-// ─── NOUVEAU MOT DE PASSE (récupération de compte) ───────────────────────────
+// ─── NOUVEAU MOT DE PASSE ─────────────────────────────────────────────────────
 app.post("/api/new-password", async (req, res) => {
   const { email, password } = req.body;
 
@@ -163,30 +145,22 @@ app.post("/api/new-password", async (req, res) => {
     const user = userResult.rows[0];
     const hashedNewPassword = await bcrypt.hash(password, 10);
 
-    const updateQuery = `
-      UPDATE utilisateurs
-      SET mot_de_passe = $1, email_disconnect = $2
-      WHERE email = $3
-      RETURNING email, nom;
-    `;
-    const updateResult = await db.query(updateQuery, [hashedNewPassword, false, email]);
+    const updateResult = await db.query(
+      `UPDATE utilisateurs SET mot_de_passe = $1, email_disconnect = $2 WHERE email = $3 RETURNING email, nom`,
+      [hashedNewPassword, false, email]
+    );
 
     if (updateResult.rowCount === 0) {
       return res.status(500).json({ error: "Erreur de mise à jour." });
     }
 
-    console.log(`✅ Mot de passe mis à jour pour ${email}`);
-
-    const getUserQuery = `
-      SELECT id, email, pseudo, avatar, annee, annee_validated, validation_envoyee
-      FROM utilisateurs WHERE email = $1
-    `;
-    const getUserResult = await db.query(getUserQuery, [email]);
+    const getUserResult = await db.query(
+      `SELECT id, email, pseudo, avatar, annee, annee_validated, validation_envoyee FROM utilisateurs WHERE email = $1`,
+      [email]
+    );
     const utilisateur = getUserResult.rows[0];
 
-    if (!utilisateur) {
-      return res.status(500).send("Impossible de charger l'utilisateur.");
-    }
+    if (!utilisateur) return res.status(500).send("Impossible de charger l'utilisateur.");
 
     req.session.user = {
       id: utilisateur.id,
@@ -197,7 +171,6 @@ app.post("/api/new-password", async (req, res) => {
       avatar: utilisateur.avatar,
       annee: utilisateur.annee
     };
-
     req.session.cookie.maxAge = 30 * 24 * 60 * 60 * 1000;
 
     return res.status(200).json({
@@ -218,11 +191,9 @@ app.get('/api/adminquestions', async (req, res) => {
       return res.status(401).json({ success: false, error: "Utilisateur non connecté" });
     }
 
-    const sql = `
-      SELECT id, faculte, module, cours, question, options, correct, image
-      FROM questions ORDER BY id ASC
-    `;
-    const result = await db.query(sql);
+    const result = await db.query(
+      `SELECT id, faculte, module, cours, question, options, correct, image FROM questions ORDER BY id ASC`
+    );
 
     const questions = result.rows.map(r => ({
       id: r.id,
@@ -247,19 +218,11 @@ app.get('/api/adminquestions', async (req, res) => {
 app.post('/api/adminquestions', async (req, res) => {
   try {
     const { faculte, module, cours, question, options, correct, image } = req.body;
-
-    const sql = `
-      INSERT INTO questions (faculte, module, cours, question, options, correct, image)
-      VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *
-    `;
-    const result = await db.query(sql, [
-      faculte, module, cours, question,
-      JSON.stringify(options || []),
-      JSON.stringify(correct || []),
-      image || null
-    ]);
+    const result = await db.query(
+      `INSERT INTO questions (faculte, module, cours, question, options, correct, image) VALUES ($1,$2,$3,$4,$5,$6,$7) RETURNING *`,
+      [faculte, module, cours, question, JSON.stringify(options || []), JSON.stringify(correct || []), image || null]
+    );
     res.json({ success: true, question: result.rows[0] });
-
   } catch (err) {
     console.error("❌ Erreur SQL /adminquestions POST :", err);
     res.status(500).json({ success: false, error: err.message });
@@ -274,17 +237,11 @@ app.put('/api/adminquestions', async (req, res) => {
       return res.status(400).json({ success: false, error: "Ancienne ou nouvelle question manquante" });
     }
 
-    const sql = `
-      UPDATE questions
-      SET faculte=$1, module=$2, cours=$3, question=$4, options=$5, correct=$6, image=$7
-      WHERE question=$8 RETURNING *
-    `;
-    const result = await db.query(sql, [
-      faculte || "", module || "", cours || "", question || "",
-      JSON.stringify(options || []),
-      JSON.stringify(correct || []),
-      image || null, oldQuestion
-    ]);
+    const result = await db.query(
+      `UPDATE questions SET faculte=$1, module=$2, cours=$3, question=$4, options=$5, correct=$6, image=$7 WHERE question=$8 RETURNING *`,
+      [faculte || "", module || "", cours || "", question || "",
+       JSON.stringify(options || []), JSON.stringify(correct || []), image || null, oldQuestion]
+    );
 
     if (result.rowCount === 0)
       return res.status(404).json({ success: false, error: "Question introuvable" });
@@ -300,9 +257,7 @@ app.put('/api/adminquestions', async (req, res) => {
 app.delete('/api/adminquestions', async (req, res) => {
   try {
     const { question } = req.body;
-    if (!question) {
-      return res.status(400).json({ success: false, error: "Texte de la question requis" });
-    }
+    if (!question) return res.status(400).json({ success: false, error: "Texte de la question requis" });
 
     const result = await db.query("DELETE FROM questions WHERE question=$1", [question]);
 
@@ -330,8 +285,7 @@ app.post('/api/saveChanges', async (req, res) => {
     for (const q of questions) {
       if (q.state === 'new') {
         await client.query(
-          `INSERT INTO questions (faculte, module, cours, question, options, correct, image)
-           VALUES ($1,$2,$3,$4,$5,$6,$7)`,
+          `INSERT INTO questions (faculte, module, cours, question, options, correct, image) VALUES ($1,$2,$3,$4,$5,$6,$7)`,
           [q.faculte || '', q.module || '', q.cours || '', q.question || '',
            JSON.stringify(q.options || []), JSON.stringify(q.correct || []), q.image || null]
         );
@@ -340,9 +294,7 @@ app.post('/api/saveChanges', async (req, res) => {
         if (!oldQ) throw new Error('❌ Ancienne question manquante pour modification.');
 
         const result = await client.query(
-          `UPDATE questions
-           SET faculte=$1, module=$2, cours=$3, question=$4, options=$5, correct=$6, image=$7
-           WHERE question=$8`,
+          `UPDATE questions SET faculte=$1, module=$2, cours=$3, question=$4, options=$5, correct=$6, image=$7 WHERE question=$8`,
           [q.faculte || '', q.module || '', q.cours || '', q.question || '',
            JSON.stringify(q.options || []), JSON.stringify(q.correct || []), q.image || null, oldQ]
         );
@@ -367,15 +319,11 @@ app.post('/api/saveChanges', async (req, res) => {
   }
 });
 
-
 // ─── VALIDATION ANNUELLE (CRON) ───────────────────────────────────────────────
 async function getUtilisateurs() {
-  const query = `
-    SELECT id, nom, prenom, email, annee
-    FROM utilisateurs
-    WHERE annee NOT LIKE '%7ème Année Médecine%'
-  `;
-  const { rows } = await db.query(query);
+  const { rows } = await db.query(
+    `SELECT id, nom, prenom, email, annee FROM utilisateurs WHERE annee NOT LIKE '%7ème Année Médecine%'`
+  );
   return rows;
 }
 
@@ -389,8 +337,7 @@ function getAnneeSuivante(anneeStr) {
   if (!match) return anneeStr;
   let n = parseInt(match[0], 10);
   if (Number.isNaN(n)) return anneeStr;
-  n = Math.min(n + 1, 7);
-  return libelleAnnee(n);
+  return libelleAnnee(Math.min(n + 1, 7));
 }
 
 function generateToken() {
@@ -399,24 +346,17 @@ function generateToken() {
 
 cron.schedule('5 20 6 9 *', async () => {
   console.log("📧 Début envoi email automatique");
-
   try {
     const utilisateurs = await getUtilisateurs();
-
     for (const u of utilisateurs) {
       const token = generateToken();
-
       try {
         await db.query(
-          `UPDATE utilisateurs
-           SET token_validation = $1, annee_validated = 0, validation_envoyee = 1
-           WHERE id = $2`,
+          `UPDATE utilisateurs SET token_validation = $1, annee_validated = 0, validation_envoyee = 1 WHERE id = $2`,
           [token, u.id]
         );
-
         await envoyerEmailValidation(u.email, u.id, u.annee, getAnneeSuivante(u.annee), token);
         console.log(`✅ Email envoyé à ${u.email}`);
-
       } catch (errUpdate) {
         console.error(`❌ Erreur update token pour utilisateur ${u.id}:`, errUpdate);
       }
@@ -428,25 +368,17 @@ cron.schedule('5 20 6 9 *', async () => {
 
 app.post("/api/choix-annee", async (req, res) => {
   const { id, choix, token } = req.body;
-
-  if (!id || !choix || !token) {
-    return res.status(400).send("Paramètres manquants");
-  }
+  if (!id || !choix || !token) return res.status(400).send("Paramètres manquants");
 
   try {
     const result = await db.query(
-      `SELECT annee, email, id, pseudo, avatar, token_validation, annee_validated, validation_envoyee
-       FROM utilisateurs WHERE id = $1`,
+      `SELECT id, annee, email, pseudo, avatar, token_validation, annee_validated, validation_envoyee FROM utilisateurs WHERE id = $1`,
       [id]
     );
-
     const user = result.rows[0];
     if (!user) return res.status(404).send("Utilisateur introuvable");
     if (user.token_validation !== token) return res.status(403).send("Token invalide");
-
-    if (user.annee_validated) {
-      return res.json({ success: false, alreadyValidated: true });
-    }
+    if (user.annee_validated) return res.json({ success: false, alreadyValidated: true });
 
     const nouvelleAnnee = (choix === "passe") ? getAnneeSuivante(user.annee) : user.annee;
 
@@ -474,34 +406,25 @@ app.post("/api/choix-annee", async (req, res) => {
 });
 
 app.get("/api/check-status", async (req, res) => {
-  if (!req.session.user) {
-    return res.json({ session: false });
-  }
-
-  const userId = req.session.user.id;
+  if (!req.session.user) return res.json({ session: false });
 
   try {
     const { rows } = await db.query(
       "SELECT annee_validated FROM utilisateurs WHERE id = $1",
-      [userId]
+      [req.session.user.id]
     );
-
-    const row = rows[0];
     return res.json({
       session: true,
-      annee_validated: row ? row.annee_validated === true : false
+      annee_validated: rows[0] ? rows[0].annee_validated === true : false
     });
-
   } catch (err) {
     console.error("❌ Erreur PostgreSQL /check-status :", err.message);
     return res.status(500).json({ session: true, annee_validated: false });
   }
 });
 
-
 // ─── FRONTEND ─────────────────────────────────────────────────────────────────
 const frontend = path.join(__dirname, '../FRONTEND');
-
 app.use(express.static(frontend));
 
 app.get('/', (req, res) => {
@@ -512,7 +435,7 @@ app.get('*', (req, res) => {
   res.sendFile(path.join(frontend, 'ouverture2.html'));
 });
 
-
+// ─── DÉMARRAGE ────────────────────────────────────────────────────────────────
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`🚀 Serveur lancé sur le port ${PORT}`);
