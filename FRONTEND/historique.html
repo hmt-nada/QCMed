@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Historique — QCMed</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="css/historique.css"/>
+</head>
+<body>
+
+  <button class="btn-retour" onclick="history.back()">← Retour</button>
+
+  <main class="page-container">
+
+    <!-- En-tête -->
+    <div class="page-header">
+      <span class="badge">📋 Historique</span>
+      <h1>Mes sessions de QCM</h1>
+      <p class="page-desc">Retrouvez toutes vos sessions passées, vos notes et les corrections détaillées.</p>
+    </div>
+
+    <!-- Filtres -->
+    <div class="filtres-bar">
+      <div class="search-wrap">
+        <span class="search-icon">🔍</span>
+        <input type="text" id="searchInput" placeholder="Rechercher un module..." autocomplete="off"/>
+      </div>
+      <select id="filterNote">
+        <option value="">Toutes les notes</option>
+        <option value="excellent">Excellent (≥ 80%)</option>
+        <option value="bien">Bien (60–79%)</option>
+        <option value="moyen">Moyen (40–59%)</option>
+        <option value="faible">Faible (&lt; 40%)</option>
+      </select>
+    </div>
+
+    <!-- Stats rapides -->
+    <div class="stats-strip" id="statsStrip">
+      <div class="stat-pill">
+        <span class="stat-val" id="statTotal">—</span>
+        <span class="stat-lbl">sessions</span>
+      </div>
+      <div class="stat-pill">
+        <span class="stat-val" id="statMoyenne">—</span>
+        <span class="stat-lbl">moyenne</span>
+      </div>
+      <div class="stat-pill">
+        <span class="stat-val" id="statMeilleure">—</span>
+        <span class="stat-lbl">meilleure note</span>
+      </div>
+    </div>
+
+    <!-- Liste sessions -->
+    <div id="sessionsList" class="sessions-list">
+      <!-- injecté par JS -->
+    </div>
+
+    <!-- État vide -->
+    <div id="emptyState" class="empty-state hidden">
+      <div class="empty-icon">📭</div>
+      <p class="empty-title">Aucune session trouvée</p>
+      <p class="empty-sub">Lancez votre premier QCM pour voir votre historique ici.</p>
+      <a href="accueil.html" class="btn-primary">Commencer un QCM</a>
+    </div>
+
+    <!-- Loader -->
+    <div id="loader" class="loader-wrap">
+      <div class="spinner"></div>
+      <p>Chargement de l'historique…</p>
+    </div>
+
+  </main>
+
+  <script src="js/historique.js"></script>
+</body>
+</html>

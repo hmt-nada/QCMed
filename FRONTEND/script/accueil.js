@@ -41,44 +41,62 @@ const modulesParAnnee = {
      ]
 };
 
-function afficherModules(anneeTexte) {
-  const annee = parseInt(anneeTexte, 10);
-  const modules = modulesParAnnee[annee] || [];
+// ─── Charger les modules depuis la BDD ────────────────────────────
+function afficherModules() {
   const container = document.getElementById("modules-list");
   container.innerHTML = "";
 
-  modules.forEach(m => {
-    const card = document.createElement("div");
-    card.className = "module-container";
-    card.dataset.nom = m.nom;
-    card.dataset.module = m.id.trim().toLowerCase();
-
-    card.innerHTML = `
-      <div class="module-card" onclick="choisirmodule('${m.id}', '${m.nom}')">
-        <div class="module-card-img">
-          <img src="${m.img}" alt="${m.nom}" class="module-img"/>
-        </div>
-        <div class="module-card-body">
-          <p class="name-style">${m.nom}</p>
-          <div class="module-cours">(0 cours)</div>
-        </div>
-      </div>
-    `;
-    container.appendChild(card);
-  });
-
-  fetch("/stats/cours-par-module")
+  fetch('/api/modules')
     .then(res => res.json())
     .then(data => {
-      data.forEach(item => {
-        const el = document.querySelector(`[data-module="${item.module.trim().toLowerCase()}"]`);
-        if (!el) return;
-        const coursDiv = el.querySelector(".module-cours");
-        if (coursDiv) coursDiv.textContent = `( ${item.nombre_cours || 0} cours )`;
+      if (!data.success) return;
+
+      if (data.modules.length === 0) {
+        container.innerHTML = `
+          <p style="color:#888; font-size:14px; text-align:center; padding:20px 0;">
+            Aucun module disponible pour le moment.
+          </p>
+        `;
+        return;
+      }
+
+      data.modules.forEach(m => {
+        const card = document.createElement("div");
+        card.className = "module-container";
+        card.dataset.nom    = m.nom;
+        card.dataset.module = m.id;
+
+        card.innerHTML = `
+          <div class="module-card" onclick="choisirmodule(${m.id}, '${m.nom}')">
+            <div class="module-card-img">
+              <img src="images/${m.img ?? 'default-module.svg'}" alt="${m.nom}" class="module-img"/>
+            </div>
+            <div class="module-card-body">
+              <p class="name-style">${m.nom}</p>
+              <div class="module-cours">( 0 cours )</div>
+            </div>
+          </div>
+        `;
+        container.appendChild(card);
       });
+
+      // ✅ Appelé ICI — après que les cartes sont dans le DOM
+      fetch("/api/cours-par-module")
+        .then(res => res.json())
+        .then(stats => {
+          stats.forEach(item => {
+            const el = document.querySelector(`[data-module="${item.id}"]`);
+            if (!el) return;
+            const coursDiv = el.querySelector(".module-cours");
+            if (coursDiv) coursDiv.textContent = `( ${item.nombre_cours || 0} cours )`;
+          });
+        })
+        .catch(err => console.error("Erreur stats :", err));
+
     })
-    .catch(err => console.error("Erreur stats :", err));
+    .catch(err => console.error('Erreur modules :', err));
 }
+
 
 function activerRecherche() {
   const search = document.getElementById('search');
@@ -122,10 +140,9 @@ const titre= document.getElementById('inscrivez');
 
   function onUtilisateurCharge(user) {
   document.getElementById("pseudo2").textContent = user.pseudo;
-  afficherModules(user.annee);
+  afficherModules();
   const mobUsername = document.getElementById("mobUsername");
 if (mobUsername) mobUsername.textContent = user.pseudo;
-  activerRecherche();
   document.getElementById("loader").style.display = "none";
   document.getElementById("content").style.display = "block";
   setTimeout(() => titre.classList.add('slide-in'), 100);

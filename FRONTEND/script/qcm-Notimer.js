@@ -75,26 +75,27 @@ function prepareQuestion(q) {
 
 function chargerQuestions() {
   if (mode === "retry") {
-    fetch(`/api/tentative-faux`)
+    fetch('/api/tentative-faux')
       .then(res => res.json())
       .then(data => {
-        results = data.results;
-        questions = data.results
-          .filter(q => !q.isCorrect)
-          .map(prepareQuestion);
-        questionsChargees = true;
+        results     = data.results;
+        questions   = data.results.filter(q => !q.isCorrect).map(prepareQuestion);
         modeCorrection = data.correction;
+        questionsChargees = true;
       });
   } else {
-    fetch(`/api/questions`)
-      .then(r => r.json())
+    fetch('/api/questions')
+      .then(res => res.json())
       .then(data => {
-        if (!data.success) throw new Error(data.error || "Erreur API");
-        questions = data.questions.map(prepareQuestion);
+        if (!data.success) {
+          console.error('Erreur chargement questions :', data.message);
+          return;
+        }
+        questions      = data.questions.map(prepareQuestion);
+        modeCorrection = data.correction; // ← récupérer le mode de correction
         questionsChargees = true;
-        modeCorrection = data.correction;
       })
-      .catch(err => console.error(err));
+      .catch(err => console.error('Erreur réseau :', err));
   }
 }
 
@@ -223,6 +224,8 @@ if (questions[id].correctionAffichee) {
   document.getElementById("expresscorr").style.display = "block";
   document.getElementById("repfigcorr").style.display = "none";
 }
+// Sync état favori pour cette question
+syncFavoriBtn(q.id);
 }
 //gérer la question precedente 
 document.getElementById('btnprec').addEventListener('click',()=>{
@@ -668,4 +671,58 @@ closeBtn.addEventListener('click', () => {
 
 overlay.addEventListener('click', (e) => {
   if (e.target === overlay) overlay.style.display = 'none';
+});
+
+// ─── Favori ───────────────────────────────────────────────────────
+const btnFavori = document.getElementById('btnfavori');
+
+function updateFavoriBtn(estFavori) {
+  const btn = btnFavori.querySelector('.btn-favori');
+  if (estFavori) {
+    btn.classList.add('active');
+  } else {
+    btn.classList.remove('active');
+  }
+}
+
+// Appelé à chaque changement de question
+function syncFavoriBtn(questionId) {
+  fetch(`/api/favoris`)
+    .then(res => res.json())
+    .then(data => {
+      if (!data.success) return;
+      const estFavori = data.favoris.some(f => f.id === questionId);
+      updateFavoriBtn(estFavori);
+    })
+    .catch(() => {});
+}
+
+btnFavori.addEventListener('click', () => {
+  const q = questions[indexActuel];
+  if (!q) return;
+
+  const btn      = btnFavori.querySelector('.btn-favori');
+  const estActif = btn.classList.contains('active');
+
+  if (estActif) {
+    // Retirer des favoris
+    fetch('/api/favoris/supprimer', {
+      method:  'DELETE',
+      headers: { 'Content-Type': 'application/json' },
+      body:    JSON.stringify({ question_id: q.id })
+    })
+    .then(res => res.json())
+    .then(data => { if (data.success) updateFavoriBtn(false); })
+    .catch(() => {});
+  } else {
+    // Ajouter aux favoris
+    fetch('/api/favoris/ajouter', {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body:    JSON.stringify({ question_id: q.id })
+    })
+    .then(res => res.json())
+    .then(data => { if (data.success) updateFavoriBtn(true); })
+    .catch(() => {});
+  }
 });

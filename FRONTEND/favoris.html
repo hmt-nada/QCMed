@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/favoris.css">
+  <title>Mes Favoris — QCMed</title>
+</head>
+<body>
+
+  <!-- LOADER -->
+  <div id="loader" class="loader">
+    <div class="loader-dots">
+      <div class="dot"></div>
+      <div class="dot"></div>
+      <div class="dot"></div>
+    </div>
+  </div>
+
+  <!-- CONTENU PRINCIPAL -->
+  <div id="content" style="display:none;">
+
+    <!-- BOUTON RETOUR -->
+    <button class="btn-retour" onclick="history.back()">
+      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24">
+        <path fill="currentColor" d="M19 11H7.83l4.88-4.88a1 1 0 0 0-1.42-1.42l-6.59 6.59a1 1 0 0 0 0 1.42l6.59 6.59a1 1 0 0 0 1.42-1.42L7.83 13H19a1 1 0 0 0 0-2z"/>
+      </svg>
+    </button>
+
+    <!-- HEADER SECTION -->
+    <div class="page-header">
+      <div class="badge-wrap">
+        <span class="badge">
+          <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="#3b5bdb" stroke="#3b5bdb" stroke-width="1.5">
+            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+          </svg>
+          Mes favoris
+        </span>
+      </div>
+      <h1 class="page-title">Questions sauvegardées</h1>
+      <p class="page-desc">Retrouve ici toutes les questions que tu as mises en favori. Entraîne-toi sans limite, sans note.</p>
+
+      <!-- STATS + FILTRES -->
+      <div class="header-meta">
+        <span class="count-badge" id="count-badge">— questions</span>
+        <div class="filters">
+          <input type="text" id="search-favori" class="search-input" placeholder="Rechercher une question...">
+          <select id="filter-module" class="select-filter">
+            <option value="">Tous les modules</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- LISTE DES FAVORIS -->
+    <div class="favoris-list" id="favoris-list">
+      <!-- injecté par JS -->
+    </div>
+
+    <!-- ÉTAT VIDE -->
+    <div class="empty-state" id="empty-state" style="display:none;">
+      <div class="empty-icon">
+        <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#c5cae9" stroke-width="1.5">
+          <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+        </svg>
+      </div>
+      <p class="empty-title">Aucun favori pour l'instant</p>
+      <p class="empty-sub">Appuie sur ❤️ pendant un QCM pour sauvegarder une question ici.</p>
+    </div>
+
+  </div><!-- fin #content -->
+
+  <!-- TOAST -->
+  <div class="toast" id="toast"></div>
+
+  <script src="js/favoris.js"></script>
+</body>
+</html>

@@ -815,3 +815,15 @@ textarea::placeholder { color: var(--text-mute); }
   color: #ef4444;
   border: 1px solid rgba(153, 27, 27, 0.2);
 }
+/* ── FAVORI ── */
+.btn-favori { transition: color 0.2s, border-color 0.2s; }
+
+.btn-favori.active {
+  color: #ef4444;
+  border-color: rgba(239, 68, 68, 0.4);
+}
+
+.btn-favori.active #heart-icon {
+  fill: #ef4444;
+  stroke: #ef4444;
+}

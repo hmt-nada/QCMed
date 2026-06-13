@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Statistiques — QCMed</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
+  <link rel="stylesheet" href="css/statistiques.css"/>
+</head>
+<body>
+
+  <button class="btn-retour" onclick="history.back()">← Retour</button>
+
+  <main class="page-container">
+
+    <!-- ── HERO : anneau de réussite ── -->
+    <section class="hero-section">
+      <div class="badge">📊 Statistiques</div>
+      <h1>Votre progression</h1>
+      <p class="page-desc">Un aperçu complet de vos performances sur QCMed.</p>
+
+      <div class="ring-wrap" id="ringWrap">
+        <svg class="ring-svg" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+          <circle class="ring-bg"    cx="100" cy="100" r="82"/>
+          <circle class="ring-fill"  cx="100" cy="100" r="82" id="ringFill"/>
+        </svg>
+        <div class="ring-inner">
+          <span class="ring-val" id="ringVal">—</span>
+          <span class="ring-lbl">taux de réussite</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── KPI STRIP ── -->
+    <div class="kpi-strip" id="kpiStrip">
+      <div class="kpi-card">
+        <span class="kpi-icon">🎯</span>
+        <span class="kpi-val" id="kpiSessions">—</span>
+        <span class="kpi-lbl">sessions</span>
+      </div>
+      <div class="kpi-card">
+        <span class="kpi-icon">⭐</span>
+        <span class="kpi-val" id="kpiBest">—</span>
+        <span class="kpi-lbl">meilleure note</span>
+      </div>
+      <div class="kpi-card">
+        <span class="kpi-icon">📈</span>
+        <span class="kpi-val" id="kpiMoyenne">—</span>
+        <span class="kpi-lbl">moyenne générale</span>
+      </div>
+    </div>
+
+    <!-- ── GRAPHE ÉVOLUTION ── -->
+    <section class="chart-section">
+      <div class="section-header">
+        <h2>Évolution des notes</h2>
+        <span class="section-sub">Vos 20 dernières sessions</span>
+      </div>
+      <div class="chart-wrap">
+        <canvas id="evolutionChart"></canvas>
+      </div>
+    </section>
+
+    <!-- ── BARRES MODULES ── -->
+    <section class="modules-section">
+      <div class="section-header">
+        <h2>Réussite par module</h2>
+        <span class="section-sub">Taux de bonnes réponses</span>
+      </div>
+      <div class="modules-list" id="modulesList">
+        <!-- injecté par JS -->
+      </div>
+    </section>
+
+    <!-- ── LOADER ── -->
+    <div id="loader" class="loader-wrap">
+      <div class="spinner"></div>
+      <p>Calcul de vos statistiques…</p>
+    </div>
+
+    <!-- ── EMPTY STATE ── -->
+    <div id="emptyState" class="empty-state hidden">
+      <div class="empty-icon">📭</div>
+      <p class="empty-title">Pas encore de données</p>
+      <p class="empty-sub">Lancez votre premier QCM pour voir vos statistiques ici.</p>
+      <a href="accueil.html" class="btn-primary">Commencer un QCM</a>
+    </div>
+
+  </main>
+
+  <script src="js/statistiques.js"></script>
+</body>
+</html>

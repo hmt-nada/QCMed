@@ -151,58 +151,30 @@ function prepareQuestion(q){
   };
 }
 
-//récupération du tableau des records des QCMs
-
-/*function chargerQuestions() {
-  fetch(`/api/questions`)
-    .then(r => r.json())
-    .then(data => {
-      if (!data.success) throw new Error(data.error || "Erreur API");
-
-      //questions = data.questions;
-    
-      // enrichir chaque question avec les variables supplémentaires
-      questions = data.questions.map(q => ({
-        ...q,                   // garder les champs envoyés par le backend
-        userAnswer: null,       // par défaut aucune réponse choisie
-        isCorrect: false,       // par défaut considéré faux
-        errorType: null ,        // facultatif : peut contenir une explication du type d’erreur
-        correctionAffichee: false,
-        score:0,
-        validerclick: false,
-        tempsRestant :null,
-        signalement:false
-      }));
-      questionsChargees = true;
-
-     // Le mode de correction    
-     modeCorrection = data.correction;
-     
-   })
-    .catch(err => console.error(err));
-}*/
-function chargerQuestions(){
-
-if(mode==="retry"){
-  fetch(`/api/tentative-faux`)
-  .then(res=>res.json())
-  .then(data=>{
-    results = data.results;            // ← sauvegarder TOUT
-    questions = data.results
-      .filter(q=>!q.isCorrect)
-      .map(prepareQuestion);
-    questionsChargees=true;
-    modeCorrection = data.correction;  // ← ne pas oublier
-  });
-}
-else{
-fetch(`/api/questions`)
-.then(res=>res.json())
-.then(data=>{
-questions = data.questions.map(prepareQuestion);
-questionsChargees=true;
-});
-}
+function chargerQuestions() {
+  if (mode === "retry") {
+    fetch('/api/tentative-faux')
+      .then(res => res.json())
+      .then(data => {
+        results     = data.results;
+        questions   = data.results.filter(q => !q.isCorrect).map(prepareQuestion);
+        modeCorrection = data.correction;
+        questionsChargees = true;
+      });
+  } else {
+    fetch('/api/questions')
+      .then(res => res.json())
+      .then(data => {
+        if (!data.success) {
+          console.error('Erreur chargement questions :', data.message);
+          return;
+        }
+        questions      = data.questions.map(prepareQuestion);
+        modeCorrection = data.correction; // ← récupérer le mode de correction
+        questionsChargees = true;
+      })
+      .catch(err => console.error('Erreur réseau :', err));
+  }
 }
 
 // starttimer: démarre/relance le timer pour la question targetIndex (défaut = indexActuel)
@@ -329,6 +301,9 @@ function afficherQuestion(id) {
   }
   // Gérer l'affichage des boutons (au cas où)
   updateButtonsState(q, q.tempsRestant);
+  // Sync état favori pour cette question
+syncFavoriBtn(q.id);
+
 }
 
 // bouton Suivant : clearInterval, changer index, afficher et lancer le timer pour la nouvelle question
@@ -814,3 +789,56 @@ overlay.addEventListener('click', (e) => {
   if (e.target === overlay) overlay.style.display = 'none';
 });
 
+// ─── Favori ───────────────────────────────────────────────────────
+const btnFavori = document.getElementById('btnfavori');
+
+function updateFavoriBtn(estFavori) {
+  const btn = btnFavori.querySelector('.btn-favori');
+  if (estFavori) {
+    btn.classList.add('active');
+  } else {
+    btn.classList.remove('active');
+  }
+}
+
+// Appelé à chaque changement de question
+function syncFavoriBtn(questionId) {
+  fetch(`/api/favoris`)
+    .then(res => res.json())
+    .then(data => {
+      if (!data.success) return;
+      const estFavori = data.favoris.some(f => f.id === questionId);
+      updateFavoriBtn(estFavori);
+    })
+    .catch(() => {});
+}
+
+btnFavori.addEventListener('click', () => {
+  const q = questions[indexActuel];
+  if (!q) return;
+
+  const btn      = btnFavori.querySelector('.btn-favori');
+  const estActif = btn.classList.contains('active');
+
+  if (estActif) {
+    // Retirer des favoris
+    fetch('/api/favoris/supprimer', {
+      method:  'DELETE',
+      headers: { 'Content-Type': 'application/json' },
+      body:    JSON.stringify({ question_id: q.id })
+    })
+    .then(res => res.json())
+    .then(data => { if (data.success) updateFavoriBtn(false); })
+    .catch(() => {});
+  } else {
+    // Ajouter aux favoris
+    fetch('/api/favoris/ajouter', {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body:    JSON.stringify({ question_id: q.id })
+    })
+    .then(res => res.json())
+    .then(data => { if (data.success) updateFavoriBtn(true); })
+    .catch(() => {});
+  }
+});

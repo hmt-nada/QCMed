@@ -37,102 +37,119 @@ checkboxes.forEach((cb) => {
   });
 });
 
-// Fonction de validation
-function validerFacultes() {
-  const facs = Array.from(document.querySelectorAll("input:checked"))
-                    .map(el => el.value)
-                    .filter(val => val !== "on");
+// ─── Charger les facultés depuis la BDD ───────────────────────────
+function chargerFacultes() {
+  fetch('/api/facultes')
+    .then(res => res.json())
+    .then(data => {
+      if (!data.success) return;
 
+      const container = document.getElementById('facultes-list');
+      container.innerHTML = '';
 
+      if (data.facultes.length === 0) {
+        container.innerHTML = `
+          <p style="color:#888; font-size:14px; text-align:center; padding:20px 0;">
+            Aucune faculté disponible pour le moment.
+          </p>
+        `;
+        return; // ← on s'arrête là, pas de rebind nécessaire
+      }
 
-  const data ={
-    faculte:facs
-  };
-  console.log("DATA ENVOYÉ :", data); 
-//evoie une requête HTTP a cette address
-fetch(`/api/choixfaculte`,{
-  //préciser la méthode de l'envoie:post(pour l'accepter en backend on a fait post)
-  method:"post",
-  
-  //on indique que les données sont en format json
-  headers:{
-    "content-type":"application/json"
-  },
-  //convertit l'objet data en format json pour que le backend le comprend 
-  body:JSON.stringify(data),
-  })
-  //quand le serveur répond on transfère la réponse en objet js depuis json
-   .then(response=>response.json())
-   //result une variable qui contient la réponse du serveur 
-   .then(result =>{
-    //si succss est true(module rçu)
-    if (result.success){
-        localStorage.setItem("selectedModule", moduleNom); 
-        // Stocker localement pour récupérer ensuite dans cours.js
-  localStorage.setItem("selectedFacultes", JSON.stringify(facs));  
-        window.location.href = "cours.html";  
-    }else{
-      alert("erreur:"+result.message);
-    }
-   })
-//gestion des erreurs du reseau (connection avec serveur )
-.catch(error=>{
-  console.error("erreur lors de l'envoi:",error);
-  alert("impossible de contacter le serveur");
-});
+      data.facultes.forEach(f => {
+        const div = document.createElement('div');
+        div.className = 'option1'; // garde ton style existant
+
+        div.innerHTML = `
+          <p class="facoptions">${f.nom.toUpperCase()}</p>
+          <label class="container2">
+            <input class="checkb" type="checkbox" value="${f.id}">
+            <div class="checkmark"></div>
+          </label>
+        `;
+        container.appendChild(div);
+      });
+
+      // ✅ Rebrancher les listeners APRÈS que les checkboxes sont dans le DOM
+      rebindCheckboxes();
+    })
+    .catch(err => {
+      console.error('Erreur facultés :', err);
+      // La page reste affichée, juste le container reste vide
+    });
 }
 
-boutton.addEventListener('click',function(event){
-let check=false;
+// ─── Listeners checkboxes (rebind après chargement dynamique) ─────
+function rebindCheckboxes() {
+  const checkboxes = document.querySelectorAll('.checkb');
+  const selectall  = document.getElementById('selectall');
 
-checkboxes.forEach((box) => {
-
-    if (box.checked) {
-      check = true;
-    }
+  selectall.addEventListener('change', function () {
+    checkboxes.forEach(cb => cb.checked = this.checked);
   });
 
+  checkboxes.forEach(cb => {
+    cb.addEventListener('change', function () {
+      if (!this.checked) {
+        selectall.checked = false;
+      } else {
+        selectall.checked = Array.from(checkboxes).every(cb => cb.checked);
+      }
+    });
+  });
+}
 
-if(!check){
+// Fonction de validation
+function validerFacultes() {
+  const facs = Array.from(document.querySelectorAll('.checkb:checked'))
+                    .map(el => el.value); // ids numériques des facultés
+
+  fetch('/api/choixfaculte', {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({ faculte: facs }),
+  })
+  .then(res => res.json())
+  .then(result => {
+    if (result.success) {
+      localStorage.setItem('selectedFacultes', JSON.stringify(facs));
+      window.location.href = 'cours.html';
+    } else {
+      alert('Erreur : ' + result.message);
+    }
+  })
+  .catch(err => {
+    console.error('Erreur réseau :', err);
+    alert('Impossible de contacter le serveur.');
+  });
+}
+
+boutton.addEventListener('click', function (event) {
+  const checkboxes = document.querySelectorAll('.checkb'); // ← lu après chargement
+  const check = Array.from(checkboxes).some(cb => cb.checked);
+
+  if (!check) {
     event.preventDefault();
-
- // Pour chaque checkbox non cochée
-    checkboxes.forEach((box) => {
-      // On récupère le div qui a la classe .checkmark (c'est l'élément visuel du "coche")
+    checkboxes.forEach(box => {
       const mark = box.parentElement.querySelector('.checkmark');
-
       if (mark) {
-        // On ajoute une classe CSS qui déclenche une animation (shake)
         mark.classList.add('shake');
-
-        // On change temporairement la couleur du checkmark en rouge
         mark.style.setProperty('--clr', 'red');
-
-        // Après 500ms (durée de l'effet), on réinitialise :
         setTimeout(() => {
-          mark.classList.remove('shake');             // On retire l'effet de vibration
-          mark.style.setProperty('--clr', '#161D6F'); // On remet la couleur d'origine (à adapter à ta couleur de base)
+          mark.classList.remove('shake');
+          mark.style.setProperty('--clr', '#161D6F');
         }, 500);
       }
     });
-   
-
-}else {   
-  
-    validerFacultes()
+  } else {
+    validerFacultes();
   }
 });
-
 
 // GARDE juste ça dans DOMContentLoaded :
 window.addEventListener("DOMContentLoaded", () => {
   document.getElementById("loader").style.display = "none";
   document.getElementById("content").style.display = "block";
   setTimeout(() => titre.classList.add('slide-in'), 100);
+  chargerFacultes(); // ← ajout
 });
-
-
-
-
-
-

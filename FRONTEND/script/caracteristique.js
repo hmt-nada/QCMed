@@ -1,8 +1,8 @@
 
 const espacemodule=document.getElementById('nommodule');
-const moduleId = localStorage.getItem("selectedModule");
-if (moduleId) {  
-espacemodule.textContent=moduleId;
+const moduleNom = localStorage.getItem("selectedModuleNom"); // même clé que partout ailleurs
+if (moduleNom) {
+  espacemodule.textContent = moduleNom;
 }
 
 //-----------------------
