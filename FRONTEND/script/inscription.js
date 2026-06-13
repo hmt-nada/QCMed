@@ -269,13 +269,27 @@ boutton.addEventListener('click', function(event) {
     credentials: 'include',
     body: JSON.stringify(data),
   })
-    .then(r => r.json())
+    .then(async response => {
+      const text = await response.text();
+      let result;
+      try {
+        result = text ? JSON.parse(text) : {};
+      } catch (err) {
+        console.error('Réponse serveur non JSON :', text);
+        throw new Error('Réponse serveur invalide.');
+      }
+
+      if (!response.ok) {
+        throw new Error(result?.message || result?.error || `Erreur ${response.status}`);
+      }
+
+      return result;
+    })
     .then(result => {
       if (result.success) {
         sessionStorage.setItem('emailInscrit', email.value.trim());
         window.location.href = 'pseudo.html';
       } else {
-        // Email déjà utilisé
         setFieldError(email, true);
         showError(emailErreurDeja);
         hideError(emailErreurFormat);
@@ -285,7 +299,7 @@ boutton.addEventListener('click', function(event) {
     })
     .catch(err => {
       console.error('Erreur lors de l\'envoi :', err);
-      alert('Impossible de contacter le serveur.');
+      alert(err.message || 'Impossible de contacter le serveur.');
     });
 });
 

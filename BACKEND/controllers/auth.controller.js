@@ -3,10 +3,23 @@ const bcrypt = require('bcrypt');
 
 const ADMIN_EMAILS = (process.env.ADMIN_EMAILS || '').split(',').map(e => e.trim());
 
+function parseAnnee(annee) {
+  if (typeof annee === 'number' && Number.isFinite(annee)) return annee;
+  if (typeof annee !== 'string') return null;
+  const parsed = parseInt(annee, 10);
+  if (!Number.isNaN(parsed)) return parsed;
+  const match = annee.match(/\d+/);
+  return match ? parseInt(match[0], 10) : null;
+}
 
 // ─── Phase 1 : Inscription (infos de base) ────────────────────────
 exports.inscription = async (req, res) => {
   const { nom, prenom, faculte, annee, email, password } = req.body; // ✅ faculte revient
+  const anneeValue = parseAnnee(annee);
+
+  if (!nom || !prenom || !faculte || !email || !password || !anneeValue) {
+    return res.status(400).json({ success: false, message: 'Tous les champs sont requis.' });
+  }
 
   try {
     const check = await db.query(
@@ -20,10 +33,10 @@ exports.inscription = async (req, res) => {
     const hashedPassword = await bcrypt.hash(password, 10);
 
     const result = await db.query(
-      `INSERT INTO utilisateurs (nom, prenom, faculte, annee, email, mot_de_passe)
-       VALUES ($1, $2, $3, $4, $5, $6)
+      `INSERT INTO utilisateurs (nom, prenom, faculte, annee, email, mot_de_passe, pseudo)
+       VALUES ($1, $2, $3, $4, $5, $6, $7)
        RETURNING id`,
-      [nom, prenom, faculte, annee, email, hashedPassword] // ✅
+      [nom, prenom, faculte, anneeValue, email, hashedPassword, '']
     );
 
     console.log('✅ Utilisateur inscrit, ID :', result.rows[0].id);

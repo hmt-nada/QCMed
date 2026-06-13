@@ -322,7 +322,7 @@ app.post('/api/saveChanges', async (req, res) => {
 // ─── VALIDATION ANNUELLE (CRON) ───────────────────────────────────────────────
 async function getUtilisateurs() {
   const { rows } = await db.query(
-    `SELECT id, nom, prenom, email, annee FROM utilisateurs WHERE annee NOT LIKE '%7ème Année Médecine%'`
+    `SELECT id, nom, prenom, email, annee FROM utilisateurs WHERE annee::text NOT LIKE '%7%'`
   );
   return rows;
 }
@@ -332,11 +332,15 @@ function libelleAnnee(n) {
   return `${suffix} Année Médecine`;
 }
 
-function getAnneeSuivante(anneeStr) {
-  const match = (anneeStr || "").match(/\d+/);
-  if (!match) return anneeStr;
-  let n = parseInt(match[0], 10);
-  if (Number.isNaN(n)) return anneeStr;
+function getAnneeSuivante(anneeValue) {
+  if (typeof anneeValue === 'number') {
+    return libelleAnnee(Math.min(anneeValue + 1, 7));
+  }
+
+  const match = String(anneeValue || "").match(/\d+/);
+  if (!match) return String(anneeValue);
+  const n = parseInt(match[0], 10);
+  if (Number.isNaN(n)) return String(anneeValue);
   return libelleAnnee(Math.min(n + 1, 7));
 }
 
