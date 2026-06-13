@@ -1,0 +1,235 @@
+/* ============================================================
+   confidentialite.css — QCMed
+   ============================================================ */
+
+*, *::before, *::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+/* ---------- Page ---------- */
+.conf-body {
+    background: #f0f2f8;
+    min-height: 100vh;
+    font-family: 'Poppins', sans-serif;
+}
+
+.conf-page {
+    max-width: 1060px;
+    margin: 0 auto;
+    padding: 2.5rem 1.25rem 3rem;
+}
+
+/* ---------- Bouton retour ---------- */
+.conf-back {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: #3b5bdb;
+    font-size: 14px;
+    font-weight: 500;
+    text-decoration: none;
+    margin-bottom: 1.75rem;
+    padding: 7px 14px 7px 10px;
+    border: 1.5px solid #c5cae9;
+    border-radius: 10px;
+    background: #ffffff;
+    transition: background .2s, border-color .2s, box-shadow .2s;
+}
+
+.conf-back svg {
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0;
+    transition: transform .2s;
+}
+
+.conf-back:hover {
+    background: #e8eaf6;
+    border-color: #3b5bdb;
+    box-shadow: 0 2px 10px rgba(59, 91, 219, .10);
+}
+
+.conf-back:hover svg {
+    transform: translateX(-3px);
+}
+
+/* ---------- Layout grille ---------- */
+.conf-layout {
+    display: grid;
+    grid-template-columns: 220px 1fr;
+    gap: 1.5rem;
+    align-items: start;
+}
+
+/* ---------- Sidebar ---------- */
+.conf-sidebar-inner {
+    background: #ffffff;
+    border: 1.5px solid #e8eaf6;
+    border-radius: 16px;
+    padding: 1.25rem;
+    position: sticky;
+    top: 1.5rem;
+}
+
+.conf-sidebar-title {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: #5c6bc0;
+    margin-bottom: .875rem;
+}
+
+.conf-nav {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: .25rem;
+}
+
+.conf-nav-link {
+    display: block;
+    font-size: 13px;
+    font-weight: 500;
+    color: #3b5bdb;
+    text-decoration: none;
+    padding: 7px 10px;
+    border-radius: 8px;
+    transition: background .18s, color .18s;
+    line-height: 1.4;
+}
+
+.conf-nav-link:hover,
+.conf-nav-link.active {
+    background: #e8eaf6;
+    color: #1a237e;
+}
+
+/* ---------- Contenu ---------- */
+.conf-content {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+/* ---------- En-tête ---------- */
+.conf-header {
+    background: #ffffff;
+    border: 1.5px solid #e8eaf6;
+    border-radius: 16px;
+    padding: 1.75rem 1.5rem;
+    margin-bottom: .25rem;
+}
+
+.conf-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: #1a237e;
+    color: #90caf9;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    padding: 5px 14px;
+    border-radius: 20px;
+    margin-bottom: 14px;
+}
+
+.conf-badge svg {
+    width: 13px;
+    height: 13px;
+}
+
+.conf-header h1 {
+    font-size: 24px;
+    font-weight: 700;
+    color: #0d1b6e;
+    margin-bottom: 8px;
+}
+
+.conf-header p {
+    font-size: 13px;
+    color: #5c6bc0;
+    line-height: 1.6;
+}
+
+/* ---------- Sections ---------- */
+.conf-section {
+    background: #ffffff;
+    border: 1.5px solid #e8eaf6;
+    border-radius: 16px;
+    padding: 1.25rem 1.5rem;
+    display: flex;
+    gap: 1rem;
+    align-items: flex-start;
+    transition: border-color .2s, box-shadow .2s;
+}
+
+.conf-section:hover {
+    border-color: #7986cb;
+    box-shadow: 0 2px 14px rgba(26, 35, 126, .07);
+}
+
+.conf-section-icon {
+    flex-shrink: 0;
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    background: #e8eaf6;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 2px;
+}
+
+.conf-section-icon svg {
+    width: 18px;
+    height: 18px;
+    stroke: #3b5bdb;
+}
+
+.conf-section-body h2 {
+    font-size: 15px;
+    font-weight: 600;
+    color: #0d1b6e;
+    margin-bottom: 6px;
+}
+
+.conf-section-body p {
+    font-size: 14px;
+    color: #37474f;
+    line-height: 1.75;
+}
+
+/* ---------- Footer ---------- */
+.conf-footer {
+    text-align: center;
+    margin-top: 1.5rem;
+    font-size: 12px;
+    color: #9fa8da;
+    border-top: 1px solid #e8eaf6;
+    padding-top: 1.5rem;
+}
+
+/* ---------- Responsive ---------- */
+@media (max-width: 680px) {
+    .conf-layout {
+        grid-template-columns: 1fr;
+    }
+
+    .conf-sidebar-inner {
+        position: static;
+    }
+
+    .conf-header h1 {
+        font-size: 20px;
+    }
+
+    .conf-section {
+        flex-direction: column;
+        gap: .75rem;
+    }
+}

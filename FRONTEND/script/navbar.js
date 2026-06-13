@@ -9,24 +9,6 @@ fetch('navbar.html')
     document.querySelectorAll('.nav-link[data-nav="' + page + '"]')
       .forEach(el => el.classList.add('active'));
 
-    // Dropdown profil
-    const profileBtn = document.getElementById('navProfileBtn');
-    const dropdown   = document.getElementById('navDropdown');
-    profileBtn?.addEventListener('click', function(e) {
-      e.stopPropagation();
-      dropdown.classList.toggle('open');
-    });
-    document.addEventListener('click', () => dropdown?.classList.remove('open'));
-
-    // Dropdown mobile (topbar)
-const mobProfileBtn = document.getElementById('mobProfileBtn');
-if (mobProfileBtn) {
-  mobProfileBtn.addEventListener('click', function(e) {
-    e.stopPropagation();
-    dropdown.classList.toggle('open');
-  });
-}
-
     // Fetch utilisateur → avatar + pseudo
     fetch('/api/utilisateur', { method: 'GET', credentials: 'include' })
       .then(r => r.json())

@@ -1,77 +1,145 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    
-     <link rel="stylesheet" href="style.css"/>
+    <link rel="stylesheet" href="css/politique.css"/>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Oleo+Script:wght@400;700&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">    
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Nunito:ital,wght@0,200..1000;1,200..1000&family=Oleo+Script:wght@400;700&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">
-<script src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js"></script>
-   
-<!------------------------------------l'image de favicon ----------------------------------------------->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
 
-<link rel="icon" type="image/png" href="logo/favicon-96x96.png" sizes="96x96" />
-<link rel="icon" type="image/svg+xml" href="logo/favicon.svg" />
-<link rel="shortcut icon" href="logo/favicon.ico" />
-<link rel="apple-touch-icon" sizes="180x180" href="logo/apple-touch-icon.png" />
-<meta name="apple-mobile-web-app-title" content="QCMed" />
-<link rel="manifest" href="logo/site.webmanifest" />
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="logo/favicon-96x96.png" sizes="96x96" />
+    <link rel="icon" type="image/svg+xml" href="logo/favicon.svg" />
+    <link rel="shortcut icon" href="logo/favicon.ico" />
+    <link rel="apple-touch-icon" sizes="180x180" href="logo/apple-touch-icon.png" />
+    <meta name="apple-mobile-web-app-title" content="QCMed" />
+    <link rel="manifest" href="logo/site.webmanifest" />
 
-<!----------------------------------------------------------------------------------------------------->
     <title>Politique de confidentialité - QCMed</title>
-
-
 </head>
+<body class="conf-body">
 
-<body class="body3">
-  
-    
-  <div class="header">    
- 
-  <nav class="sidebar2">
-    <h3>Sommaire</h3>
-    <ul>
-        <li><a href="#donnees">1. Données collectées</a></li>
-        <li><a href="#utilisation">2. Utilisation des données</a></li>
-        <li><a href="#securite">3. Sécurité</a></li>
-        <li><a href="#partage">4. Partage des données</a></li>
-        <li><a href="#droits">5. Droits des utilisateurs</a></li>
-      </ul>
-  </nav>
+    <div class="conf-page">
 
-  <!-- Contenu -->
-  <div class="content2">
-    <img  class="logo3" src="logo/brain-cercle.png"/>
-    <h1>Politique de confidentialité – QCMed</h1>
-      
-      <h2 id="donnees">1. Données collectées</h2>
-      <p>Nous collectons uniquement les informations nécessaires à l’inscription et à l’utilisation du plateforme, comme votre nom et votre adresse e-mail.</p>
+        <!-- Bouton retour -->
+        <a href="javascript:history.back()" class="conf-back" aria-label="Retour">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="15 18 9 12 15 6"/>
+            </svg>
+            Retour
+        </a>
 
-      <h2 id="utilisation">2. Utilisation des données</h2>
-      <p>Vos données servent uniquement à gérer votre compte, vous permettre d’accéder aux QCM et améliorer votre expérience sur la plateforme.</p>
+        <div class="conf-layout">
 
-      <h2 id="securite">3. Sécurité</h2>
-      <p>Nous mettons en place des mesures pour protéger vos informations personnelles contre tout accès non autorisé ou perte de données.</p>
+            <!-- Sidebar sommaire -->
+            <aside class="conf-sidebar">
+                <div class="conf-sidebar-inner">
+                    <p class="conf-sidebar-title">Sommaire</p>
+                    <nav>
+                        <ul class="conf-nav">
+                            <li><a href="#donnees" class="conf-nav-link">1. Données collectées</a></li>
+                            <li><a href="#utilisation" class="conf-nav-link">2. Utilisation des données</a></li>
+                            <li><a href="#securite" class="conf-nav-link">3. Sécurité</a></li>
+                            <li><a href="#partage" class="conf-nav-link">4. Partage des données</a></li>
+                            <li><a href="#droits" class="conf-nav-link">5. Droits des utilisateurs</a></li>
+                        </ul>
+                    </nav>
+                </div>
+            </aside>
 
-      <h2 id="partage">4. Partage des données</h2>
-      <p>Vos données ne sont jamais vendues ou transmises à des tiers à des fins commerciales. Elles peuvent être partagées uniquement si la loi l’exige.</p>
+            <!-- Contenu principal -->
+            <main class="conf-content">
 
-      <h2 id="droits">5. Droits des utilisateurs</h2>
-      <p>Vous pouvez accéder, modifier ou supprimer vos informations personnelles directement depuis votre espace utilisateur.</p>
+                <!-- En-tête -->
+                <div class="conf-header">
+                    <div class="conf-badge">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+                            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                            <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                        </svg>
+                        Confidentialité
+                    </div>
+                    <h1>Politique de confidentialité</h1>
+                    <p>Dernière mise à jour : 2025 — QCMed s'engage à protéger vos données personnelles.</p>
+                </div>
 
-  </div>
+                <!-- Sections -->
+                <section class="conf-section" id="donnees">
+                    <div class="conf-section-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                            <ellipse cx="12" cy="5" rx="9" ry="3"/>
+                            <path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/>
+                            <path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/>
+                        </svg>
+                    </div>
+                    <div class="conf-section-body">
+                        <h2>1. Données collectées</h2>
+                        <p>Nous collectons uniquement les informations nécessaires à l'inscription et à l'utilisation de la plateforme, comme votre nom et votre adresse e-mail.</p>
+                    </div>
+                </section>
 
-  </div>
+                <section class="conf-section" id="utilisation">
+                    <div class="conf-section-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                            <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+                        </svg>
+                    </div>
+                    <div class="conf-section-body">
+                        <h2>2. Utilisation des données</h2>
+                        <p>Vos données servent uniquement à gérer votre compte, vous permettre d'accéder aux QCM et améliorer votre expérience sur la plateforme.</p>
+                    </div>
+                </section>
 
+                <section class="conf-section" id="securite">
+                    <div class="conf-section-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                        </svg>
+                    </div>
+                    <div class="conf-section-body">
+                        <h2>3. Sécurité</h2>
+                        <p>Nous mettons en place des mesures pour protéger vos informations personnelles contre tout accès non autorisé ou perte de données.</p>
+                    </div>
+                </section>
 
-<script  src="script/conditions.js"> </script>
+                <section class="conf-section" id="partage">
+                    <div class="conf-section-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                            <circle cx="18" cy="5" r="3"/>
+                            <circle cx="6" cy="12" r="3"/>
+                            <circle cx="18" cy="19" r="3"/>
+                            <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/>
+                            <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/>
+                        </svg>
+                    </div>
+                    <div class="conf-section-body">
+                        <h2>4. Partage des données</h2>
+                        <p>Vos données ne sont jamais vendues ou transmises à des tiers à des fins commerciales. Elles peuvent être partagées uniquement si la loi l'exige.</p>
+                    </div>
+                </section>
+
+                <section class="conf-section" id="droits">
+                    <div class="conf-section-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                            <circle cx="9" cy="7" r="4"/>
+                            <path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/>
+                        </svg>
+                    </div>
+                    <div class="conf-section-body">
+                        <h2>5. Droits des utilisateurs</h2>
+                        <p>Vous pouvez accéder, modifier ou supprimer vos informations personnelles directement depuis votre espace utilisateur.</p>
+                    </div>
+                </section>
+
+                <!-- Footer -->
+                <footer class="conf-footer">
+                    &copy; 2025 QCMed. Tous droits réservés.
+                </footer>
+
+            </main>
+        </div>
+    </div>
 </body>
 </html>

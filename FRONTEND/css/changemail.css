@@ -1,0 +1,352 @@
+/* ── RESET ── */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+/* ── BASE ── */
+body {
+  font-family: 'Poppins', sans-serif;
+  background: #f0f2f7;
+  min-height: 100vh;
+  color: #1a1a2e;
+}
+
+/* ── HEADER ── */
+.header {
+  background: #fff;
+  border-bottom: 1px solid #e4e7ef;
+  padding: 0 1.5rem;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.header-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 700;
+  font-size: 1.05rem;
+  color: #161D6F;
+  text-decoration: none;
+}
+
+.header-brand img {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+}
+
+.back-link {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #161D6F;
+  text-decoration: none;
+  padding: 6px 14px;
+  border: 1.5px solid #c8ccdf;
+  border-radius: 8px;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.back-link:hover {
+  background: #f0f2f7;
+  border-color: #161D6F;
+}
+
+/* ── LAYOUT ── */
+.page {
+  max-width: 520px;
+  margin: 0 auto;
+  padding: 2.5rem 1rem 4rem;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+/* ── BANNIÈRE INFO ── */
+.info-banner {
+  background: #e6f1fb;
+  border: 1px solid #b5d4f4;
+  border-radius: 12px;
+  padding: 14px 16px;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.info-icon {
+  flex-shrink: 0;
+  margin-top: 1px;
+  color: #185FA5;
+}
+
+.info-banner p {
+  font-size: 0.78rem;
+  color: #0C447C;
+  line-height: 1.55;
+}
+
+/* ── SECTION LABEL ── */
+.section-title {
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: #8b92b0;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin-bottom: 0.6rem;
+  padding-left: 2px;
+}
+
+/* ── CARD ── */
+.card {
+  background: #fff;
+  border-radius: 16px;
+  border: 1px solid #e4e7ef;
+  overflow: visible;
+}
+
+/* ── FORMULAIRE ── */
+.form-section {
+  padding: 1.5rem 1.5rem 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.1rem;
+}
+
+.divider {
+  height: 1px;
+  background: #f0f2f7;
+  margin: 0 1.5rem;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.field label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #5a6080;
+}
+
+/* ── CHAMP + ŒIL ── */
+.input-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.input-wrap input {
+  width: 100%;
+  height: 42px;
+  border-radius: 9px;
+  border: 1.5px solid #d8dce8;
+  background: #f7f8fc;
+  color: #1a1a2e;
+  font-size: 0.875rem;
+  font-family: 'Poppins', sans-serif;
+  padding: 0 44px 0 14px;
+  outline: none;
+  transition: border-color 0.18s, background 0.18s, box-shadow 0.18s;
+}
+
+.input-wrap input::placeholder {
+  color: #b0b7d0;
+}
+
+.input-wrap input:focus {
+  border-color: #161D6F;
+  background: #fff;
+  box-shadow: 0 0 0 3px rgba(22, 29, 111, 0.1);
+}
+
+/* Champ valide */
+.input-wrap input.valide {
+  border-color: #1D9E75;
+  background: #fff;
+}
+
+/* Champ en erreur */
+.input-wrap input[style*="border-color: red"],
+.input-wrap input.error {
+  border-color: #E24B4A !important;
+  background: #fff9f9;
+}
+
+/* Bouton œil */
+.eye-btn {
+  position: absolute;
+  right: 12px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #9ba3bf;
+  display: flex;
+  align-items: center;
+  padding: 4px;
+  border-radius: 4px;
+  transition: color 0.15s;
+}
+
+.eye-btn:hover {
+  color: #5a6080;
+}
+
+.eye-btn.hidden {
+  display: none;
+}
+
+/* ── MESSAGES D'ERREUR ── */
+.field-error {
+  font-size: 0.71rem;
+  color: #E24B4A;
+  display: none;
+  margin-top: 1px;
+}
+
+/* Utilisé par JS via style ou classe */
+.field-error[style*="display: block"],
+.field-error.show {
+  display: block;
+}
+
+/* ── BOUTON SAUVEGARDER ── */
+.save-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: calc(100% - 3rem);
+  margin: 1.25rem 1.5rem 1.5rem;
+  height: 44px;
+  border-radius: 10px;
+  background: #161D6F;
+  color: #fff;
+  border: none;
+  font-size: 0.875rem;
+  font-weight: 600;
+  font-family: 'Poppins', sans-serif;
+  cursor: pointer;
+  transition: opacity 0.15s, transform 0.1s;
+}
+
+.save-btn:hover {
+  opacity: 0.9;
+}
+
+.save-btn:active {
+  transform: scale(0.98);
+}
+
+/* ── MODAL ── */
+.modal-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(3px);
+  z-index: 900;
+}
+
+.modal-overlay.show {
+  display: block;
+}
+
+.modal {
+  display: none;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: #fff;
+  border-radius: 16px;
+  border: 1px solid #e4e7ef;
+  max-width: 380px;
+  width: 90%;
+  padding: 2rem 1.75rem;
+  text-align: center;
+  z-index: 1000;
+}
+
+.modal.show {
+  display: block;
+}
+
+.modal-icon {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: #eef0fb;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 1rem;
+}
+
+.modal h3 {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #1a1a2e;
+  margin-bottom: 8px;
+}
+
+.modal p {
+  font-size: 0.8rem;
+  color: #6b7490;
+  line-height: 1.6;
+}
+
+.modal-btn {
+  margin-top: 1.25rem;
+  height: 40px;
+  padding: 0 24px;
+  border-radius: 8px;
+  background: #161D6F;
+  color: #fff;
+  border: none;
+  font-size: 0.85rem;
+  font-weight: 600;
+  font-family: 'Poppins', sans-serif;
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+
+.modal-btn:hover {
+  opacity: 0.9;
+}
+
+/* ── RESPONSIVE ── */
+@media (max-width: 560px) {
+  .page {
+    padding: 1.5rem 0.75rem 3rem;
+    gap: 1.5rem;
+  }
+
+  .form-section {
+    padding: 1.25rem 1rem 0.75rem;
+  }
+
+  .divider {
+    margin: 0 1rem;
+  }
+
+  .save-btn {
+    width: calc(100% - 2rem);
+    margin: 1rem 1rem 1rem;
+  }
+
+  .modal {
+    padding: 1.5rem 1.25rem;
+  }
+}

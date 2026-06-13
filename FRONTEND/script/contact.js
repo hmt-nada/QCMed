@@ -1,9 +1,13 @@
-const rempli=document.getElementsByClassName('nonvide');
+/* ============================================================
+   contact.js — QCMed
+   Validation + envoi via fetch /api/contact-mail
+   ============================================================ */
 
-//si ils sont non vides (valide)
-//nom prenom faculte année 
+// ---------- Champs non vides (nom, message) ----------
+const rempli = document.getElementsByClassName('nonvide');
+
 for (let i = 0; i < rempli.length; i++) {
- rempli[i].addEventListener('input', function() {
+    rempli[i].addEventListener('input', function () {
         if (this.value.length > 0) {
             this.classList.add('valide');
         } else {
@@ -12,200 +16,182 @@ for (let i = 0; i < rempli.length; i++) {
     });
 }
 
-//---------vérification de l'email -----------------------------------------------------------------------------------------------
-const email=document.getElementById('email');
-const emailerror=document.getElementById('mailinvalide');
-const titrenormal=document.getElementById('titrenormal');
-let mailblur=false;
-let mailinvalide=false;
+// ---------- Validation email ----------
+const email        = document.getElementById('email');
+const emailerror   = document.getElementById('mailinvalide');
+const titrenormal  = document.getElementById('titrenormal');
+let mailblur    = false;
+let mailinvalide = false;
 
-// Fonction pour vérifier si l'email est valide
-  function verifierEmail(email) {
-    // Expression régulière (regex) simple pour les emails
+function verifierEmail(val) {
     const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return regex.test(email); // retourne true si c'est bon, sinon false
-  }
-   // Quand l'utilisateur tape dans le champ
-
- email.addEventListener("input", () => {
-    const valeurEmail = email.value;
- if (valeurEmail === "") {
-    //  Champ vide → remettre le titre normal
-    email.style.borderColor = ""; // couleur par défaut
-    emailerror.style.display = "none";
-    titrenormal.style.display = "block";
-
- }else if(mailblur){
-if(verifierEmail(valeurEmail)){
-    mailinvalide=false;
-    email.style.borderColor = "";
-    email.classList.add('valide');   
-    emailerror.style.display = "none";
-    titrenormal.style.display = "block";
-
-}else{
-     mailinvalide=true;
-     email.style.borderColor = "red";
-      emailerror.style.display = "block";
-      titrenormal.style.display = "none";
-      email.classList.remove('valide');
-
+    return regex.test(val);
 }
- }});
 
-  email.addEventListener("blur", () => {
-    const valeurEmail = email.value;
-    mailblur=true;
- if (valeurEmail === "") {
-    //  Champ vide → remettre le titre normal
-    email.style.borderColor = ""; // couleur par défaut
-    emailerror.style.display = "none";
-    titrenormal.style.display = "block";
-    email.classList.remove('valide');
- }else if (verifierEmail(valeurEmail)) {
-      // Email valide
-      mailinvalide=false;
-      email.classList.add('valide');
-      titrenormal.style.display = "block";
-      emailerror.style.display = "none";
-    } else {
-      // Email invalide
-      mailinvalide=true;
-      email.classList.remove('valide');
-      email.style.borderColor = "red";
-      titrenormal.style.display = "none";
-      emailerror.style.display = "block";
-    }
-  });
+email.addEventListener('input', () => {
+    const val = email.value;
 
-
-  //verification finale du boutton -----------------------------
-const boutton=document.getElementById('boutton');
-const alert=document.getElementById('alert');
-const alert2=document.getElementById('alert_erreur');
-const nom=document.getElementById('nom');
-const valeurEmail = email.value;
-const message=document.getElementById('message2');
-const form = document.getElementById('form'); // id de ton formulaire
-boutton.addEventListener('click',function(event){
-let erreur=false;
-let name=false;
-let mailchamp=false;
-let mssgchamp=false;
-
-
-    if(nom.value.trim()===""){
-        erreur=true;
-        name=true;
-        nom.style.borderColor="red";
-    }
-    if(message.value.trim()===""){
-        erreur=true;
-        mssgchamp=true;
-        message.style.borderColor="red";
-    }
-    if((email.value.trim()==="") || (mailinvalide==true)){
-        erreur=true;
-        mailchamp=true;
-        email.style.borderColor="red";
-    }
-    
-if (erreur) {
-    event.preventDefault();
-    // Supprimer d’abord pour éviter les doublons
-    alert.classList.remove("visible"); // Réinitialise l'état
-    void alert.offsetWidth; // Force le navigateur à re-calculer l'animation
-    alert.classList.add("visible"); // Relance l'animation
-
-    // Disparaît au bout de 4 secondes
-    setTimeout(() => {
-       alert.classList.remove("visible");
-    }, 2000);
-
-}else {
-  
-    event.preventDefault(); // Empêche le rechargement de page
-    // Récupérer les valeurs
-    const nom = document.getElementById('nom').value.trim();
-    const email = document.getElementById('email').value.trim();
-    const message = document.getElementById('message2').value.trim();
-
-    // Vérifications côté client
-    if (!nom || !email || !message) {
-        alert('Veuillez remplir tous les champs correctement.');
+    if (val === '') {
+        email.style.borderColor = '';
+        email.classList.remove('valide', 'erreur');
+        emailerror.style.display  = 'none';
+        titrenormal.style.display = 'block';
         return;
     }
 
-    
-       fetch(`/api/contact-mail`, { // URL côté serveur
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ nom, email, message })
-        })
-
-         .then(response=>response.json())
-   //result une variable qui contient la réponse du serveur 
-   .then(result =>{
-
-        if (result.success) {
-            alert2.classList.remove("visible"); // Réinitialise l'état
-    void alert2.offsetWidth; // Force le navigateur à re-calculer l'animation
-    alert2.classList.add("visible"); // Relance l'animation
-
-    // Disparaît au bout de 4 secondes
-    setTimeout(() => {
-       alert2.classList.remove("visible");
-       window.location.href = "accueil.html";
-    }, 2000);
-            form.reset();
+    if (mailblur) {
+        if (verifierEmail(val)) {
+            mailinvalide = false;
+            email.classList.add('valide');
+            email.classList.remove('erreur');
+            emailerror.style.display  = 'none';
+            titrenormal.style.display = 'block';
         } else {
-            alert('Erreur lors de l’envoi : ' + result.error);
+            mailinvalide = true;
+            email.classList.add('erreur');
+            email.classList.remove('valide');
+            emailerror.style.display  = 'block';
+            titrenormal.style.display = 'none';
         }
- })
-    .catch (err =>{
-        alert('Impossible de contacter le serveur.');
-        console.error(err);
-    });   
-    
-  }
-//réinitialisation du champ nom 
-nom.addEventListener('input',()=>{
-if(name){
-nom.style.borderColor = "";
-nom.classList.remove('valide');
-nom.addEventListener('blur',()=>{
-if(nom.value.length>0){
-nom.classList.add('valide');
-}
-});
-}
-});  
-//réinitialisation du champ message
-message.addEventListener('input',()=>{
-if(mssgchamp){
-message.style.borderColor = "";
-message.classList.remove('valide');
-message.addEventListener('blur',()=>{
-if(message.value.length>0){
-message.classList.add('valide');
-}
-
+    }
 });
 
-}});
-//réinitialisation du champ email 
-email.addEventListener('input',()=>{
-if(mailchamp){
-email.style.borderColor = "";
-email.classList.remove('valide');
-}});
+email.addEventListener('blur', () => {
+    mailblur = true;
+    const val = email.value;
+
+    if (val === '') {
+        email.classList.remove('valide', 'erreur');
+        emailerror.style.display  = 'none';
+        titrenormal.style.display = 'block';
+        return;
+    }
+
+    if (verifierEmail(val)) {
+        mailinvalide = false;
+        email.classList.add('valide');
+        email.classList.remove('erreur');
+        emailerror.style.display  = 'none';
+        titrenormal.style.display = 'block';
+    } else {
+        mailinvalide = true;
+        email.classList.add('erreur');
+        email.classList.remove('valide');
+        emailerror.style.display  = 'block';
+        titrenormal.style.display = 'none';
+    }
 });
 
-  const button = document.querySelector('.c-button--gooey');
-  button.addEventListener('click', () => {
-    button.classList.add('clicked');
-    setTimeout(() => {
-      button.classList.remove('clicked');
-    }, 200);
-  });
+// ---------- Toasts ----------
+function showToast(id, duration) {
+    const el = document.getElementById(id);
+    el.classList.remove('visible');
+    void el.offsetWidth; // force reflow pour relancer l'animation si besoin
+    el.classList.add('visible');
+    setTimeout(() => el.classList.remove('visible'), duration || 2500);
+}
 
+// ---------- Soumission ----------
+const boutton = document.getElementById('boutton');
+const nom     = document.getElementById('nom');
+const message = document.getElementById('message2');
+const form    = document.getElementById('form');
+
+boutton.addEventListener('click', function (event) {
+    event.preventDefault();
+
+    let erreur    = false;
+    let nameErr   = false;
+    let mailErr   = false;
+    let mssgErr   = false;
+
+    // Vérification nom
+    if (nom.value.trim() === '') {
+        erreur = true;
+        nameErr = true;
+        nom.classList.add('erreur');
+    }
+
+    // Vérification message
+    if (message.value.trim() === '') {
+        erreur = true;
+        mssgErr = true;
+        message.classList.add('erreur');
+    }
+
+    // Vérification email
+    if (email.value.trim() === '' || mailinvalide) {
+        erreur = true;
+        mailErr = true;
+        email.classList.add('erreur');
+    }
+
+    if (erreur) {
+        showToast('alert', 2500);
+        return;
+    }
+
+    // ----- Envoi -----
+    const nomVal     = nom.value.trim();
+    const emailVal   = email.value.trim();
+    const messageVal = message.value.trim();
+
+    fetch('/api/contact-mail', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ nom: nomVal, email: emailVal, message: messageVal })
+    })
+        .then(response => response.json())
+        .then(result => {
+            if (result.success) {
+                showToast('alert_erreur', 2500);
+                form.reset();
+                // Nettoyer les classes de validation
+                nom.classList.remove('valide', 'erreur');
+                email.classList.remove('valide', 'erreur');
+                message.classList.remove('valide', 'erreur');
+                mailinvalide = false;
+                mailblur     = false;
+                emailerror.style.display  = 'none';
+                titrenormal.style.display = 'block';
+                setTimeout(() => { window.location.href = 'accueil.html'; }, 2600);
+            } else {
+                showToast('alert', 2500);
+            }
+        })
+        .catch(err => {
+            console.error(err);
+            showToast('alert', 2500);
+        });
+
+    // ----- Réinitialisation des bordures rouges à la prochaine frappe -----
+    if (nameErr) {
+        nom.addEventListener('input', function handler() {
+            nom.classList.remove('erreur');
+            nom.removeEventListener('input', handler);
+        });
+    }
+
+    if (mssgErr) {
+        message.addEventListener('input', function handler() {
+            message.classList.remove('erreur');
+            message.removeEventListener('input', handler);
+        });
+    }
+
+    if (mailErr) {
+        email.addEventListener('input', function handler() {
+            email.classList.remove('erreur');
+            email.removeEventListener('input', handler);
+        });
+    }
+});
+
+// ---------- Effet bouton gooey (conservé si utilisé ailleurs) ----------
+const gooeyBtn = document.querySelector('.c-button--gooey');
+if (gooeyBtn) {
+    gooeyBtn.addEventListener('click', () => {
+        gooeyBtn.classList.add('clicked');
+        setTimeout(() => gooeyBtn.classList.remove('clicked'), 200);
+    });
+}

@@ -232,3 +232,23 @@ window.addEventListener("DOMContentLoaded", () => {
         document.getElementById("pseudo").textContent = "Erreur";
     });
 });
+function getStrength(v) {
+  if (v.length === 0) return 0;
+  if (v.length < 6) return 1;
+  if (v.length < 10) return 2;
+  return 3 + (v.length >= 12 && /[^a-zA-Z0-9]/.test(v) ? 1 : 0);
+}
+
+password2.addEventListener('input', () => {
+  const s = getStrength(password2.value);
+  const cls = ['', 'weak', 'medium', 'strong', 'strong'];
+  const labels = ['', 'Trop court', 'Moyen', 'Fort', 'Très fort'];
+  ['s1','s2','s3','s4'].forEach((id, i) => {
+    const el = document.getElementById(id);
+    el.className = '';
+    if (i < s) el.classList.add(cls[Math.min(s, 4)]);
+  });
+  const lbl = document.getElementById('strength-label');
+  lbl.textContent = password2.value.length > 0 ? labels[Math.min(s, 4)] : '';
+  lbl.style.color = s <= 1 ? '#E24B4A' : s === 2 ? '#BA7517' : '#1D9E75';
+});

@@ -250,18 +250,8 @@ boutton.addEventListener('click', function(event) {
        
     
 
-        // On ne change pas l'email dans la session pour l'instant
-        password.classList.add('valide'); 
-        email.classList.add('valide'); 
-        email2.classList.add('valide');     
-        document.getElementById('missmatch').style.display="none";
-        passchamp = false;
-        mailchamp = false;
-        mailchamp2 = false;
-         // ✅ Popup temporaire pour informer l'utilisateur
-        sessionStorage.setItem('emailchange','true');
-         // 🔹 Recharge la page pour effacer les champs
-        location.reload();
+       document.getElementById('modal-overlay').classList.add('show');
+document.getElementById('popup_email_info').classList.add('show');
        
       }
     })
@@ -269,6 +259,8 @@ boutton.addEventListener('click', function(event) {
       alert("Erreur réseau : " + error.message);
     });
   }
+
+  
 
 //réinitialisation du champ email 
 email.addEventListener('input',()=>{
@@ -296,6 +288,11 @@ password.classList.remove('valide');
 
 });
 
+document.getElementById('modal-close').addEventListener('click', () => {
+  document.getElementById('modal-overlay').classList.remove('show');
+  document.getElementById('popup_email_info').classList.remove('show');
+});
+
 //afficher le pseudo et avatar 
 window.addEventListener("DOMContentLoaded", () => {
 
@@ -311,67 +308,6 @@ window.addEventListener("DOMContentLoaded", () => {
           const user = result.utilisateur;
           document.getElementById("avatar").src = user.avatar;
           document.getElementById("pseudo").textContent = user.pseudo;
-
-
-          if(sessionStorage.getItem('emailchange') === 'true') {
-        // 🔹 Supprimer le flag pour ne pas réafficher à nouveau
-        sessionStorage.removeItem('emailchange');
-          setTimeout(() => {
-      const popup = document.createElement('div');
-      // overlay flou
-            const overlay = document.createElement('div');
-            overlay.id = 'modal-overlay';
-            overlay.style.position = 'fixed';
-            overlay.style.top = 0;
-            overlay.style.left = 0;
-            overlay.style.width = '100%';
-            overlay.style.height = '100%';
-            overlay.style.backgroundColor = 'rgba(0,0,0,0.5)';
-            overlay.style.backdropFilter = 'blur(3px)';
-            overlay.style.zIndex = '999';
-
-            // popup modal
-            const modal = document.createElement('div');
-            modal.id = 'popup_email_info';
-            modal.style.position = 'fixed';
-            modal.style.top = '50%';
-            modal.style.left = '50%';
-            modal.style.transform = 'translate(-50%, -50%)';
-            modal.style.backgroundColor = '#0077b6';
-            modal.style.color = 'white';
-            modal.style.padding = '25px 35px';
-            modal.style.borderRadius = '10px';
-            modal.style.boxShadow = '0 2px 15px rgba(0,0,0,0.3)';
-            modal.style.fontSize = '18px';
-            modal.style.fontWeight = 'bold';
-            modal.style.zIndex = '1000';
-            modal.style.textAlign = 'center';
-            modal.innerText = "Vérifiez votre boîte e-mail et activez votre nouvelle adresse. Sinon, votre adresse précédente restera active.";
-
-            // bouton fermer
-            const closeBtn = document.createElement('button');
-            closeBtn.innerText = "OK";
-            closeBtn.style.marginTop = "15px";
-            closeBtn.style.padding = "8px 15px";
-            closeBtn.style.border = "none";
-            closeBtn.style.borderRadius = "5px";
-            closeBtn.style.backgroundColor = "#00b4d8";
-            closeBtn.style.color = "white";
-            closeBtn.style.cursor = "pointer";
-            closeBtn.addEventListener('click', () => {
-                overlay.remove();
-                modal.remove();
-            });
-
-            modal.appendChild(closeBtn);
-            document.body.appendChild(overlay);
-            document.body.appendChild(modal);
-
-      setTimeout(() => {
-        popup.remove();
-      }, 5000);
-    }, 500); // délai court pour que la page ait le temps de reload
-  }
            
         } else {
           document.getElementById("pseudo").textContent = "Inconnu";
