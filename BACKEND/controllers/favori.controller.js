@@ -1,5 +1,13 @@
 const db = require('../config/db');
 
+function normalizeImageUrl(imageUrl) {
+  if (!imageUrl || imageUrl === 'null') return null;
+  if (/^(https?:|data:)/i.test(imageUrl)) return imageUrl;
+  if (imageUrl.startsWith('/')) return imageUrl;
+  if (imageUrl.startsWith('images/')) return `/${imageUrl}`;
+  return `/images/${imageUrl}`;
+}
+
 // ─── Ajouter un favori ────────────────────────────────────────────
 exports.ajouter = async (req, res) => {
   const userId = req.session?.user?.id;
@@ -80,7 +88,7 @@ const corrects = bonnesLettres.map(l => lettres.indexOf(l)).filter(i => i >= 0);
         explication: q.explication,
         cours:       q.cours_titre,
         module:      q.module_nom,
-        image:       q.image_url || null
+        image:       normalizeImageUrl(q.image_url)
       };
     });
 

@@ -1,5 +1,13 @@
 const db = require('../config/db');
 
+function normalizeImageUrl(imageUrl) {
+  if (!imageUrl || imageUrl === 'null') return null;
+  if (/^(https?:|data:)/i.test(imageUrl)) return imageUrl;
+  if (imageUrl.startsWith('/')) return imageUrl;
+  if (imageUrl.startsWith('images/')) return `/${imageUrl}`;
+  return `/images/${imageUrl}`;
+}
+
 // ─── Modules selon l'année de l'utilisateur ───────────────────────
 exports.getModules = async (req, res) => {
   const annee = req.session?.user?.annee;
@@ -248,7 +256,7 @@ exports.getQuestions = async (req, res) => {
         corrects: corrects,
         explication: q.explication,
         cours:       q.cours_titre,
-        image:       q.image_url || null
+        image:       normalizeImageUrl(q.image_url)
       };
     });
 

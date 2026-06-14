@@ -15,27 +15,29 @@ button.addEventListener('click', () => {
       button.classList.remove('clicked');
     }, 200);
 });
-const checkboxes = document.querySelectorAll('.checkb');
 const boutton=document.getElementById('boutton');
-const selectall=document.getElementById('selectall');
-selectall.addEventListener('change',function(){
 
-checkboxes.forEach((a)=>{
 
-  a.checked=this.checked;
-});
 
-});
-checkboxes.forEach((cb) => {
-  cb.addEventListener('change', function () {
-    if (!this.checked) {
-      selectall.checked = false;
-    } else {
-      const allChecked = Array.from(checkboxes).every(cb => cb.checked);
-      selectall.checked = allChecked;
-    }
+function getFacultyCheckboxes() {
+  return Array.from(document.querySelectorAll('.checkb')).filter(cb => cb.id !== 'selectall');
+}
+
+function attachFacultyCheckboxLogic() {
+  const selectall = document.getElementById('selectall');
+  const checkboxes = getFacultyCheckboxes();
+  if (!selectall) return;
+
+  selectall.addEventListener('change', function () {
+    checkboxes.forEach(cb => cb.checked = this.checked);
   });
-});
+
+  checkboxes.forEach(cb => {
+    cb.addEventListener('change', function () {
+      selectall.checked = checkboxes.length > 0 && checkboxes.every(c => c.checked);
+    });
+  });
+}
 
 // ─── Charger les facultés depuis la BDD ───────────────────────────
 function chargerFacultes() {
@@ -71,7 +73,7 @@ function chargerFacultes() {
       });
 
       // ✅ Rebrancher les listeners APRÈS que les checkboxes sont dans le DOM
-      rebindCheckboxes();
+      attachFacultyCheckboxLogic();
     })
     .catch(err => {
       console.error('Erreur facultés :', err);
@@ -81,27 +83,13 @@ function chargerFacultes() {
 
 // ─── Listeners checkboxes (rebind après chargement dynamique) ─────
 function rebindCheckboxes() {
-  const checkboxes = document.querySelectorAll('.checkb');
-  const selectall  = document.getElementById('selectall');
-
-  selectall.addEventListener('change', function () {
-    checkboxes.forEach(cb => cb.checked = this.checked);
-  });
-
-  checkboxes.forEach(cb => {
-    cb.addEventListener('change', function () {
-      if (!this.checked) {
-        selectall.checked = false;
-      } else {
-        selectall.checked = Array.from(checkboxes).every(cb => cb.checked);
-      }
-    });
-  });
+  attachFacultyCheckboxLogic();
 }
 
 // Fonction de validation
 function validerFacultes() {
-  const facs = Array.from(document.querySelectorAll('.checkb:checked'))
+  const facs = getFacultyCheckboxes()
+                    .filter(cb => cb.checked)
                     .map(el => el.value); // ids numériques des facultés
 
   fetch('/api/choixfaculte', {
@@ -125,8 +113,8 @@ function validerFacultes() {
 }
 
 boutton.addEventListener('click', function (event) {
-  const checkboxes = document.querySelectorAll('.checkb'); // ← lu après chargement
-  const check = Array.from(checkboxes).some(cb => cb.checked);
+  const checkboxes = getFacultyCheckboxes();
+  const check = checkboxes.some(cb => cb.checked);
 
   if (!check) {
     event.preventDefault();

@@ -18,9 +18,61 @@
   <link rel="stylesheet" href="css/inscription.css">
 
   <title>Inscription — QCMed</title>
+
+  <style>
+    /* ── Bouton retour ── */
+    .back-btn {
+      position: fixed;
+      top: 1.1rem;
+      left: 1.25rem;
+      z-index: 9999;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.45rem 0.9rem 0.45rem 0.65rem;
+      background: #1B4FD8;
+      border: none;
+      border-radius: 999px;
+      color: #ffffff;
+      font-family: 'Poppins', sans-serif;
+      font-size: 0.8rem;
+      font-weight: 600;
+      text-decoration: none;
+      box-shadow: 0 2px 12px rgba(27,79,216,0.35);
+      transition: background 0.2s, transform 0.2s, box-shadow 0.2s;
+      cursor: pointer;
+    }
+
+    .back-btn:hover {
+      background: #1540b8;
+      transform: translateX(-2px);
+      box-shadow: 0 4px 18px rgba(27,79,216,0.5);
+    }
+
+    .back-btn svg {
+      width: 16px;
+      height: 16px;
+      stroke: #ffffff;
+      fill: none;
+      flex-shrink: 0;
+      transition: transform 0.2s;
+    }
+
+    .back-btn:hover svg {
+      transform: translateX(-2px);
+    }
+  </style>
 </head>
 
 <body class="page-inscription">
+
+  <!-- ── Flèche retour ── -->
+  <a href="ouverture2.html" class="back-btn" aria-label="Retour à l'accueil">
+    <svg viewBox="0 0 24 24" fill="none" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M19 12H5M12 5l-7 7 7 7"/>
+    </svg>
+    Retour
+  </a>
 
   <!-- Alerte erreur globale -->
   <div class="alert-box" id="alert" role="alert" aria-live="assertive">
@@ -164,54 +216,38 @@
     </div>
 
     <div class="brand-center">
-      <!-- Illustration SVG médicale / étudiant -->
       <div class="brand-illustration">
         <svg viewBox="0 0 320 280" xmlns="http://www.w3.org/2000/svg" class="illus-svg">
-          <!-- fond blob -->
           <ellipse cx="160" cy="160" rx="130" ry="110" fill="rgba(255,255,255,0.12)" />
-          <!-- bureau -->
           <rect x="60" y="195" width="200" height="8" rx="4" fill="rgba(255,255,255,0.35)"/>
-          <!-- ordinateur écran -->
           <rect x="90" y="120" width="110" height="72" rx="8" fill="white" opacity="0.95"/>
           <rect x="96" y="126" width="98" height="58" rx="5" fill="#e8f4fd"/>
-          <!-- lignes QCM sur l'écran -->
           <rect x="102" y="133" width="50" height="4" rx="2" fill="#0065F8" opacity="0.7"/>
           <rect x="102" y="143" width="36" height="3" rx="2" fill="#001087" opacity="0.4"/>
           <circle cx="102" cy="153" r="3" fill="#0065F8" opacity="0.6"/>
           <rect x="109" y="151" width="28" height="3" rx="2" fill="#001087" opacity="0.35"/>
           <circle cx="102" cy="163" r="3" fill="#0065F8" opacity="0.3"/>
           <rect x="109" y="161" width="22" height="3" rx="2" fill="#001087" opacity="0.25"/>
-          <!-- check mark -->
           <circle cx="172" cy="148" r="10" fill="#0065F8" opacity="0.9"/>
           <polyline points="167,148 171,152 177,144" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
-          <!-- pied ordi -->
           <rect x="137" y="192" width="16" height="5" rx="2" fill="rgba(255,255,255,0.5)"/>
           <rect x="128" y="196" width="34" height="4" rx="2" fill="rgba(255,255,255,0.35)"/>
-          <!-- personnage corps -->
           <rect x="188" y="158" width="26" height="38" rx="10" fill="white" opacity="0.9"/>
-          <!-- tête -->
           <circle cx="201" cy="146" r="16" fill="white" opacity="0.95"/>
-          <!-- yeux -->
           <circle cx="196" cy="144" r="2" fill="#0065F8"/>
           <circle cx="206" cy="144" r="2" fill="#0065F8"/>
-          <!-- sourire -->
           <path d="M196 150 Q201 154 206 150" fill="none" stroke="#0065F8" stroke-width="1.5" stroke-linecap="round"/>
-          <!-- bras -->
           <line x1="188" y1="168" x2="172" y2="175" stroke="white" stroke-width="7" stroke-linecap="round" opacity="0.9"/>
-          <!-- stéthoscope -->
           <path d="M168 175 Q162 185 168 192 Q174 198 180 192" fill="none" stroke="#cee1f7" stroke-width="3" stroke-linecap="round"/>
           <circle cx="180" cy="192" r="5" fill="#cee1f7" opacity="0.9"/>
-          <!-- chapeau de diplôme -->
           <polygon points="201,126 220,134 201,140 182,134" fill="#001087" opacity="0.85"/>
           <rect x="196" y="126" width="10" height="4" fill="#001087" opacity="0.85"/>
           <line x1="220" y1="134" x2="222" y2="142" stroke="#001087" stroke-width="2" opacity="0.7"/>
           <circle cx="222" cy="143" r="2" fill="#cee1f7"/>
-          <!-- étoiles déco -->
           <circle cx="75" cy="100" r="3" fill="rgba(255,255,255,0.5)"/>
           <circle cx="255" cy="85" r="4" fill="rgba(255,255,255,0.4)"/>
           <circle cx="240" cy="200" r="2.5" fill="rgba(255,255,255,0.45)"/>
           <circle cx="80" cy="210" r="2" fill="rgba(255,255,255,0.4)"/>
-          <!-- petits carrés déco -->
           <rect x="68" y="130" width="6" height="6" rx="1" fill="rgba(255,255,255,0.3)" transform="rotate(15 68 130)"/>
           <rect x="248" y="165" width="6" height="6" rx="1" fill="rgba(255,255,255,0.3)" transform="rotate(-10 248 165)"/>
         </svg>
@@ -220,7 +256,6 @@
       <h2 class="brand-title">QCMed</h2>
       <p class="brand-desc">Prépare tes examens avec des milliers de QCMs classés par matière, année et faculté.</p>
 
-      <!-- Stats -->
       <div class="brand-stats">
         <div class="stat">
           <span class="stat-num">5000+</span>
@@ -241,7 +276,6 @@
 
   </aside>
 
-  <!-- SVG filter gooey (gardé pour compatibilité JS) -->
   <svg xmlns="http://www.w3.org/2000/svg" style="display:none">
     <defs>
       <filter id="goo">
@@ -255,7 +289,6 @@
   <script src="config/config.js"></script>
   <script src="script/inscription.js"></script>
 
-  <!-- Patch JS : autreFaculte group toggle -->
   <script>
     document.getElementById('faculte').addEventListener('change', function() {
       const grp = document.getElementById('autreFaculteGroup');
@@ -263,14 +296,14 @@
       if (this.value === 'autre') document.getElementById('autreFaculte').focus();
     });
 
-  if (sessionStorage.getItem('fromConnexion')) {
-    document.querySelector('.brand-side').classList.add('slide-from-right');
-    sessionStorage.removeItem('fromConnexion');
-  }
-  document.querySelectorAll('a[href="connexion.html"], a[href="connxion.html"]').forEach(a =>
-    a.addEventListener('click', () => sessionStorage.setItem('fromInscription', '1'))
-  );
-</script>
+    if (sessionStorage.getItem('fromConnexion')) {
+      document.querySelector('.brand-side').classList.add('slide-from-right');
+      sessionStorage.removeItem('fromConnexion');
+    }
+    document.querySelectorAll('a[href="connexion.html"], a[href="connxion.html"]').forEach(a =>
+      a.addEventListener('click', () => sessionStorage.setItem('fromInscription', '1'))
+    );
+  </script>
 
 </body>
 </html>

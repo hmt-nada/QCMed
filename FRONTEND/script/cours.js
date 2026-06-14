@@ -5,18 +5,22 @@ const titre     = document.getElementById('inscrivez');
 // =======================
 // Checkboxes logic
 // =======================
+function getCourseCheckboxes() {
+  return Array.from(document.querySelectorAll('.checkb')).filter(cb => cb.id !== 'selectall');
+}
+
 function attachCheckboxLogic() {
-  const checkboxes = document.querySelectorAll('.checkb');
-  const selectall  = document.getElementById('selectall');
+  const courseCheckboxes = getCourseCheckboxes();
+  const selectall        = document.getElementById('selectall');
   if (!selectall) return;
 
   selectall.addEventListener('change', function () {
-    checkboxes.forEach(cb => cb.checked = this.checked);
+    courseCheckboxes.forEach(cb => cb.checked = this.checked);
   });
 
-  checkboxes.forEach(cb => {
+  courseCheckboxes.forEach(cb => {
     cb.addEventListener('change', function () {
-      selectall.checked = Array.from(checkboxes).every(c => c.checked);
+      selectall.checked = courseCheckboxes.length > 0 && courseCheckboxes.every(c => c.checked);
     });
   });
 }
@@ -82,10 +86,11 @@ function afficherCours() {
 // Validation
 // =======================
 function validerCours() {
-  const checkboxes = document.querySelectorAll('.checkb');
-  const cours = Array.from(checkboxes)
+  const checkboxes = getCourseCheckboxes();
+  const cours = checkboxes
                      .filter(cb => cb.checked)
-                     .map(cb => cb.value);
+                     .map(cb => cb.value)
+                     .filter(v => v && v.trim() !== '');
 
   fetch('/api/choixcours', {
     method: 'POST',
@@ -110,8 +115,8 @@ function validerCours() {
 // Bouton suivant
 // =======================
 document.getElementById('boutton').addEventListener('click', function (event) {
-  const checkboxes = document.querySelectorAll('.checkb');
-  const anyChecked = Array.from(checkboxes).some(cb => cb.checked);
+  const checkboxes = getCourseCheckboxes();
+  const anyChecked = checkboxes.some(cb => cb.checked);
 
   if (!anyChecked) {
     event.preventDefault();
