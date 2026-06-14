@@ -286,9 +286,11 @@ exports.submitQcm = async (req, res) => {
   req.session.note    = note;
   req.session.results = questions;
 
+  const client = await db.connect();
   try {
-    // 2. Créer la session QCM → récupérer son id
-    const sessionResult = await db.query(
+    await client.query('BEGIN');
+
+    const sessionResult = await client.query(
       `INSERT INTO sessions_qcm (user_id, note, correction, module_id)
        VALUES ($1, $2, $3, $4)
        RETURNING id`,
@@ -296,7 +298,6 @@ exports.submitQcm = async (req, res) => {
     );
     const sessionId = sessionResult.rows[0].id;
 
-    // 3. Insérer chaque question dans historique_qcm
     const lettres = ['A','B','C','D','E','F'];
 
     for (const q of questions) {
@@ -304,7 +305,7 @@ exports.submitQcm = async (req, res) => {
         .map(i => lettres[i])
         .join(',') || null;
 
-      await db.query(
+      await client.query(
         `INSERT INTO historique_qcm
            (user_id, question_id, reponse_choisie, correct, repondu_le, session_id)
          VALUES ($1, $2, $3, $4, NOW(), $5)`,
@@ -312,13 +313,16 @@ exports.submitQcm = async (req, res) => {
       );
     }
 
+    await client.query('COMMIT');
     console.log(`✅ Session ${sessionId} enregistrée : ${questions.length} questions, note ${note}`);
     return res.json({ success: true });
 
   } catch (err) {
+    await client.query('ROLLBACK').catch(() => {});
     console.error('❌ Erreur submit-qcm :', err.message);
-    // Session sauvegardée en mémoire, on ne bloque pas l'utilisateur
-    return res.json({ success: true, warning: 'Historique non enregistré.' });
+    return res.status(500).json({ success: false, message: 'Impossible d’enregistrer l’historique.' });
+  } finally {
+    client.release();
   }
 };
 

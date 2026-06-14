@@ -1,7 +1,10 @@
 const db = require('../config/db');
 const bcrypt = require('bcrypt');
 
-const ADMIN_EMAILS = (process.env.ADMIN_EMAILS || '').split(',').map(e => e.trim());
+const ADMIN_EMAILS = (process.env.ADMIN_EMAILS || '')
+  .split(',')
+  .map(e => e.trim().toLowerCase())
+  .filter(Boolean);
 
 function parseAnnee(annee) {
   if (typeof annee === 'number' && Number.isFinite(annee)) return annee;

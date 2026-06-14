@@ -549,12 +549,10 @@ fetch(`/api/submit-qcm`,{
    .then(response=>response.json())
    //result une variable qui contient la réponse du serveur 
    .then(result =>{
-    //si succss est true(module rçu)
     if (result.success){   
-       //ici il faut un redirection vars la page de la note 
        window.location.href = "note.html";
-    }else{
-      alert("erreur:"+result.message);
+    } else {
+      alert(result.message || result.warning || "Erreur lors de l'enregistrement du QCM.");
     }
    })
 

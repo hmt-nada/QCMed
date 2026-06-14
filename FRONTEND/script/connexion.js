@@ -215,14 +215,10 @@ setTimeout(() => {
 
   // ✅ Redirection selon rôle
   if (data.utilisateur.role === "admin") {
-    showAdminModal(choice => {
-        if (choice === 'admin') window.location.href = "panel.html";
-        else window.location.href = "accueil.html";
-      });
-    
-  } else {
-    window.location.href = "accueil.html";     // page user normale
-  }
+  window.location.href = "panel.html";
+} else {
+  window.location.href = "accueil.html";
+}
 
 }, 2000);
 

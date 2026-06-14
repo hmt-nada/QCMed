@@ -1,480 +1,1087 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  
-  <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Oleo+Script:wght@400;700&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">    
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Nunito:ital,wght@0,200..1000;1,200..1000&family=Oleo+Script:wght@400;700&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">
-<script src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js"></script>
-
-   <!------------------------------------l'image de favicon ----------------------------------------------->
-
-<link rel="icon" type="image/png" href="logo/favicon-96x96.png" sizes="96x96" />
-<link rel="icon" type="image/svg+xml" href="logo/favicon.svg" />
-<link rel="shortcut icon" href="logo/favicon.ico" />
-<link rel="apple-touch-icon" sizes="180x180" href="logo/apple-touch-icon.png" />
-<meta name="apple-mobile-web-app-title" content="QCMed" />
-<link rel="manifest" href="logo/site.webmanifest" />
-
-  <title>Admin - Gestion Questions</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Panel Admin</title>
   <style>
-    body { font-family: Arial; margin: 20px; background: #f0f0f0; }
-    table { width: 100%; border-collapse: collapse; background: white; }
-    th, td { border: 1px solid #ccc; padding: 8px; vertical-align: top; }
-    th { background: #007bff; color: white; }
-    td[contenteditable="true"] { background: #ffffe0; }
-    button { margin: 2px; cursor: pointer; }
-    #add-question-btn, #save-all-btn { margin: 10px 5px; padding: 8px 12px; font-size: 16px; }
-    img { max-width: 80px; }
-    pre { white-space: pre-wrap; word-wrap: break-word; margin: 0; }
-  .btn-update {
-  background-color: #4caf50;
-  color: white;
-  border: none;
-  padding: 6px 12px;
-  border-radius: 6px;
-  cursor: pointer;
-  transition: 0.3s;
-}
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap');
 
-.btn-update:hover {
-  background-color: #45a049;
-}
-td[contenteditable="true"] {
-  cursor: text;
-  background-color: #fff9e6;
-  transition: background-color 0.2s ease;
-}
-td[contenteditable="true"]:focus {
-  background-color: #fff3b0;
-}
-button:hover {
-  transform: scale(1.05);
-}
-button:active {
-  transform: scale(0.97);
-}
-.toolbar {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  background: #ffffffee; /* fond blanc semi-transparent */
-  backdrop-filter: blur(6px);
-  padding: 10px 20px;
-  display: flex;
-  justify-content: center;
-  gap: 10px;
-  z-index: 1000;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.15);
-  transition: background 0.3s ease, box-shadow 0.3s ease;
-}
-.toolbar.scrolled {
-  background: #f8f8f8ee;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-}
-body {
-  padding-top: 70px; /* pour éviter que le contenu passe sous la barre */
-}
-input, textarea {
-  outline: none;        /* supprime le contour par défaut */
-  border: none;         /* supprime la bordure si tu veux un look plus clean */
-  width: 100%;          /* occupe toute la cellule */
-  box-sizing: border-box; /* pour que padding ne dépasse pas */
-  background: transparent; /* background transparent pour ne pas changer la couleur de la cellule */
-  font-family: inherit; /* hérite de la police de la table */
-  font-size: inherit;   /* hérite de la taille de la table */
-}
+    :root {
+      --bg:        #0f1117;
+      --surface:   #181c27;
+      --card:      #1e2235;
+      --border:    #2a2f45;
+      --accent:    #4f8ef7;
+      --accent2:   #6ee7b7;
+      --danger:    #f87171;
+      --text:      #e8eaf0;
+      --muted:     #7c8299;
+      --radius:    12px;
+      --shadow:    0 4px 24px rgba(0,0,0,0.4);
+    }
 
-input:focus, textarea:focus {
-  outline: none;        /* assure qu’au focus rien n’apparaît */
-  box-shadow: none;     /* supprime tout effet de surbrillance */
-  background: transparent; /* garde le fond transparent si tu veux */
-}
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+    }
+
+    /* ── SIDEBAR ── */
+    .sidebar {
+      width: 240px;
+      min-height: 100vh;
+      background: var(--surface);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      padding: 28px 0;
+      position: fixed;
+      top: 0; left: 0; bottom: 0;
+    }
+
+    .sidebar-logo {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: var(--accent);
+      padding: 0 24px 28px;
+      border-bottom: 1px solid var(--border);
+      letter-spacing: -0.3px;
+    }
+
+    .sidebar-logo span { color: var(--accent2); }
+
+    .sidebar-nav {
+      margin-top: 20px;
+      flex: 1;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 24px;
+      cursor: pointer;
+      color: var(--muted);
+      font-size: 0.9rem;
+      font-weight: 500;
+      border-left: 3px solid transparent;
+      transition: all 0.2s;
+    }
+
+    .nav-item:hover { color: var(--text); background: rgba(79,142,247,0.07); }
+    .nav-item.active { color: var(--accent); border-left-color: var(--accent); background: rgba(79,142,247,0.1); }
+
+    .nav-item svg { width: 18px; height: 18px; flex-shrink: 0; }
+
+    .sidebar-footer {
+      padding: 20px 24px 0;
+      border-top: 1px solid var(--border);
+    }
+
+    .admin-badge {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 0;
+    }
+
+    .avatar-circle {
+      width: 34px; height: 34px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.8rem; font-weight: 700; color: #fff;
+    }
+
+    .admin-info { font-size: 0.8rem; }
+    .admin-name { font-weight: 600; color: var(--text); }
+    .admin-role { color: var(--muted); font-size: 0.72rem; margin-top: 1px; }
+
+    .btn-logout {
+      margin-top: 12px;
+      width: 100%;
+      padding: 9px;
+      background: transparent;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--muted);
+      font-size: 0.82rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .btn-logout:hover { border-color: var(--danger); color: var(--danger); }
+
+    /* ── MAIN ── */
+    .main {
+      margin-left: 240px;
+      flex: 1;
+      padding: 36px 40px;
+      max-width: calc(100% - 240px);
+    }
+
+    .page { display: none; }
+    .page.active { display: block; }
+
+    .page-header {
+      margin-bottom: 32px;
+    }
+
+    .page-title {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 1.6rem;
+      font-weight: 700;
+      color: var(--text);
+      letter-spacing: -0.5px;
+    }
+
+    .page-sub {
+      color: var(--muted);
+      font-size: 0.88rem;
+      margin-top: 5px;
+    }
+
+    /* ── STATS ── */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+      margin-bottom: 32px;
+    }
+
+    .stat-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px 22px;
+    }
+
+    .stat-label { font-size: 0.78rem; color: var(--muted); font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px; }
+    .stat-value { font-family: 'Space Grotesk', sans-serif; font-size: 2rem; font-weight: 700; margin-top: 6px; color: var(--text); }
+    .stat-value.accent  { color: var(--accent); }
+    .stat-value.accent2 { color: var(--accent2); }
+
+    /* ── FORM CARD ── */
+    .form-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 28px 30px;
+      margin-bottom: 28px;
+      box-shadow: var(--shadow);
+    }
+
+    .form-card-title {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 1rem;
+      font-weight: 600;
+      margin-bottom: 22px;
+      padding-bottom: 14px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .form-card-title .dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: var(--accent);
+    }
+
+    /* Cascade selects */
+    .cascade {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 14px;
+      margin-bottom: 22px;
+    }
+
+    .field { display: flex; flex-direction: column; gap: 6px; }
+
+    label {
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+    }
+
+    select, input[type="text"], input[type="url"], textarea {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text);
+      font-family: 'Inter', sans-serif;
+      font-size: 0.88rem;
+      padding: 10px 12px;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      outline: none;
+      width: 100%;
+    }
+
+    select:focus, input:focus, textarea:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(79,142,247,0.15);
+    }
+
+    select:disabled { opacity: 0.45; cursor: not-allowed; }
+
+    textarea { resize: vertical; min-height: 90px; }
+
+    .choices-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .choice-field {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .choice-label-row {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .choice-badge {
+      width: 22px; height: 22px;
+      border-radius: 50%;
+      background: var(--border);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.7rem;
+      font-weight: 700;
+      color: var(--muted);
+      flex-shrink: 0;
+    }
+
+    .choice-badge.correct { background: rgba(110,231,183,0.2); color: var(--accent2); }
+
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 16px; }
+    .form-full { margin-bottom: 16px; }
+
+    .bonne-reponse-wrap {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      padding: 12px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+    }
+
+    .bonne-reponse-wrap span { font-size: 0.8rem; color: var(--muted); }
+
+    .radio-choice {
+      display: flex; align-items: center; gap: 5px;
+      cursor: pointer;
+    }
+
+    .radio-choice input[type="radio"] {
+      width: auto;
+      accent-color: var(--accent2);
+    }
+
+    .radio-choice label {
+      font-size: 0.82rem;
+      color: var(--text);
+      text-transform: none;
+      letter-spacing: 0;
+      cursor: pointer;
+    }
+
+    .btn-submit {
+      background: linear-gradient(135deg, var(--accent), #6b8ef0);
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      padding: 13px 32px;
+      font-size: 0.92rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: opacity 0.2s, transform 0.15s;
+      font-family: 'Inter', sans-serif;
+    }
+
+    .btn-submit:hover { opacity: 0.9; transform: translateY(-1px); }
+    .btn-submit:active { transform: translateY(0); }
+
+    .btn-reset {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--muted);
+      border-radius: 10px;
+      padding: 13px 22px;
+      font-size: 0.88rem;
+      cursor: pointer;
+      font-family: 'Inter', sans-serif;
+      transition: all 0.2s;
+      margin-left: 10px;
+    }
+
+    .btn-reset:hover { border-color: var(--muted); color: var(--text); }
+
+    .form-actions { display: flex; align-items: center; margin-top: 20px; }
+
+    /* ── TOAST ── */
+    .toast {
+      position: fixed;
+      bottom: 28px; right: 28px;
+      padding: 14px 22px;
+      border-radius: 10px;
+      font-size: 0.88rem;
+      font-weight: 500;
+      z-index: 999;
+      opacity: 0;
+      transform: translateY(10px);
+      transition: all 0.3s;
+      pointer-events: none;
+    }
+
+    .toast.show { opacity: 1; transform: translateY(0); }
+    .toast.success { background: rgba(110,231,183,0.15); border: 1px solid var(--accent2); color: var(--accent2); }
+    .toast.error   { background: rgba(248,113,113,0.15); border: 1px solid var(--danger);  color: var(--danger); }
+
+    /* ── TABLE QUESTIONS ── */
+    .table-wrap {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+
+    .table-header {
+      padding: 18px 24px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .table-title {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 0.95rem;
+      font-weight: 600;
+    }
+
+    .search-input {
+      padding: 8px 14px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text);
+      font-size: 0.84rem;
+      width: 220px;
+    }
+
+    table { width: 100%; border-collapse: collapse; }
+
+    thead th {
+      padding: 12px 16px;
+      text-align: left;
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+    }
+
+    tbody tr {
+      border-bottom: 1px solid var(--border);
+      transition: background 0.15s;
+    }
+
+    tbody tr:last-child { border-bottom: none; }
+    tbody tr:hover { background: rgba(79,142,247,0.04); }
+
+    tbody td {
+      padding: 13px 16px;
+      font-size: 0.85rem;
+      color: var(--text);
+      vertical-align: middle;
+    }
+
+    .td-enonce {
+      max-width: 320px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 3px 10px;
+      border-radius: 20px;
+      font-size: 0.72rem;
+      font-weight: 600;
+    }
+
+    .badge-blue { background: rgba(79,142,247,0.15); color: var(--accent); }
+    .badge-green { background: rgba(110,231,183,0.15); color: var(--accent2); }
+
+    .btn-del {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--muted);
+      border-radius: 6px;
+      padding: 5px 10px;
+      font-size: 0.78rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-del:hover { border-color: var(--danger); color: var(--danger); }
+
+    .empty-state {
+      text-align: center;
+      padding: 48px;
+      color: var(--muted);
+      font-size: 0.88rem;
+    }
+
+    .empty-state svg { width: 40px; height: 40px; margin-bottom: 12px; opacity: 0.4; }
+
+    .loading { text-align: center; padding: 30px; color: var(--muted); font-size: 0.85rem; }
+
+    /* ── FILTER ROW ── */
+    .filter-row {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 20px;
+      align-items: flex-end;
+    }
+
+    .filter-row .field { flex: 1; }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 1100px) {
+      .stats-grid { grid-template-columns: repeat(2, 1fr); }
+      .cascade { grid-template-columns: repeat(2, 1fr); }
+      .choices-grid { grid-template-columns: 1fr 1fr; }
+    }
   </style>
 </head>
 <body>
-  <div class="toolbar">
-     <h1>📘 Panel Admin - Gestion des Questions</h1>
-  <button id="addBtn" onclick="addQuestion()">➕ Ajouter une question</button>
-  <button id="saveBtn" onclick="saveAll()">💾 Sauvegarder les modifications</button>
-</div>
 
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="sidebar-logo">Med<span>Quiz</span> Admin</div>
+  <nav class="sidebar-nav">
+    <div class="nav-item active" onclick="showPage('dashboard')">
+      <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0h6"/></svg>
+      Tableau de bord
+    </div>
+    <div class="nav-item" onclick="showPage('ajouter')">
+      <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+      Ajouter une question
+    </div>
+    <div class="nav-item" onclick="showPage('liste'); chargerQuestionsListe()">
+      <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+      Liste des questions
+    </div>
+  </nav>
+  <div class="sidebar-footer">
+    <div class="admin-badge">
+      <div class="avatar-circle" id="avatarLetter">A</div>
+      <div class="admin-info">
+        <div class="admin-name" id="adminPseudo">Admin</div>
+        <div class="admin-role">Administrateur</div>
+      </div>
+    </div>
+    <button class="btn-logout" onclick="seDeconnecter()">Se déconnecter</button>
+  </div>
+</aside>
 
-  <table id="table-questions">
-    <thead>
-      <tr>
-        
-        <th>Faculté</th>
-        <th>Module</th>
-        <th>Cours</th>
-        <th>Question</th>
-        <th>Options (JSON)</th>
-        <th>Réponses correctes (JSON)</th>
-        <th>Image</th>
-        <th>Actions</th>
-      </tr>
-    </thead>
-    <tbody></tbody>
-  </table>
+<!-- MAIN -->
+<main class="main">
+
+  <!-- PAGE : DASHBOARD -->
+  <div class="page active" id="page-dashboard">
+    <div class="page-header">
+      <div class="page-title">Tableau de bord</div>
+      <div class="page-sub">Vue d'ensemble de la plateforme</div>
+    </div>
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-label">Questions</div>
+        <div class="stat-value accent" id="stat-questions">—</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Cours</div>
+        <div class="stat-value" id="stat-cours">—</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Modules</div>
+        <div class="stat-value" id="stat-modules">—</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Utilisateurs</div>
+        <div class="stat-value accent2" id="stat-users">—</div>
+      </div>
+    </div>
+
+    <div class="form-card">
+      <div class="form-card-title"><span class="dot"></span> Raccourci rapide</div>
+      <p style="color:var(--muted); font-size:0.88rem; margin-bottom:18px;">
+        Vous pouvez ajouter une nouvelle question directement depuis ici.
+      </p>
+      <button class="btn-submit" onclick="showPage('ajouter')">➕ &nbsp;Ajouter une question</button>
+    </div>
+  </div>
+
+  <!-- PAGE : AJOUTER -->
+  <div class="page" id="page-ajouter">
+    <div class="page-header">
+      <div class="page-title">Ajouter une question</div>
+      <div class="page-sub">Sélectionnez le contexte puis remplissez le formulaire</div>
+    </div>
+
+    <div class="form-card">
+      <div class="form-card-title"><span class="dot"></span> Contexte de la question</div>
+      <div class="cascade">
+        <div class="field">
+          <label>Faculté</label>
+          <select id="sel-faculte" onchange="chargerModules()">
+            <option value="">— Sélectionner —</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Année</label>
+          <select id="sel-annee" onchange="filtrerModules()" disabled>
+            <option value="">— Sélectionner —</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Module</label>
+          <select id="sel-module" onchange="chargerCours()" disabled>
+            <option value="">— Sélectionner —</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Cours</label>
+          <select id="sel-cours" disabled>
+            <option value="">— Sélectionner —</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <div class="form-card">
+      <div class="form-card-title"><span class="dot"></span> Contenu de la question</div>
+
+      <div class="form-full">
+        <label>Énoncé de la question *</label>
+        <textarea id="enonce" placeholder="Écrivez l'énoncé de la question ici..."></textarea>
+      </div>
+
+      <div class="form-full">
+        <label>Image (URL — optionnel)</label>
+        <input type="url" id="image_url" placeholder="https://exemple.com/image.png" />
+      </div>
+
+      <div class="form-card-title" style="margin-top:8px; margin-bottom:14px; border-top:1px solid var(--border); padding-top:18px;">
+        <span class="dot" style="background:var(--accent2)"></span> Choix de réponses
+      </div>
+
+      <div class="choices-grid">
+        <div class="choice-field">
+          <div class="choice-label-row">
+            <div class="choice-badge" id="badge-a">A</div>
+            <label style="text-transform:none; letter-spacing:0; color:var(--text);">Choix A *</label>
+          </div>
+          <input type="text" id="choix_a" placeholder="Réponse A..." />
+        </div>
+        <div class="choice-field">
+          <div class="choice-label-row">
+            <div class="choice-badge" id="badge-b">B</div>
+            <label style="text-transform:none; letter-spacing:0; color:var(--text);">Choix B *</label>
+          </div>
+          <input type="text" id="choix_b" placeholder="Réponse B..." />
+        </div>
+        <div class="choice-field">
+          <div class="choice-label-row">
+            <div class="choice-badge" id="badge-c">C</div>
+            <label style="text-transform:none; letter-spacing:0; color:var(--text);">Choix C *</label>
+          </div>
+          <input type="text" id="choix_c" placeholder="Réponse C..." />
+        </div>
+        <div class="choice-field">
+          <div class="choice-label-row">
+            <div class="choice-badge" id="badge-d">D</div>
+            <label style="text-transform:none; letter-spacing:0; color:var(--text);">Choix D</label>
+          </div>
+          <input type="text" id="choix_d" placeholder="Réponse D (optionnel)..." />
+        </div>
+        <div class="choice-field">
+          <div class="choice-label-row">
+            <div class="choice-badge" id="badge-e">E</div>
+            <label style="text-transform:none; letter-spacing:0; color:var(--text);">Choix E</label>
+          </div>
+          <input type="text" id="choix_e" placeholder="Réponse E (optionnel)..." />
+        </div>
+        <div class="choice-field">
+          <div class="choice-label-row">
+            <div class="choice-badge" id="badge-f">F</div>
+            <label style="text-transform:none; letter-spacing:0; color:var(--text);">Choix F</label>
+          </div>
+          <input type="text" id="choix_f" placeholder="Réponse F (optionnel)..." />
+        </div>
+      </div>
+
+      <div class="form-full">
+        <label>Bonne réponse *</label>
+        <div class="bonne-reponse-wrap">
+          <span>Sélectionner :</span>
+          <label class="radio-choice"><input type="radio" name="bonne_rep" value="A" /> <label>A</label></label>
+          <label class="radio-choice"><input type="radio" name="bonne_rep" value="B" /> <label>B</label></label>
+          <label class="radio-choice"><input type="radio" name="bonne_rep" value="C" /> <label>C</label></label>
+          <label class="radio-choice"><input type="radio" name="bonne_rep" value="D" /> <label>D</label></label>
+          <label class="radio-choice"><input type="radio" name="bonne_rep" value="E" /> <label>E</label></label>
+          <label class="radio-choice"><input type="radio" name="bonne_rep" value="F" /> <label>F</label></label>
+        </div>
+      </div>
+
+      <div class="form-full" style="margin-top:16px;">
+        <label>Explication / Correction (optionnel)</label>
+        <textarea id="explication" placeholder="Explication de la bonne réponse..." style="min-height:80px;"></textarea>
+      </div>
+
+      <div class="form-actions">
+        <button class="btn-submit" onclick="soumettreQuestion()">✓ &nbsp;Enregistrer la question</button>
+        <button class="btn-reset" onclick="resetFormulaire()">Réinitialiser</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- PAGE : LISTE -->
+  <div class="page" id="page-liste">
+    <div class="page-header">
+      <div class="page-title">Liste des questions</div>
+      <div class="page-sub">Consultez et gérez toutes les questions</div>
+    </div>
+
+    <div class="filter-row">
+      <div class="field">
+        <label>Filtrer par faculté</label>
+        <select id="filtre-faculte" onchange="chargerFiltreModules()">
+          <option value="">Toutes les facultés</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Filtrer par année</label>
+        <select id="filtre-annee" onchange="filtrerModulesFiltre()">
+          <option value="">Toutes les années</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Filtrer par module</label>
+        <select id="filtre-module" onchange="chargerCoursFiltre()">
+          <option value="">Tous les modules</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Filtrer par cours</label>
+        <select id="filtre-cours" onchange="chargerQuestionsListe()">
+          <option value="">Tous les cours</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="table-wrap">
+      <div class="table-header">
+        <div class="table-title">Questions</div>
+        <input class="search-input" type="text" placeholder="🔍 Rechercher..." oninput="filtrerTableau(this.value)" />
+      </div>
+      <div id="table-body-wrap">
+        <div class="loading">Chargement...</div>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
 
 <script>
-  let questions = [];
-let isLoading = false; // empêche les doubles appels
+// ── VÉRIFICATION SESSION ADMIN ────────────────────────────────────
+async function verifierAdmin() {
+  try {
+    const res = await fetch('/api/session');
+    const data = await res.json();
+    if (!data.success || data.utilisateur?.role !== 'admin') {
+      window.location.href = 'connxion.html';
+      return;
+    }
+    const pseudo = data.utilisateur.pseudo || 'Admin';
+    document.getElementById('adminPseudo').textContent = pseudo;
+    document.getElementById('avatarLetter').textContent = pseudo.charAt(0).toUpperCase();
+  } catch {
+    window.location.href = 'connxion.html';
+  }
+}
 
-  async function saveAll() {
-  const changedQuestions = questions
-  .filter(q => ["new", "changed", "deleted"].includes(q.state))
-  .map(q => ({
-    faculte: q.faculte,
-    module: q.module,
-    cours: q.cours,
-    question: q.question,
-    oldQuestion: q.oldQuestion || null,
-    options: q.options,
-    correct: q.correct,
-    image: q.image,
-    state: q.state,
-      oldData: q.oldData || null
-  }));
+// ── NAVIGATION ────────────────────────────────────────────────────
+function showPage(name) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('page-' + name).classList.add('active');
+  const idx = { dashboard: 0, ajouter: 1, liste: 2 };
+  document.querySelectorAll('.nav-item')[idx[name]]?.classList.add('active');
+  if (name === 'dashboard') chargerStats();
+}
 
-console.log("🧩 [DEBUG] Tentative suppression :", changedQuestions);
-console.log("🧠 [DEBUG] IDs envoyés au serveur :", changedQuestions.map(q => q.id));
+// ── TOAST ─────────────────────────────────────────────────────────
+function showToast(msg, type = 'success') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast ' + type + ' show';
+  setTimeout(() => t.classList.remove('show'), 3500);
+}
+
+// ── DONNÉES GLOBALES ──────────────────────────────────────────────
+let tousModules = [];
+let toutesFacultes = [];
+let tousCoursFiltre = [];
+let questionsTableau = [];
+
+// ── INIT ──────────────────────────────────────────────────────────
+async function init() {
+  await verifierAdmin();
+  await chargerFacultes();
+  await chargerStats();
+}
+
+// ── STATS ─────────────────────────────────────────────────────────
+async function chargerStats() {
+  try {
+    const res = await fetch('/api/admin/stats');
+    const data = await res.json();
+    document.getElementById('stat-questions').textContent = data.questions ?? '—';
+    document.getElementById('stat-cours').textContent     = data.cours     ?? '—';
+    document.getElementById('stat-modules').textContent   = data.modules   ?? '—';
+    document.getElementById('stat-users').textContent     = data.users     ?? '—';
+  } catch { /* silencieux */ }
+}
+
+// ── FACULTÉS ──────────────────────────────────────────────────────
+async function chargerFacultes() {
+  try {
+    const res  = await fetch('/api/admin/facultes');
+    const data = await res.json();
+    toutesFacultes = data;
+
+    const selF  = document.getElementById('sel-faculte');
+    const filF  = document.getElementById('filtre-faculte');
+
+    [selF, filF].forEach(sel => {
+      const def = sel.options[0].outerHTML;
+      sel.innerHTML = def;
+      data.forEach(f => {
+        const opt = document.createElement('option');
+        opt.value = f.id;
+        opt.textContent = f.nom;
+        sel.appendChild(opt);
+      });
+    });
+  } catch { showToast('Erreur chargement facultés', 'error'); }
+}
+
+// ── MODULES (cascade ajout) ───────────────────────────────────────
+async function chargerModules() {
+  const faculteId = document.getElementById('sel-faculte').value;
+  const selAnnee  = document.getElementById('sel-annee');
+  const selModule = document.getElementById('sel-module');
+  const selCours  = document.getElementById('sel-cours');
+
+  selAnnee.innerHTML  = '<option value="">— Sélectionner —</option>';
+  selModule.innerHTML = '<option value="">— Sélectionner —</option>';
+  selCours.innerHTML  = '<option value="">— Sélectionner —</option>';
+  selAnnee.disabled = selModule.disabled = selCours.disabled = true;
+
+  if (!faculteId) return;
 
   try {
-    console.table(questions.filter(q => q.state === "deleted"));
-    const res = await fetch("/api/saveChanges", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ questions: changedQuestions })
+    const res  = await fetch(`/api/admin/modules?faculte_id=${faculteId}`);
+    tousModules = await res.json();
+
+    // Extraire les années uniques
+    const annees = [...new Set(tousModules.map(m => m.annee))].sort((a,b) => a-b);
+    annees.forEach(a => {
+      const opt = document.createElement('option');
+      opt.value = a;
+      opt.textContent = `${a}ère/ème année`;
+      selAnnee.appendChild(opt);
+    });
+    selAnnee.disabled = false;
+  } catch { showToast('Erreur chargement modules', 'error'); }
+}
+
+function filtrerModules() {
+  const annee    = document.getElementById('sel-annee').value;
+  const selMod   = document.getElementById('sel-module');
+  const selCours = document.getElementById('sel-cours');
+
+  selMod.innerHTML   = '<option value="">— Sélectionner —</option>';
+  selCours.innerHTML = '<option value="">— Sélectionner —</option>';
+  selMod.disabled = selCours.disabled = true;
+
+  if (!annee) return;
+
+  const filtres = tousModules.filter(m => String(m.annee) === String(annee));
+  filtres.forEach(m => {
+    const opt = document.createElement('option');
+    opt.value = m.id;
+    opt.textContent = m.nom;
+    selMod.appendChild(opt);
+  });
+  selMod.disabled = false;
+}
+
+async function chargerCours() {
+  const moduleId = document.getElementById('sel-module').value;
+  const selCours = document.getElementById('sel-cours');
+  selCours.innerHTML = '<option value="">— Sélectionner —</option>';
+  selCours.disabled = true;
+  if (!moduleId) return;
+
+  try {
+    const res  = await fetch(`/api/admin/cours?module_id=${moduleId}`);
+    const data = await res.json();
+    data.forEach(c => {
+      const opt = document.createElement('option');
+      opt.value = c.id;
+      opt.textContent = c.titre;
+      selCours.appendChild(opt);
+    });
+    selCours.disabled = false;
+  } catch { showToast('Erreur chargement cours', 'error'); }
+}
+
+// ── SOUMETTRE QUESTION ────────────────────────────────────────────
+async function soumettreQuestion() {
+  const faculteId   = document.getElementById('sel-faculte').value;
+  const coursId     = document.getElementById('sel-cours').value;
+  const enonce      = document.getElementById('enonce').value.trim();
+  const choix_a     = document.getElementById('choix_a').value.trim();
+  const choix_b     = document.getElementById('choix_b').value.trim();
+  const choix_c     = document.getElementById('choix_c').value.trim();
+  const choix_d     = document.getElementById('choix_d').value.trim();
+  const choix_e     = document.getElementById('choix_e').value.trim();
+  const choix_f     = document.getElementById('choix_f').value.trim();
+  const image_url   = document.getElementById('image_url').value.trim();
+  const explication = document.getElementById('explication').value.trim();
+  const bonneRep    = document.querySelector('input[name="bonne_rep"]:checked')?.value;
+
+  if (!faculteId || !coursId) return showToast('Sélectionnez une faculté et un cours', 'error');
+  if (!enonce)   return showToast('L\'énoncé est obligatoire', 'error');
+  if (!choix_a || !choix_b || !choix_c) return showToast('Les choix A, B et C sont obligatoires', 'error');
+  if (!bonneRep) return showToast('Sélectionnez la bonne réponse', 'error');
+
+  try {
+    const res = await fetch('/api/admin/questions', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        cours_id: parseInt(coursId),
+        faculte_id: parseInt(faculteId),
+        enonce,
+        choix_a, choix_b, choix_c,
+        choix_d: choix_d || null,
+        choix_e: choix_e || null,
+        choix_f: choix_f || null,
+        bonne_reponse: bonneRep,
+        explication:  explication || null,
+        image_url:    image_url   || null
+      })
     });
 
     const data = await res.json();
     if (data.success) {
-      alert("✅ Changements sauvegardés !");
-      loadQuestions(); // recharger la table depuis la base
+      showToast('✓ Question ajoutée avec succès !');
+      resetFormulaire();
+      chargerStats();
     } else {
-      alert("❌ Erreur : " + data.message);
+      showToast(data.message || 'Erreur lors de l\'ajout', 'error');
     }
-  } catch (err) {
-    console.error("Erreur saveAll:", err);
-    alert("Erreur réseau : " + err.message);
-  }
-}
-function saveEdit(index) {
-  const q = questions[index];
-  const tr = document.querySelectorAll('#table-questions tbody tr')[index];
-  const editableCells = tr.querySelectorAll('td:not(:last-child)');
-  const fields = ['faculte', 'module', 'cours', 'question', 'options', 'correct', 'image'];
-
-  // 🔹 Sauvegarde des nouvelles valeurs
-  editableCells.forEach((td, i) => {
-    let value = td.innerText.trim();
-    if (fields[i] === 'options' || fields[i] === 'correct') {
-      try { value = JSON.parse(value); } catch { /* garde texte brut si erreur */ }
-    }
-    q[fields[i]] = value;
-    td.removeAttribute('contenteditable');
-    td.style.backgroundColor = '';
-  });
-
-  // 🔹 Marque la ligne comme changée
-  q.state = q.state === 'new' ? 'new' : 'changed';
-
-  // 🔹 Restaure les boutons
-  const actionsTd = tr.querySelector('td:last-child');
-  actionsTd.innerHTML = ''; // on vide la cellule d’actions
-
-  // 📝 Bouton Modifier
-  const editBtn = document.createElement('button');
-  editBtn.textContent = '📝 Modifier';
-  editBtn.onclick = (e) => {
-    e.preventDefault();
-    enableEdit(index);
-  };
-  actionsTd.appendChild(editBtn);
-
-  // ❌ Bouton Supprimer (remis comme avant)
-  const delBtn = document.createElement('button');
-  delBtn.textContent = '❌';
-  delBtn.onclick = () => deleteQuestion(index);
-  actionsTd.appendChild(delBtn);
-
-  // 🔹 Badge visuel
-  const span = document.createElement('span');
-  span.textContent = '(changed)';
-  span.style.color = 'orange';
-  span.style.marginLeft = '6px';
-  actionsTd.appendChild(span);
+  } catch { showToast('Erreur réseau', 'error'); }
 }
 
-// enable editing mode for a line
-function enableEdit(index) {
-  const q = questions[index];
-  const tr = document.querySelectorAll('#table-questions tbody tr')[index];
-
-  q.oldData = JSON.parse(JSON.stringify(q));
-  q.state = q.state === "new" ? "new" : "editing";
-
-  const editableCells = tr.querySelectorAll('td:not(:last-child)');
-  editableCells.forEach(td => {
-    td.setAttribute('contenteditable', 'true');
-    td.style.outline = 'none';
-    td.style.backgroundColor = '#fffdf0';
-  });
-
-  const actionsTd = tr.querySelector('td:last-child');
-  actionsTd.innerHTML = '';
-
-  // 💾 Bouton Enregistrer
-  const saveBtn = document.createElement('button');
-  saveBtn.textContent = '💾 Enregistrer';
-  saveBtn.onclick = () => saveEdit(index);
-  actionsTd.appendChild(saveBtn);
-
-  // ❌ Bouton Annuler
-  const cancelBtn = document.createElement('button');
-  cancelBtn.textContent = '❌ Annuler';
-  cancelBtn.onclick = () => cancelEdit(index);
-  actionsTd.appendChild(cancelBtn);
-
-  // 🔸 Badge visuel
-  const span = document.createElement('span');
-  span.textContent = '(editing)';
-  span.style.color = 'orange';
-  span.style.marginLeft = '6px';
-  actionsTd.appendChild(span);
+function resetFormulaire() {
+  ['enonce','choix_a','choix_b','choix_c','choix_d','choix_e','choix_f','image_url','explication']
+    .forEach(id => document.getElementById(id).value = '');
+  document.querySelectorAll('input[name="bonne_rep"]').forEach(r => r.checked = false);
 }
 
+// ── LISTE : FILTRES EN CASCADE ────────────────────────────────────
+let tousModulesFiltre = [];
 
+async function chargerFiltreModules() {
+  const faculteId = document.getElementById('filtre-faculte').value;
+  const selA = document.getElementById('filtre-annee');
+  const selM = document.getElementById('filtre-module');
+  const selC = document.getElementById('filtre-cours');
 
-// cancel editing and restore oldData
-function cancelEdit(index) {
-  const q = questions[index];
-  if (q.oldData) {
-    // restaure valeurs
-    q.faculte = q.oldData.faculte;
-    q.module = q.oldData.module;
-    q.cours = q.oldData.cours;
-    q.question = q.oldData.question;
-    q.options = q.oldData.options;
-    q.correct = q.oldData.correct;
-    q.image = q.oldData.image;
-    q.oldData = null;
-  }
-  q.state = q.state === "new" ? "new" : "unchanged";
-  renderQuestions();
-}
+  selA.innerHTML = '<option value="">Toutes les années</option>';
+  selM.innerHTML = '<option value="">Tous les modules</option>';
+  selC.innerHTML = '<option value="">Tous les cours</option>';
 
-// accept edit, mark as changed
-function validateEdit(index) {
-  const q = questions[index];
-  // si on veut, on peut vérifier qu'au moins un champ a changé
-  q.state = q.state === "new" ? "new" : "changed";
-  renderQuestions();
-}
-// update a single field while editing
-function updateField(index, field, value) {
-  const q = questions[index];
-  if (!q) return;
-  if (field === "options" || field === "correct") {
-    // try to parse JSON if user types JSON
-    if (typeof value === "string") {
-      try { value = JSON.parse(value); } catch { /* assume it's already array when passed */ }
-    }
-  }
-  q[field] = value;
-}
+  if (!faculteId) { chargerQuestionsListe(); return; }
 
-function handleInputChange(index, field, value) {
-   if (!questions[index]) return;
-   
-  // ✅ On change l’état UNE SEULE FOIS
-  if (questions[index].state === "unchanged" && field === "question") {
-    // Sauvegarder l'ancienne question avant modification
-    questions[index].oldQuestion = questions[index].question;
-  }
-// ✅ Met à jour la valeur
-  if (field !== "id") questions[index][field] = value;
- if (questions[index].state === "unchanged") {
-    questions[index].state = "changed";
-  }
-  
-  // 🚫 Si c’est déjà "new" ou "changed", on ne fait rien
-  // (donc pas de reassignation inutile)
-
-  // ✅ Met juste à jour le badge de statut visuel
-  const tr = document.querySelectorAll('tbody tr')[index];
-  if (tr) {
-    const span = tr.querySelector('span');
-    if (span) {
-      span.textContent = `(${questions[index].state})`;
-      span.style.color =
-        questions[index].state === 'new' ? 'green' :
-        questions[index].state === 'changed' ? 'orange' :
-        questions[index].state === 'deleted' ? 'red' : '#888';
-    }
-  }
-}
-
-function deleteQuestion(index) {
-  if (questions[index].state === "new") {
-    questions.splice(index, 1);
-  } else {
-    questions[index].state = "deleted";
-  }
-  renderQuestions();
-
-  const tr = document.querySelectorAll('tbody tr')[index];
-  if (tr) tr.style.opacity = "0.5";
-}
-
-function addQuestion() {
-  const newQuestion = {
-    id: null,
-    faculte: "",
-    module: "",
-    cours: "",
-    question: "",
-    options: ["", "", "", ""],
-    correct: [],
-    image: "",
-    state: "new",
-    oldData: null
-  };
-  questions.push(newQuestion);
-  renderQuestions();
-}
-
-const tbody = document.querySelector('#table-questions tbody');
-
-// 🔹 Charger toutes les questions
-async function loadQuestions() {
-  if (isLoading) return;
-  isLoading = true;
   try {
-    const res = await fetch('/api/adminquestions');
-    if (!res.ok) throw new Error('HTTP ' + res.status);
-    const data = await res.json();
-    if (!data.success) throw new Error('Format inattendu');
-    questions = data.questions.map(q => ({ ...q })); // shallow copy
-    renderQuestions();
-  } catch (e) {
-    console.error(e);
-    alert('Erreur: ' + e.message);
-  } finally {
-    isLoading = false;
-  }
+    const res = await fetch(`/api/admin/modules?faculte_id=${faculteId}`);
+    tousModulesFiltre = await res.json();
+    const annees = [...new Set(tousModulesFiltre.map(m => m.annee))].sort((a,b) => a-b);
+    annees.forEach(a => {
+      const opt = document.createElement('option');
+      opt.value = a;
+      opt.textContent = `${a}ère/ème année`;
+      selA.appendChild(opt);
+    });
+  } catch {}
+  chargerQuestionsListe();
 }
-// render function with edit/validate/cancel controls
-function renderQuestions() {
-  const tbody = document.querySelector('#table-questions tbody');
-  tbody.innerHTML = '';
-  questions.forEach((q, index) => {
-    const tr = document.createElement('tr');
 
-    // id hidden cell
- tr.dataset.id = q.id ?? '';
+function filtrerModulesFiltre() {
+  const annee = document.getElementById('filtre-annee').value;
+  const selM  = document.getElementById('filtre-module');
+  const selC  = document.getElementById('filtre-cours');
+  selM.innerHTML = '<option value="">Tous les modules</option>';
+  selC.innerHTML = '<option value="">Tous les cours</option>';
 
-    function makeCell(field, isTextarea = false) {
-      const td = document.createElement('td');
-      if (q.state === 'editing' || q.state === 'new') {
-    const input = isTextarea ? document.createElement('textarea') : document.createElement('input');
-    input.value = (field === 'options' || field === 'correct') ? JSON.stringify(q[field] || []) : (q[field] ?? '');
-    input.oninput = (e) => updateField(index, field, isTextarea ? e.target.value : e.target.value);
-    td.appendChild(input);
-} else {
-    td.contentEditable = false;
-    td.textContent = (field === 'options' || field === 'correct') ? JSON.stringify(q[field] || []) : (q[field] ?? '');
-}
-      return td;
-    }
-
-    tr.appendChild(makeCell('faculte'));
-    tr.appendChild(makeCell('module'));
-    tr.appendChild(makeCell('cours'));
-    tr.appendChild(makeCell('question', true));
-    tr.appendChild(makeCell('options', true));
-    tr.appendChild(makeCell('correct', true));
-    tr.appendChild(makeCell('image'));
-
-    const actionsTd = document.createElement('td');
-
-    // Delete button (mark deleted)
-    const delBtn = document.createElement('button');
-    delBtn.textContent = '❌';
-    delBtn.onclick = () => {
-      if (q.state === 'new') {
-        questions.splice(index, 1);
-      } else {
-        q.state = 'deleted';
-      }
-      renderQuestions();
-    };
-    actionsTd.appendChild(delBtn);
-
-    // Edit / Validate / Cancel buttons
-    if (q.state === 'editing') {
-      const saveBtn = document.createElement('button');
-      saveBtn.textContent = '✅ Valider';
-      saveBtn.onclick = () => validateEdit(index);
-      actionsTd.appendChild(saveBtn);
-
-      const cancelBtn = document.createElement('button');
-      cancelBtn.textContent = '❌ Annuler';
-      cancelBtn.onclick = () => cancelEdit(index);
-      actionsTd.appendChild(cancelBtn);
-    } else {
-      const editBtn = document.createElement('button');
-      editBtn.classList.add('btn-update');
-editBtn.textContent = '📝 Modifier';
-editBtn.addEventListener('click', (e) => {
-  e.preventDefault();
-  enableEdit(index);
-});
-actionsTd.appendChild(editBtn);
-
-      // visual state badge
-      const span = document.createElement('span');
-      span.style.fontSize = '12px';
-      span.style.marginLeft = '6px';
-      span.style.color =
-        q.state === 'new' ? 'green' :
-        q.state === 'changed' ? 'orange' :
-        q.state === 'deleted' ? 'red' : '#888';
-      span.textContent = `(${q.state})`;
-      actionsTd.appendChild(span);
-    }
-
-    if (q.state === 'deleted') {
-      tr.style.opacity = '0.5';
-    }
-
-    tr.appendChild(actionsTd);
-    tbody.appendChild(tr);
+  const filtres = annee ? tousModulesFiltre.filter(m => String(m.annee) === String(annee)) : tousModulesFiltre;
+  filtres.forEach(m => {
+    const opt = document.createElement('option');
+    opt.value = m.id;
+    opt.textContent = m.nom;
+    selM.appendChild(opt);
   });
+  chargerQuestionsListe();
 }
 
+async function chargerCoursFiltre() {
+  const moduleId = document.getElementById('filtre-module').value;
+  const selC = document.getElementById('filtre-cours');
+  selC.innerHTML = '<option value="">Tous les cours</option>';
 
-document.getElementById('addBtn').onclick = addQuestion;
-document.getElementById('saveBtn').onclick = saveAll;
+  if (!moduleId) { chargerQuestionsListe(); return; }
 
-loadQuestions();
-window.addEventListener("scroll", () => {
-  const toolbar = document.querySelector(".toolbar");
-  if (window.scrollY > 30) toolbar.classList.add("scrolled");
-  else toolbar.classList.remove("scrolled");
-});
+  try {
+    const res  = await fetch(`/api/admin/cours?module_id=${moduleId}`);
+    const data = await res.json();
+    data.forEach(c => {
+      const opt = document.createElement('option');
+      opt.value = c.id;
+      opt.textContent = c.titre;
+      selC.appendChild(opt);
+    });
+  } catch {}
+  chargerQuestionsListe();
+}
 
+// ── LISTE : CHARGER QUESTIONS ─────────────────────────────────────
+async function chargerQuestionsListe() {
+  const faculteId = document.getElementById('filtre-faculte').value;
+  const coursId   = document.getElementById('filtre-cours').value;
+  const moduleId  = document.getElementById('filtre-module').value;
+
+  let url = '/api/admin/questions?';
+  if (faculteId) url += `faculte_id=${faculteId}&`;
+  if (coursId)   url += `cours_id=${coursId}&`;
+  else if (moduleId) url += `module_id=${moduleId}&`;
+
+  const wrap = document.getElementById('table-body-wrap');
+  wrap.innerHTML = '<div class="loading">Chargement...</div>';
+
+  try {
+    const res  = await fetch(url);
+    questionsTableau = await res.json();
+    renderTableau(questionsTableau);
+  } catch { wrap.innerHTML = '<div class="loading">Erreur de chargement</div>'; }
+}
+
+function renderTableau(questions) {
+  const wrap = document.getElementById('table-body-wrap');
+  if (!questions.length) {
+    wrap.innerHTML = `<div class="empty-state">
+      <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+      <div>Aucune question trouvée</div>
+    </div>`;
+    return;
+  }
+
+  const rows = questions.map(q => `
+    <tr>
+      <td class="td-enonce" title="${q.enonce}">${q.enonce}</td>
+      <td><span class="badge badge-green">${q.bonne_reponse}</span></td>
+      <td><span class="badge badge-blue">${q.cours_titre || '—'}</span></td>
+      <td>${q.faculte_nom || '—'}</td>
+      <td>
+        <button class="btn-del" onclick="supprimerQuestion(${q.id})">🗑 Supprimer</button>
+      </td>
+    </tr>
+  `).join('');
+
+  wrap.innerHTML = `
+    <table>
+      <thead><tr>
+        <th>Énoncé</th>
+        <th>Bonne réponse</th>
+        <th>Cours</th>
+        <th>Faculté</th>
+        <th>Action</th>
+      </tr></thead>
+      <tbody>${rows}</tbody>
+    </table>
+  `;
+}
+
+function filtrerTableau(query) {
+  const q = query.toLowerCase();
+  const filtrees = questionsTableau.filter(q2 =>
+    (q2.enonce || '').toLowerCase().includes(q) ||
+    (q2.cours_titre || '').toLowerCase().includes(q) ||
+    (q2.faculte_nom || '').toLowerCase().includes(q)
+  );
+  renderTableau(filtrees);
+}
+
+// ── SUPPRIMER ─────────────────────────────────────────────────────
+async function supprimerQuestion(id) {
+  if (!confirm('Supprimer cette question définitivement ?')) return;
+  try {
+    const res  = await fetch(`/api/admin/questions/${id}`, { method: 'DELETE' });
+    const data = await res.json();
+    if (data.success) {
+      showToast('Question supprimée');
+      chargerQuestionsListe();
+      chargerStats();
+    } else {
+      showToast('Erreur suppression', 'error');
+    }
+  } catch { showToast('Erreur réseau', 'error'); }
+}
+
+// ── DÉCONNEXION ───────────────────────────────────────────────────
+async function seDeconnecter() {
+  await fetch('/api/deconnexion', { method: 'POST' });
+  window.location.href = 'connxion.html';
+}
+
+// ── LANCEMENT ─────────────────────────────────────────────────────
+init();
 </script>
 </body>
 </html>
