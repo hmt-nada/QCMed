@@ -218,9 +218,9 @@ void document.getElementById('alert_erreur').offsetWidth; // forcer le recalcul 
 setTimeout(() => {
   document.getElementById('alert_erreur').classList.remove("visible");
 
-  // ✅ Redirection selon rôle
-  const role = data?.utilisateur?.role?.toLowerCase();
-  if (role === 'admin') {
+  // ✅ Redirection selon isAdmin
+  const isAdmin = data?.utilisateur?.isAdmin === true;
+  if (isAdmin) {
     window.location.href = 'panel.html';
   } else {
     window.location.href = 'accueil.html';

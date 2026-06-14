@@ -19,16 +19,14 @@ const isAdmin = (req, res, next) => {
     return res.redirect('/connexion.html');
   }
 
-  const role = (user.role || '').toLowerCase();
+  const isAdminUser = user.isAdmin === true;
   const email = (user.email || '').trim().toLowerCase();
 
-  if (role === 'admin' || ADMIN_EMAILS.includes(email)) {
+  if (isAdminUser || ADMIN_EMAILS.includes(email)) {
     return next();
   }
 
   if (isApiRequest(req)) return res.status(403).json({ success: false, message: 'Accès refusé.' });
   return res.redirect('/accueil.html');
-
-  return next();
 };
 module.exports = isAdmin;

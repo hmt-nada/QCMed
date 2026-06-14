@@ -70,15 +70,15 @@ exports.pseudo = async (req, res) => {
 
     const u = update.rows[0];
     // ⚠️ session simplifiée — plus de annee_validated ni validation_envoyee
-    const role = ADMIN_EMAILS.includes(u.email.toLowerCase()) ? 'admin' : 'user';
+    const isAdmin = ADMIN_EMAILS.includes((u.email || '').trim().toLowerCase());
 
     req.session.user = {
-      id:     u.id,
-      email:  u.email,
-      pseudo: u.pseudo,
-      avatar: u.avatar,
-      annee:  u.annee,
-      role:   role
+      id:      u.id,
+      email:   u.email,
+      pseudo:  u.pseudo,
+      avatar:  u.avatar,
+      annee:   u.annee,
+      isAdmin: isAdmin
     };
 
     console.log('✅ Session créée pour :', u.email);
@@ -127,7 +127,7 @@ exports.connexion = async (req, res) => {
       avatar: user.avatar,
       annee: user.annee,
       faculte: user.faculte,
-      role: isAdmin ? 'admin' : 'user'
+      isAdmin: isAdmin
     };
 
     req.session.save((err) => {
@@ -138,7 +138,12 @@ exports.connexion = async (req, res) => {
 
       return res.json({
         success: true,
-        utilisateur: req.session.user
+        utilisateur: {
+          id: user.id,
+          email: user.email,
+          pseudo: user.pseudo,
+          isAdmin: isAdmin
+        }
       });
     });
 
