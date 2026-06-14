@@ -94,11 +94,15 @@ exports.pseudo = async (req, res) => {
 exports.connexion = async (req, res) => {
   const { email, password } = req.body;
 
+  if (!email || !password || typeof email !== 'string' || typeof password !== 'string') {
+    return res.status(400).json({ error: 'Email et mot de passe sont requis.' });
+  }
+
   try {
     // 1. Vérifier si l'utilisateur existe
     const result = await db.query(
       'SELECT * FROM utilisateurs WHERE email = $1',
-      [email]
+      [email.trim().toLowerCase()]
     );
 
     const user = result.rows[0];
