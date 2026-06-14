@@ -128,7 +128,7 @@ function showAdminModal(onChoice) {
 
   //verification finale du boutton -----------------------------
 const boutton=document.getElementById('boutton');
-const alert=document.getElementById('alert');
+const alertBox = document.getElementById('alert');
 
 
 boutton.addEventListener('click',function(event){
@@ -151,13 +151,13 @@ if((email.value.trim()==="") || (mailinvalide==true)){
     if (erreur) {
     event.preventDefault();
     // Supprimer d’abord pour éviter les doublons
-    alert.classList.remove("visible"); // Réinitialise l'état
-void alert.offsetWidth; // Force le navigateur à re-calculer l'animation
-alert.classList.add("visible"); // Relance l'animation
+    alertBox.classList.remove("visible"); // Réinitialise l'état
+void alertBox.offsetWidth; // Force le navigateur à re-calculer l'animation
+alertBox.classList.add("visible"); // Relance l'animation
 
 // Disparaît au bout de 4 secondes
 setTimeout(() => {
-  alert.classList.remove("visible");
+  alertBox.classList.remove("visible");
 }, 2000);
 
 }else {
@@ -183,22 +183,23 @@ setTimeout(() => {
 
     if (!response.ok) {
       if (data?.error === "Mot de passe incorrect") {
-        password.style.borderColor = "red";
-        password.classList.remove('valide');
-        document.getElementById('missmatch').style.display = "block";
-        mssgpass.style.display = "none";
-        passchamp = true;
-      } else if (data?.error === "Utilisateur introuvable") {
-        email.style.borderColor = "red";
-        email.classList.remove('valide');
-        document.getElementById('mailincorrect').style.display = "block";
-        titrenormal.style.display = "none";
-        mailchamp = true;
-      } else {
-        alert('Erreur de connexion. Veuillez réessayer plus tard.');
-      }
-      return;
-    } else {
+      //mot de passe incorrect
+     password.style.borderColor = "red";
+     password.classList.remove('valide');     
+     document.getElementById('missmatch').style.display="block";
+     mssgpass.style.display="none";
+     passchamp=true;
+
+     }
+     if (data.error ==="Utilisateur introuvable") {
+      //email est incorrect 
+     email.style.borderColor = "red";
+     email.classList.remove('valide');     
+     document.getElementById('mailincorrect').style.display="block";
+     titrenormal.style.display = "none";
+     mailchamp=true;
+     }
+    }else{
   
       password.classList.add('valide'); 
       email.classList.add('valide');      
@@ -217,12 +218,12 @@ void document.getElementById('alert_erreur').offsetWidth; // forcer le recalcul 
 setTimeout(() => {
   document.getElementById('alert_erreur').classList.remove("visible");
 
-  const role = data?.utilisateur?.role;
-  if (role === "admin") {
-    window.location.href = "panel.html";
-  } else {
-    window.location.href = "accueil.html";
-  }
+  // ✅ Redirection selon rôle
+  if (data.utilisateur.role === "admin") {
+  window.location.href = "panel.html";
+} else {
+  window.location.href = "accueil.html";
+}
 
 }, 2000);
 
