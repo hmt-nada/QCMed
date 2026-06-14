@@ -117,28 +117,33 @@ exports.connexion = async (req, res) => {
     }
 
     // 3. Créer la session (champs existants uniquement)
-   const ADMIN_EMAILS = (process.env.ADMIN_EMAILS || '').split(',').map(e => e.trim());
+  
 
 // Dans ta route de connexion, après avoir vérifié le mot de passe :
-const isAdmin = ADMIN_EMAILS.includes(user.email);
+const isAdmin = ADMIN_EMAILS.includes(user.email.toLowerCase());
 
 req.session.user = {
   id: user.id,
   pseudo: user.pseudo,
   email: user.email,
-  role: isAdmin ? 'admin' : 'user'   // ← rôle calculé depuis .env
+  role: isAdmin ? 'admin' : 'user'
 };
-console.log(`✅ Connexion : ${email}`);
-res.json({
-  success: true,
-  utilisateur: {
-    id: user.id,
-    pseudo: user.pseudo,
-    email: user.email,
-    role: isAdmin ? 'admin' : 'user'  // ← envoyé au frontend
-  }
-});
 
+req.session.save((err) => {
+  if (err) {
+    console.error('Erreur session save:', err);
+    return res.status(500).json({ error: 'Erreur session.' });
+  }
+  res.json({
+    success: true,
+    utilisateur: {
+      id: user.id,
+      pseudo: user.pseudo,
+      email: user.email,
+      role: isAdmin ? 'admin' : 'user'
+    }
+  });
+});
 
   } catch (err) {
     console.error('❌ Erreur connexion :', err.message);
