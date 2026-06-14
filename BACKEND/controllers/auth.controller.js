@@ -120,12 +120,12 @@ exports.connexion = async (req, res) => {
    const ADMIN_EMAILS = (process.env.ADMIN_EMAILS || '').split(',').map(e => e.trim());
 
 // Dans ta route de connexion, après avoir vérifié le mot de passe :
-const isAdmin = ADMIN_EMAILS.includes(utilisateur.email);
+const isAdmin = ADMIN_EMAILS.includes(user.email);
 
 req.session.user = {
-  id: utilisateur.id,
-  pseudo: utilisateur.pseudo,
-  email: utilisateur.email,
+  id: user.id,
+  pseudo: user.pseudo,
+  email: user.email,
   role: isAdmin ? 'admin' : 'user'   // ← rôle calculé depuis .env
 };
 console.log(`✅ Connexion : ${email}`);
