@@ -132,9 +132,9 @@ console.log(`✅ Connexion : ${email}`);
 res.json({
   success: true,
   utilisateur: {
-    id: utilisateur.id,
-    pseudo: utilisateur.pseudo,
-    email: utilisateur.email,
+    id: user.id,
+    pseudo: user.pseudo,
+    email: user.email,
     role: isAdmin ? 'admin' : 'user'  // ← envoyé au frontend
   }
 });

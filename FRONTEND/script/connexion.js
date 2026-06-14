@@ -233,8 +233,8 @@ setTimeout(() => {
    
   })
   .catch(error => {
-    alert("Erreur réseau : " + error.message);
-  });
+  console.error("Erreur réseau : " + error.message);
+});
 
 
     
