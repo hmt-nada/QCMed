@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const db = require('../config/db');
 const isAdmin = require('../middleware/isAdmin');
+const isAuthenticated = require('../middleware/isAuthenticated');
 
 // Stats
 router.get('/stats', isAdmin, async (req, res) => {
@@ -20,13 +21,13 @@ router.get('/stats', isAdmin, async (req, res) => {
 });
 
 // Facultés
-router.get('/facultes', isAdmin, async (req, res) => {
+router.get('/facultes', isAuthenticated, async (req, res) => {
   const r = await db.query('SELECT * FROM facultes ORDER BY nom');
   res.json(r.rows);
 });
 
 // Modules filtrés par faculté
-router.get('/modules', isAdmin, async (req, res) => {
+router.get('/modules', isAuthenticated, async (req, res) => {
   const { faculte_id } = req.query;
   const r = await db.query(
     `SELECT * FROM modules
@@ -38,7 +39,7 @@ router.get('/modules', isAdmin, async (req, res) => {
 });
 
 // Cours filtrés par module
-router.get('/cours', isAdmin, async (req, res) => {
+router.get('/cours', isAuthenticated, async (req, res) => {
   const { module_id } = req.query;
   const r = await db.query(
     'SELECT * FROM cours WHERE module_id = $1 ORDER BY titre',

@@ -219,11 +219,12 @@ setTimeout(() => {
   document.getElementById('alert_erreur').classList.remove("visible");
 
   // ✅ Redirection selon rôle
-  if (data.utilisateur.role === "admin") {
-  window.location.href = "panel.html";
-} else {
-  window.location.href = "accueil.html";
-}
+  const role = data?.utilisateur?.role?.toLowerCase();
+  if (role === 'admin') {
+    window.location.href = 'panel.html';
+  } else {
+    window.location.href = 'accueil.html';
+  }
 
 }, 2000);
 

@@ -98,11 +98,13 @@ exports.connexion = async (req, res) => {
     return res.status(400).json({ error: 'Email et mot de passe sont requis.' });
   }
 
+  const normalizedEmail = email.trim().toLowerCase();
+
   try {
     // 1. Vérifier si l'utilisateur existe
     const result = await db.query(
       'SELECT * FROM utilisateurs WHERE email = $1',
-      [email.trim().toLowerCase()]
+      [normalizedEmail]
     );
 
     const user = result.rows[0];
@@ -116,34 +118,29 @@ exports.connexion = async (req, res) => {
       return res.status(401).json({ error: 'Mot de passe incorrect' });
     }
 
-    // 3. Créer la session (champs existants uniquement)
-  
+    const isAdmin = ADMIN_EMAILS.includes(normalizedEmail);
 
-// Dans ta route de connexion, après avoir vérifié le mot de passe :
-const isAdmin = ADMIN_EMAILS.includes(user.email.toLowerCase());
-
-req.session.user = {
-  id: user.id,
-  pseudo: user.pseudo,
-  email: user.email,
-  role: isAdmin ? 'admin' : 'user'
-};
-
-req.session.save((err) => {
-  if (err) {
-    console.error('Erreur session save:', err);
-    return res.status(500).json({ error: 'Erreur session.' });
-  }
-  res.json({
-    success: true,
-    utilisateur: {
+    req.session.user = {
       id: user.id,
-      pseudo: user.pseudo,
       email: user.email,
+      pseudo: user.pseudo,
+      avatar: user.avatar,
+      annee: user.annee,
+      faculte: user.faculte,
       role: isAdmin ? 'admin' : 'user'
-    }
-  });
-});
+    };
+
+    req.session.save((err) => {
+      if (err) {
+        console.error('❌ Erreur session save :', err);
+        return res.status(500).json({ error: 'Erreur session.' });
+      }
+
+      return res.json({
+        success: true,
+        utilisateur: req.session.user
+      });
+    });
 
   } catch (err) {
     console.error('❌ Erreur connexion :', err.message);
