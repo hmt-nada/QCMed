@@ -135,6 +135,85 @@ exports.connexion = async (req, res) => {
   }
 };
 
+// ─── Récupération de mot de passe ─────────────────────────────────
+exports.recoverEmail = async (req, res) => {
+  const { email } = req.body;
+  if (!email || typeof email !== 'string') {
+    return res.status(400).json({ success: false, message: 'Adresse e-mail requise.' });
+  }
+
+  try {
+    const result = await db.query(
+      'SELECT id FROM utilisateurs WHERE email = $1',
+      [email.trim().toLowerCase()]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ success: false, message: 'Aucun compte trouvé avec cet e-mail.' });
+    }
+
+    return res.json({ success: true });
+  } catch (err) {
+    console.error('❌ Erreur recoverEmail :', err.message);
+    return res.status(500).json({ success: false, message: 'Erreur serveur.' });
+  }
+};
+
+exports.recoverIdentity = async (req, res) => {
+  const { email, nom, prenom } = req.body;
+  if (!email || !nom || !prenom) {
+    return res.status(400).json({ success: false, message: 'Email, nom et prénom sont requis.' });
+  }
+
+  try {
+    const result = await db.query(
+      'SELECT nom, prenom FROM utilisateurs WHERE email = $1',
+      [email.trim().toLowerCase()]
+    );
+
+    const user = result.rows[0];
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'Aucun compte trouvé avec cet e-mail.' });
+    }
+
+    const nomOK = (user.nom || '').trim().toLowerCase() === nom.trim().toLowerCase();
+    const prenomOK = (user.prenom || '').trim().toLowerCase() === prenom.trim().toLowerCase();
+
+    if (!nomOK || !prenomOK) {
+      return res.status(401).json({ success: false, message: 'Nom ou prénom incorrect.' });
+    }
+
+    return res.json({ success: true });
+  } catch (err) {
+    console.error('❌ Erreur recoverIdentity :', err.message);
+    return res.status(500).json({ success: false, message: 'Erreur serveur.' });
+  }
+};
+
+exports.recoverPassword = async (req, res) => {
+  const { email, password } = req.body;
+  if (!email || !password || typeof password !== 'string' || password.length < 6) {
+    return res.status(400).json({ success: false, message: 'Email et mot de passe valide sont requis.' });
+  }
+
+  try {
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const result = await db.query(
+      'UPDATE utilisateurs SET mot_de_passe = $1 WHERE email = $2 RETURNING id',
+      [hashedPassword, email.trim().toLowerCase()]
+    );
+
+    if (result.rowCount === 0) {
+      return res.status(404).json({ success: false, message: 'Utilisateur introuvable.' });
+    }
+
+    return res.json({ success: true });
+  } catch (err) {
+    console.error('❌ Erreur recoverPassword :', err.message);
+    return res.status(500).json({ success: false, message: 'Erreur serveur.' });
+  }
+};
+
 // ─── Déconnexion ──────────────────────────────────────────────────
 exports.deconnexion = async (req, res) => {
   try {

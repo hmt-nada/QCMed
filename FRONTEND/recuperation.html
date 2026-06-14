@@ -320,9 +320,9 @@
     </div>
   </aside>
 
-  <script src="config/config.js"></script>
-
   <script>
+    const BASE_API = '/api';
+
     // ── Utilitaires ──
     function showAlert(msg, type = 'error') {
       const el = document.getElementById('rec-alert');
@@ -360,7 +360,7 @@
     // ── Variables globales de session ──
     let emailTrouve = '';
 
-    // ── ÉTAPE 1 : vérifier que l'email existe dans Firebase ──
+    // ── ÉTAPE 1 : vérifier que l'email existe dans le backend ──
     async function verifierEmail() {
       const email = document.getElementById('rec-email').value.trim().toLowerCase();
       if (!email) { showAlert('Saisis ton adresse e-mail.'); return; }
@@ -371,22 +371,22 @@
       btn.disabled = true;
 
       try {
-        // Cherche l'email dans la collection "users" de Firestore via l'API REST
-        const url = `${window._FIREBASE_BASE}/users?${new URLSearchParams({
-          'orderBy': '"email"',
-          'equalTo': `"${email}"`
-        })}`;
-        const res  = await fetch(url);
-        const data = await res.json();
+        const res = await fetch(`${BASE_API}/recover-email`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email })
+        });
 
-        if (data && Object.keys(data).length > 0) {
-          emailTrouve = email;
-          goToStep(2);
-        } else {
-          showAlert('Aucun compte trouvé avec cet e-mail.');
+        if (!res.ok) {
+          const error = await res.json().catch(() => ({}));
+          showAlert(error.message || 'Aucun compte trouvé avec cet e-mail.');
+          return;
         }
+
+        emailTrouve = email;
+        goToStep(2);
       } catch (e) {
-        showAlert('Erreur de connexion. Réessaie.');
+        showAlert('Erreur de serveur. Réessaie.');
       }
 
       btn.textContent = 'Continuer';
@@ -404,28 +404,21 @@
       btn.disabled = true;
 
       try {
-        const url = `${window._FIREBASE_BASE}/users?${new URLSearchParams({
-          'orderBy': '"email"',
-          'equalTo': `"${emailTrouve}"`
-        })}`;
-        const res  = await fetch(url);
-        const data = await res.json();
+        const res = await fetch(`${BASE_API}/recover-identity`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: emailTrouve, nom, prenom })
+        });
 
-        let ok = false;
-        for (const key in data) {
-          const u = data[key];
-          const nomDB    = (u.nom    || '').toLowerCase();
-          const prenomDB = (u.prenom || '').toLowerCase();
-          if (nomDB === nom && prenomDB === prenom) { ok = true; break; }
+        if (!res.ok) {
+          const error = await res.json().catch(() => ({}));
+          showAlert(error.message || 'Nom ou prénom incorrect. Vérifie tes informations.');
+          return;
         }
 
-        if (ok) {
-          goToStep(3);
-        } else {
-          showAlert('Nom ou prénom incorrect. Vérifie tes informations.');
-        }
+        goToStep(3);
       } catch (e) {
-        showAlert('Erreur de connexion. Réessaie.');
+        showAlert('Erreur de serveur. Réessaie.');
       }
 
       btn.textContent = 'Vérifier mon identité';
@@ -445,36 +438,22 @@
       btn.disabled = true;
 
       try {
-        // Récupérer la clé du document Firebase
-        const url = `${window._FIREBASE_BASE}/users?${new URLSearchParams({
-          'orderBy': '"email"',
-          'equalTo': `"${emailTrouve}"`
-        })}`;
-        const res  = await fetch(url);
-        const data = await res.json();
-
-        let docKey = null;
-        for (const key in data) { docKey = key; break; }
-
-        if (!docKey) { showAlert('Utilisateur introuvable.'); btn.textContent = 'Réinitialiser le mot de passe'; btn.disabled = false; return; }
-
-        // Mettre à jour le mot de passe (PATCH)
-        const patchUrl = `${window._FIREBASE_BASE}/users/${docKey}.json`;
-        const patchRes = await fetch(patchUrl, {
-          method: 'PATCH',
+        const res = await fetch(`${BASE_API}/recover-password`, {
+          method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ password: p1 })
+          body: JSON.stringify({ email: emailTrouve, password: p1 })
         });
 
-        if (patchRes.ok) {
-          goToStep(4);
-          // Cacher l'indicateur d'étapes sur l'écran de succès
-          document.querySelector('.steps-indicator').style.display = 'none';
-        } else {
-          showAlert('Erreur lors de la mise à jour. Réessaie.');
+        if (!res.ok) {
+          const error = await res.json().catch(() => ({}));
+          showAlert(error.message || 'Erreur lors de la mise à jour. Réessaie.');
+          return;
         }
+
+        goToStep(4);
+        document.querySelector('.steps-indicator').style.display = 'none';
       } catch (e) {
-        showAlert('Erreur de connexion. Réessaie.');
+        showAlert('Erreur de serveur. Réessaie.');
       }
 
       btn.textContent = 'Réinitialiser le mot de passe';
