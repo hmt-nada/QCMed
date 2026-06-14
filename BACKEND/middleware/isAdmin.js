@@ -6,6 +6,8 @@ const isApiRequest = (req) => {
   return false;
 };
 
+const ADMIN_EMAILS = (process.env.ADMIN_EMAILS || '').split(',').map(e => e.trim());
+
 const isAdmin = (req, res, next) => {
   const user = req.session && req.session.user;
   if (!user) {
@@ -13,12 +15,11 @@ const isAdmin = (req, res, next) => {
     return res.redirect('/connexion.html');
   }
 
-  if (user.role !== 'admin') {
+  if (!ADMIN_EMAILS.includes(user.email)) {
     if (isApiRequest(req)) return res.status(403).json({ success: false, message: 'Accès refusé.' });
     return res.redirect('/accueil.html');
   }
 
   return next();
 };
-
 module.exports = isAdmin;
