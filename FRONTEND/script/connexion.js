@@ -162,85 +162,75 @@ setTimeout(() => {
 
 }else {
 
-  fetch(`/api/connexion`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify({
-      email: email.value,
-      password: password.value
-    })
+ fetch(`/api/connexion`, {
+  method: "POST",
+  headers: {
+    "Content-Type": "application/json"
+  },
+  body: JSON.stringify({
+    email: email.value,
+    password: password.value
   })
-  
-  .then(async (response)=>{
-    let data = null;
-    try {
-      data = await response.json();
-    } catch (err) {
-      data = null;
-    }
+})
+.then(async (response) => {
+  console.log("1 - status :", response.status);
 
-    if (!response.ok) {
-      if (data?.error === "Mot de passe incorrect") {
-      //mot de passe incorrect
-     password.style.borderColor = "red";
-     password.classList.remove('valide');     
-     document.getElementById('missmatch').style.display="block";
-     mssgpass.style.display="none";
-     passchamp=true;
-
-     }
-     if (data.error ==="Utilisateur introuvable") {
-      //email est incorrect 
-     email.style.borderColor = "red";
-     email.classList.remove('valide');     
-     document.getElementById('mailincorrect').style.display="block";
-     titrenormal.style.display = "none";
-     mailchamp=true;
-     }
-    }else{
-  
-      password.classList.add('valide'); 
-      email.classList.add('valide');      
-      document.getElementById('missmatch').style.display="none";
-      document.getElementById('mailincorrect').style.display="none";
-      passchamp=false;
-      mailchamp=false;
-      
-
-       document.getElementById('alert_erreur').classList.remove("visible"); // pour reset
-void document.getElementById('alert_erreur').offsetWidth; // forcer le recalcul CSS
-       document.getElementById('alert_erreur').classList.add("visible");
-
-  // Cacher l'alerte après 3 secondes
-  // Cacher l'alerte après 2-3 secondes
-setTimeout(() => {
-  document.getElementById('alert_erreur').classList.remove("visible");
-
-   console.log("DATA REÇUE :", data); // ← ajoute cette ligne
-  console.log("isAdmin :", data?.utilisateur?.isAdmin);
-
-  // ✅ Redirection selon isAdmin
-  const isAdmin = data?.utilisateur?.isAdmin === true;
-  if (isAdmin) {
-    window.location.href = 'panel.html';
-  } else {
-    window.location.href = 'accueil.html';
+  let data = null;
+  try {
+    data = await response.json();
+    console.log("2 - data :", data);
+  } catch (err) {
+    console.log("2 - erreur JSON :", err);
+    data = null;
   }
 
-}, 2000);
+  console.log("3 - response.ok :", response.ok);
 
-     
-     
+  if (!response.ok) {
+    console.log("4 - erreur :", data?.error);
+    if (data?.error === "Mot de passe incorrect") {
+      password.style.borderColor = "red";
+      password.classList.remove('valide');
+      document.getElementById('missmatch').style.display = "block";
+      mssgpass.style.display = "none";
+      passchamp = true;
     }
-   
-  })
-  .catch(error => {
-  console.error("Erreur réseau : " + error.message);
+    if (data?.error === "Utilisateur introuvable") {
+      email.style.borderColor = "red";
+      email.classList.remove('valide');
+      document.getElementById('mailincorrect').style.display = "block";
+      titrenormal.style.display = "none";
+      mailchamp = true;
+    }
+  } else {
+    console.log("5 - succès, isAdmin :", data?.utilisateur?.isAdmin);
+    password.classList.add('valide');
+    email.classList.add('valide');
+    document.getElementById('missmatch').style.display = "none";
+    document.getElementById('mailincorrect').style.display = "none";
+    passchamp = false;
+    mailchamp = false;
+
+    document.getElementById('alert_erreur').classList.remove("visible");
+    void document.getElementById('alert_erreur').offsetWidth;
+    document.getElementById('alert_erreur').classList.add("visible");
+
+    setTimeout(() => {
+      document.getElementById('alert_erreur').classList.remove("visible");
+      console.log("6 - redirection, isAdmin :", data?.utilisateur?.isAdmin);
+      const isAdmin = data?.utilisateur?.isAdmin === true;
+      console.log("7 - va vers :", isAdmin ? 'panel.html' : 'accueil.html');
+      if (isAdmin) {
+        window.location.href = 'panel.html';
+      } else {
+        window.location.href = 'accueil.html';
+      }
+    }, 2000);
+  }
+})
+.catch(error => {
+  console.log("ERREUR RÉSEAU :", error.message);
 });
-
-
     
   }
   //réinitialisation du champ email 
