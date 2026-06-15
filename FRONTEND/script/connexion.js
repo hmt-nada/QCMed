@@ -218,6 +218,9 @@ void document.getElementById('alert_erreur').offsetWidth; // forcer le recalcul 
 setTimeout(() => {
   document.getElementById('alert_erreur').classList.remove("visible");
 
+   console.log("DATA REÇUE :", data); // ← ajoute cette ligne
+  console.log("isAdmin :", data?.utilisateur?.isAdmin);
+
   // ✅ Redirection selon isAdmin
   const isAdmin = data?.utilisateur?.isAdmin === true;
   if (isAdmin) {
