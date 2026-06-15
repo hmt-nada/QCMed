@@ -721,10 +721,12 @@ async function verifierAdmin() {
   try {
     const res = await fetch('/api/session');
     const data = await res.json();
-    if (!data.success || data.utilisateur?.role !== 'admin') {
+    
+    if (!data.success || data.utilisateur?.isAdmin !== true) {
       window.location.href = 'connxion.html';
       return;
     }
+    
     const pseudo = data.utilisateur.pseudo || 'Admin';
     document.getElementById('adminPseudo').textContent = pseudo;
     document.getElementById('avatarLetter').textContent = pseudo.charAt(0).toUpperCase();
