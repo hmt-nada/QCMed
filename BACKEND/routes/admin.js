@@ -295,6 +295,63 @@ router.get('/questions', isAdmin, async (req, res) => {
   }
 });
 
+// Ajouter une question
+router.post('/questions', isAdmin, async (req, res) => {
+  try {
+    const {
+      cours_id,
+      faculte_id,
+      enonce,
+      choix_a,
+      choix_b,
+      choix_c,
+      choix_d,
+      choix_e,
+      choix_f,
+      bonne_reponse,
+      explication,
+      image_url
+    } = req.body;
+
+    // Validation des champs obligatoires
+    if (!cours_id)     return res.status(400).json({ success: false, message: 'cours_id obligatoire.' });
+    if (!faculte_id)   return res.status(400).json({ success: false, message: 'faculte_id obligatoire.' });
+    if (!enonce?.trim()) return res.status(400).json({ success: false, message: 'L\'énoncé est obligatoire.' });
+    if (!choix_a?.trim()) return res.status(400).json({ success: false, message: 'Le choix A est obligatoire.' });
+    if (!choix_b?.trim()) return res.status(400).json({ success: false, message: 'Le choix B est obligatoire.' });
+    if (!choix_c?.trim()) return res.status(400).json({ success: false, message: 'Le choix C est obligatoire.' });
+    if (!bonne_reponse) return res.status(400).json({ success: false, message: 'La bonne réponse est obligatoire.' });
+
+    await db.query(
+      `INSERT INTO questions
+         (id, cours_id, faculte_id, enonce,
+          choix_a, choix_b, choix_c, choix_d, choix_e, choix_f,
+          bonne_reponse, explication, image_url)
+       VALUES
+         ((SELECT COALESCE(MAX(id), 0) + 1 FROM questions),
+          $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)`,
+      [
+        cours_id,
+        faculte_id,
+        enonce.trim(),
+        choix_a.trim(),
+        choix_b.trim(),
+        choix_c.trim(),
+        choix_d  || null,
+        choix_e  || null,
+        choix_f  || null,
+        bonne_reponse,
+        explication  || null,
+        image_url    || null
+      ]
+    );
+
+    return res.json({ success: true });
+  } catch (err) {
+    return sendAdminError(res, err, 'POST /questions', req);
+  }
+});
+
 // Supprimer une question
 router.delete('/questions/:id', isAdmin, async (req, res) => {
   try {
