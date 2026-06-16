@@ -59,8 +59,10 @@ const {
   envoyermailcontact
 } = require("./email");
 
-app.get('/api/session', (req, res) => {
-  if (!req.session.user) return res.json({ success: false });
+// Dans app.js — version améliorée (optionnel)
+const isAuthenticated = require('./middleware/isAuthenticated');
+
+app.get('/api/session', isAuthenticated, (req, res) => {
   res.json({ success: true, utilisateur: req.session.user });
 });
 

@@ -98,7 +98,7 @@ router.post('/cours', isAdmin, async (req, res) => {
 // Filtres : faculte_id, cours_id, module_id (via join cours→modules)
 router.get('/questions', isAdmin, async (req, res) => {
   try {
-    const { faculte_id, cours_id, module_id } = req.query;
+    const { faculte_id, cours_id, module_id, annee } = req.query;
     const r = await db.query(
       `SELECT q.*, c.titre AS cours_titre, f.nom AS faculte_nom
        FROM questions q
@@ -108,8 +108,9 @@ router.get('/questions', isAdmin, async (req, res) => {
        WHERE ($1::int IS NULL OR q.faculte_id = $1)
          AND ($2::int IS NULL OR q.cours_id   = $2)
          AND ($3::int IS NULL OR c.module_id  = $3)
+         AND ($4::int IS NULL OR m.annee      = $4)
        ORDER BY q.id DESC`,
-      [faculte_id || null, cours_id || null, module_id || null]
+      [faculte_id || null, cours_id || null, module_id || null, annee || null]
     );
     res.json(r.rows);
   } catch (err) {

@@ -487,7 +487,7 @@
       <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
       Ajouter une question
     </div>
-    <div class="nav-item" onclick="showPage('liste'); chargerQuestionsListe()">
+    <div class="nav-item" onclick="showPage('liste')">
       <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
       Liste des questions
     </div>
@@ -803,10 +803,22 @@
 <div class="toast" id="toast"></div>
 
 <script>
+
+  async function apiFetch(url, options = {}) {
+  const res = await fetch(url, options);
+  if (!res) return; 
+  if (res.status === 401) {
+    window.location.href = 'connxion.html';
+    return null;
+  }
+  return res;
+}
+
 // ── VÉRIFICATION SESSION ADMIN ────────────────────────────────────
 async function verifierAdmin() {
   try {
-    const res = await fetch('/api/session');
+    const res = await apiFetch('/api/session');
+    if (!res) return; 
     const data = await res.json();
     
     if (!data.success || data.utilisateur?.isAdmin !== true) {
@@ -830,6 +842,21 @@ function showPage(name) {
   const idx = { dashboard: 0, ajouter: 1, liste: 2, 'ajouter-module': 3, 'ajouter-cours': 4 };
   document.querySelectorAll('.nav-item')[idx[name]]?.classList.add('active');
   if (name === 'dashboard') chargerStats();
+  if (name === 'liste') initialiserFiltresListe();
+}
+
+function initialiserFiltresListe() {
+  // Remplir les années dans le filtre liste si pas encore fait
+  const selA = document.getElementById('filtre-annee');
+  if (selA.options.length <= 1) {
+    for (let a = 1; a <= 7; a++) {
+      const opt = document.createElement('option');
+      opt.value = a;
+      opt.textContent = 'Année ' + a;
+      selA.appendChild(opt);
+    }
+  }
+  chargerQuestionsListe();
 }
 
 // ── TOAST ─────────────────────────────────────────────────────────
@@ -856,7 +883,8 @@ async function init() {
 // ── STATS ─────────────────────────────────────────────────────────
 async function chargerStats() {
   try {
-    const res = await fetch('/api/admin/stats');
+    const res = await apiFetch('/api/admin/stats');
+if (!res) return;
     const data = await res.json();
     document.getElementById('stat-questions').textContent = data.questions ?? '—';
     document.getElementById('stat-cours').textContent     = data.cours     ?? '—';
@@ -868,7 +896,8 @@ async function chargerStats() {
 // ── FACULTÉS ──────────────────────────────────────────────────────
 async function chargerFacultes() {
   try {
-    const res  = await fetch('/api/admin/facultes');
+    const res  = await apiFetch('/api/admin/facultes');
+     if (!res) return;
     const data = await res.json();
     toutesFacultes = data;
 
@@ -925,7 +954,8 @@ async function chargerCours() {
   if (!moduleId) return;
 
   try {
-    const res  = await fetch(`/api/admin/cours?module_id=${moduleId}`);
+    const res  = await apiFetch(`/api/admin/cours?module_id=${moduleId}`);
+    if (!res) return; 
     const data = await res.json();
     data.forEach(c => {
       const opt = document.createElement('option');
@@ -958,7 +988,7 @@ async function soumettreQuestion() {
   if (!bonneRep) return showToast('Sélectionnez la bonne réponse', 'error');
 
   try {
-    const res = await fetch('/api/admin/questions', {
+    const res = await apiFetch('/api/admin/questions', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -974,6 +1004,7 @@ async function soumettreQuestion() {
         image_url:    image_url   || null
       })
     });
+    if (!res) return; 
 
     const data = await res.json();
     if (data.success) {
@@ -996,11 +1027,12 @@ async function soumettreModule() {
   if (!nom)   return showToast('Le nom du module est obligatoire', 'error');
 
   try {
-    const res  = await fetch('/api/admin/modules', {
+    const res  = await apiFetch('/api/admin/modules', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ annee: parseInt(annee), nom, img: img || null })
     });
+    if (!res) return; 
     const data = await res.json();
     if (data.success) {
       showToast('✓ Module ajouté avec succès !');
@@ -1027,7 +1059,8 @@ async function chargerModulesPourCours() {
   if (!annee) return;
 
   try {
-    const res  = await fetch(`/api/admin/modules?annee=${annee}`);
+    const res  = await apiFetch(`/api/admin/modules?annee=${annee}`);
+    if (!res) return; 
     const data = await res.json();
     data.forEach(m => {
       const opt = document.createElement('option');
@@ -1047,11 +1080,12 @@ async function soumettreCours() {
   if (!titre)    return showToast('Le titre du cours est obligatoire', 'error');
 
   try {
-    const res  = await fetch('/api/admin/cours', {
+    const res  = await apiFetch('/api/admin/cours', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ module_id: parseInt(moduleId), titre })
     });
+    if (!res) return; 
     const data = await res.json();
     if (data.success) {
       showToast('✓ Cours ajouté avec succès !');
@@ -1074,6 +1108,17 @@ function resetFormulaire() {
   ['enonce','choix_a','choix_b','choix_c','choix_d','choix_e','choix_f','image_url','explication']
     .forEach(id => document.getElementById(id).value = '');
   document.querySelectorAll('input[name="bonne_rep"]').forEach(r => r.checked = false);
+
+  // Réinitialiser les selects cascade
+  document.getElementById('sel-faculte').selectedIndex = 0;
+
+  const selAnnee  = document.getElementById('sel-annee');
+  const selModule = document.getElementById('sel-module');
+  const selCours  = document.getElementById('sel-cours');
+  selAnnee.innerHTML  = '<option value="">— Sélectionner —</option>';
+  selModule.innerHTML = '<option value="">— Sélectionner —</option>';
+  selCours.innerHTML  = '<option value="">— Sélectionner —</option>';
+  selAnnee.disabled = selModule.disabled = selCours.disabled = true;
 }
 
 // ── LISTE : FILTRES EN CASCADE ────────────────────────────────────
@@ -1090,7 +1135,8 @@ async function filtrerModules() {                          // UNE SEULE version,
   if (!annee) return;
 
   try {
-    const res  = await fetch(`/api/admin/modules?annee=${annee}`);
+    const res  = await apiFetch(`/api/admin/modules?annee=${annee}`);
+    if (!res) return; 
     const data = await res.json();
     data.forEach(m => {
       const opt = document.createElement('option');
@@ -1135,7 +1181,8 @@ async function filtrerModulesFiltre() {
   if (!annee) { chargerQuestionsListe(); return; }
 
   try {
-    const res  = await fetch(`/api/admin/modules?annee=${annee}`); // ✅ par annee
+    const res  = await apiFetch(`/api/admin/modules?annee=${annee}`); // ✅ par annee
+    if (!res) return; 
     const data = await res.json();
     data.forEach(m => {
       const opt = document.createElement('option');
@@ -1155,7 +1202,8 @@ async function chargerCoursFiltre() {
   if (!moduleId) { chargerQuestionsListe(); return; }
 
   try {
-    const res  = await fetch(`/api/admin/cours?module_id=${moduleId}`);
+    const res  = await apiFetch(`/api/admin/cours?module_id=${moduleId}`);
+    if (!res) return; 
     const data = await res.json();
     data.forEach(c => {
       const opt = document.createElement('option');
@@ -1184,7 +1232,8 @@ async function chargerQuestionsListe() {
   wrap.innerHTML = '<div class="loading">Chargement...</div>';
 
   try {
-    const res = await fetch(url);
+    const res = await apiFetch(url);
+    if (!res) return;
     questionsTableau = await res.json();
     renderTableau(questionsTableau);
   } catch { wrap.innerHTML = '<div class="loading">Erreur de chargement</div>'; }
@@ -1240,7 +1289,8 @@ function filtrerTableau(query) {
 async function supprimerQuestion(id) {
   if (!confirm('Supprimer cette question définitivement ?')) return;
   try {
-    const res  = await fetch(`/api/admin/questions/${id}`, { method: 'DELETE' });
+    const res  = await apiFetch(`/api/admin/questions/${id}`, { method: 'DELETE' });
+    if (!res) return; 
     const data = await res.json();
     if (data.success) {
       showToast('Question supprimée');
@@ -1254,7 +1304,7 @@ async function supprimerQuestion(id) {
 
 // ── DÉCONNEXION ───────────────────────────────────────────────────
 async function seDeconnecter() {
-  await fetch('/api/deconnexion', { method: 'POST' });
+  await apiFetch('/api/deconnexion', { method: 'POST' });
   window.location.href = 'connxion.html';
 }
 
