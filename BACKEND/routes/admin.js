@@ -175,6 +175,97 @@ router.post('/cours', isAdmin, async (req, res) => {
   }
 });
 
+// Supprimer un cours (et toutes ses questions)
+router.delete('/cours/:id', isAdmin, async (req, res) => {
+  const courseId = Number(req.params.id);
+
+  if (!Number.isInteger(courseId) || courseId <= 0) {
+    return res.status(400).json({
+      success: false,
+      message: 'ID de cours invalide.'
+    });
+  }
+
+  try {
+    await db.query('BEGIN');
+
+    const deleteQuestions = await db.query(
+      'DELETE FROM questions WHERE cours_id = $1',
+      [courseId]
+    );
+
+    const deleteCourse = await db.query(
+      'DELETE FROM cours WHERE id = $1',
+      [courseId]
+    );
+
+    await db.query('COMMIT');
+
+    return res.json({
+      success: true,
+      deletedQuestions: deleteQuestions.rowCount || 0,
+      deletedCourse: deleteCourse.rowCount || 0,
+    });
+  } catch (err) {
+    try { await db.query('ROLLBACK'); } catch (_) {}
+    return sendAdminError(res, err, `DELETE /cours/${req.params.id}`, req);
+  }
+});
+
+// Supprimer un module (avec ses cours et questions)
+router.delete('/modules/:id', isAdmin, async (req, res) => {
+  const moduleId = Number(req.params.id);
+
+  if (!Number.isInteger(moduleId) || moduleId <= 0) {
+    return res.status(400).json({
+      success: false,
+      message: 'ID de module invalide.'
+    });
+  }
+
+  try {
+    await db.query('BEGIN');
+
+    const courseRows = await db.query(
+      'SELECT id FROM cours WHERE module_id = $1',
+      [moduleId]
+    );
+
+    const courseIds = courseRows.rows.map(row => row.id);
+
+    let deletedQuestions = 0;
+    if (courseIds.length > 0) {
+      const deleteQuestions = await db.query(
+        'DELETE FROM questions WHERE cours_id = ANY($1)',
+        [courseIds]
+      );
+      deletedQuestions = deleteQuestions.rowCount || 0;
+    }
+
+    const deleteCourses = await db.query(
+      'DELETE FROM cours WHERE module_id = $1',
+      [moduleId]
+    );
+
+    const deleteModule = await db.query(
+      'DELETE FROM modules WHERE id = $1',
+      [moduleId]
+    );
+
+    await db.query('COMMIT');
+
+    return res.json({
+      success: true,
+      deletedCours: deleteCourses.rowCount || 0,
+      deletedQuestions,
+      deletedModule: deleteModule.rowCount || 0,
+    });
+  } catch (err) {
+    try { await db.query('ROLLBACK'); } catch (_) {}
+    return sendAdminError(res, err, `DELETE /modules/${req.params.id}`, req);
+  }
+});
+
 // Lister questions avec jointures
 router.get('/questions', isAdmin, async (req, res) => {
   try {

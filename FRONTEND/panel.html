@@ -797,6 +797,74 @@
   </div>
 </div>
 
+<div class="page" id="page-gerer-cours">
+  <div class="page-header">
+    <div class="page-title">Gérer les cours</div>
+    <div class="page-sub">Supprimez un cours et toutes ses questions associées</div>
+  </div>
+  <div class="form-card">
+    <div class="filter-row" style="margin-bottom: 0;">
+      <div class="field">
+        <label>Année</label>
+        <select id="gerer-cours-annee" onchange="chargerModulesPourGestionCours()">
+          <option value="">Toutes les années</option>
+          <option value="1">1</option>
+          <option value="2">2</option>
+          <option value="3">3</option>
+          <option value="4">4</option>
+          <option value="5">5</option>
+          <option value="6">6</option>
+          <option value="7">7</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Module</label>
+        <select id="gerer-cours-module" onchange="chargerCoursGestion()" disabled>
+          <option value="">Sélectionnez une année</option>
+        </select>
+      </div>
+    </div>
+  </div>
+  <div class="table-wrap">
+    <div class="table-header">
+      <div class="table-title">Cours</div>
+    </div>
+    <div id="table-cours-gerer-wrap">
+      <div class="loading">Sélectionnez un module</div>
+    </div>
+  </div>
+</div>
+
+<div class="page" id="page-gerer-modules">
+  <div class="page-header">
+    <div class="page-title">Gérer les modules</div>
+    <div class="page-sub">Supprimez un module avec tous ses cours et questions</div>
+  </div>
+  <div class="form-card">
+    <div class="field" style="max-width: 260px;">
+      <label>Année</label>
+      <select id="gerer-modules-annee" onchange="chargerModulesGestion()">
+        <option value="">Toutes les années</option>
+        <option value="1">1</option>
+        <option value="2">2</option>
+        <option value="3">3</option>
+        <option value="4">4</option>
+        <option value="5">5</option>
+        <option value="6">6</option>
+        <option value="7">7</option>
+      </select>
+    </div>
+  </div>
+  <div class="table-wrap">
+    <div class="table-header">
+      <div class="table-title">Modules</div>
+    </div>
+    <div id="table-modules-gerer-wrap">
+      <div class="loading">Sélectionnez une année</div>
+    </div>
+  </div>
+</div>
+
 </main>
 
 <!-- TOAST -->
@@ -855,10 +923,20 @@ function showPage(name) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
   document.getElementById('page-' + name).classList.add('active');
-  const idx = { dashboard: 0, ajouter: 1, liste: 2, 'ajouter-module': 3, 'ajouter-cours': 4 };
+  const idx = {
+    dashboard: 0,
+    ajouter: 1,
+    liste: 2,
+    'ajouter-module': 3,
+    'ajouter-cours': 4,
+    'gerer-cours': 5,
+    'gerer-modules': 6
+  };
   document.querySelectorAll('.nav-item')[idx[name]]?.classList.add('active');
   if (name === 'dashboard') chargerStats();
   if (name === 'liste') initialiserFiltresListe();
+  if (name === 'gerer-cours') chargerModulesPourGestionCours();
+  if (name === 'gerer-modules') chargerModulesGestion();
 }
 
 function initialiserFiltresListe() {
