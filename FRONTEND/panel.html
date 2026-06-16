@@ -818,59 +818,17 @@ async function chargerModules() {
 
   // Années fixes 1 à 7
   for (let a = 1; a <= 7; a++) {
-    const opt = document.createElement('option');
-    opt.value = a;
-    opt.textContent = `${a}ère/ème année`;
-    selAnnee.appendChild(opt);
-  }
+  const opt = document.createElement('option');
+  opt.value = a;
+  opt.textContent = a;   // ✅ juste 1, 2, 3...
+  selAnnee.appendChild(opt);
+}
   selAnnee.disabled = false;
 }
 
 // Année change → fetch les modules de cette année
-async function filtrerModules() {
-  const annee    = document.getElementById('sel-annee').value;
-  const selMod   = document.getElementById('sel-module');
-  const selCours = document.getElementById('sel-cours');
 
-  selMod.innerHTML   = '<option value="">— Sélectionner —</option>';
-  selCours.innerHTML = '<option value="">— Sélectionner —</option>';
-  selMod.disabled = selCours.disabled = true;
 
-  if (!annee) return;
-
-  try {
-    const res  = await fetch(`/api/admin/modules?annee=${annee}`); // ✅ corrigé
-    const data = await res.json();
-    data.forEach(m => {
-      const opt = document.createElement('option');
-      opt.value = m.id;
-      opt.textContent = m.nom;
-      selMod.appendChild(opt);
-    });
-    selMod.disabled = false;
-  } catch { showToast('Erreur chargement modules', 'error'); }
-}
-
-function filtrerModules() {
-  const annee    = document.getElementById('sel-annee').value;
-  const selMod   = document.getElementById('sel-module');
-  const selCours = document.getElementById('sel-cours');
-
-  selMod.innerHTML   = '<option value="">— Sélectionner —</option>';
-  selCours.innerHTML = '<option value="">— Sélectionner —</option>';
-  selMod.disabled = selCours.disabled = true;
-
-  if (!annee) return;
-
-  const filtres = tousModules.filter(m => String(m.annee) === String(annee));
-  filtres.forEach(m => {
-    const opt = document.createElement('option');
-    opt.value = m.id;
-    opt.textContent = m.nom;
-    selMod.appendChild(opt);
-  });
-  selMod.disabled = false;
-}
 
 async function chargerCours() {
   const moduleId = document.getElementById('sel-module').value;
@@ -948,8 +906,32 @@ function resetFormulaire() {
 }
 
 // ── LISTE : FILTRES EN CASCADE ────────────────────────────────────
-let tousModulesFiltre = [];
+// ── CASCADE FORMULAIRE ─────────────────────────────────────
+async function filtrerModules() {                          // UNE SEULE version, async
+  const annee    = document.getElementById('sel-annee').value;
+  const selMod   = document.getElementById('sel-module');
+  const selCours = document.getElementById('sel-cours');
 
+  selMod.innerHTML   = '<option value="">— Sélectionner —</option>';
+  selCours.innerHTML = '<option value="">— Sélectionner —</option>';
+  selMod.disabled = selCours.disabled = true;
+
+  if (!annee) return;
+
+  try {
+    const res  = await fetch(`/api/admin/modules?annee=${annee}`);
+    const data = await res.json();
+    data.forEach(m => {
+      const opt = document.createElement('option');
+      opt.value = m.id;
+      opt.textContent = m.nom;
+      selMod.appendChild(opt);
+    });
+    selMod.disabled = false;
+  } catch { showToast('Erreur chargement modules', 'error'); }
+}
+
+// ── CASCADE LISTE ──────────────────────────────────────────
 async function chargerFiltreModules() {
   const faculteId = document.getElementById('filtre-faculte').value;
   const selA = document.getElementById('filtre-annee');
@@ -962,34 +944,36 @@ async function chargerFiltreModules() {
 
   if (!faculteId) { chargerQuestionsListe(); return; }
 
-  try {
-    const res = await fetch(`/api/admin/modules?faculte_id=${faculteId}`);
-    tousModulesFiltre = await res.json();
-    const annees = [...new Set(tousModulesFiltre.map(m => m.annee))].sort((a,b) => a-b);
-    annees.forEach(a => {
-      const opt = document.createElement('option');
-      opt.value = a;
-      opt.textContent = `${a}ère/ème année`;
-      selA.appendChild(opt);
-    });
-  } catch {}
+  // Années fixes 1 à 7, pas de fetch
+  for (let a = 1; a <= 7; a++) {
+    const opt = document.createElement('option');
+    opt.value = a;
+    opt.textContent = `${a}ème année`;
+    selA.appendChild(opt);
+  }
   chargerQuestionsListe();
 }
 
-function filtrerModulesFiltre() {
+async function filtrerModulesFiltre() {
   const annee = document.getElementById('filtre-annee').value;
   const selM  = document.getElementById('filtre-module');
   const selC  = document.getElementById('filtre-cours');
+
   selM.innerHTML = '<option value="">Tous les modules</option>';
   selC.innerHTML = '<option value="">Tous les cours</option>';
 
-  const filtres = annee ? tousModulesFiltre.filter(m => String(m.annee) === String(annee)) : tousModulesFiltre;
-  filtres.forEach(m => {
-    const opt = document.createElement('option');
-    opt.value = m.id;
-    opt.textContent = m.nom;
-    selM.appendChild(opt);
-  });
+  if (!annee) { chargerQuestionsListe(); return; }
+
+  try {
+    const res  = await fetch(`/api/admin/modules?annee=${annee}`); // ✅ par annee
+    const data = await res.json();
+    data.forEach(m => {
+      const opt = document.createElement('option');
+      opt.value = m.id;
+      opt.textContent = m.nom;
+      selM.appendChild(opt);
+    });
+  } catch {}
   chargerQuestionsListe();
 }
 
