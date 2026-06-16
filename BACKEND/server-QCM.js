@@ -6,7 +6,7 @@ const bcrypt = require("bcrypt");
 const cron = require("node-cron");
 const crypto = require("crypto");
 const path = require('path');
-require('dotenv').config();
+require('dotenv').config({ path: path.resolve(__dirname, '.env') });
 
 // ─── CRÉATION DE L'APP (doit être avant tout app.use) ────────────────────────
 const app = express();

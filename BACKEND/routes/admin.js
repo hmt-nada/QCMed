@@ -129,7 +129,8 @@ router.post('/modules', isAdmin, async (req, res) => {
     }
 
     await db.query(
-      'INSERT INTO modules (annee, nom, img) VALUES ($1, $2, $3)',
+      `INSERT INTO modules (id, annee, nom, img)
+       VALUES ((SELECT COALESCE(MAX(id), 0) + 1 FROM modules), $1, $2, $3)`,
       [annee, nom, img]
     );
 
@@ -163,7 +164,8 @@ router.post('/cours', isAdmin, async (req, res) => {
     }
 
     await db.query(
-      'INSERT INTO cours (module_id, titre) VALUES ($1, $2)',
+      `INSERT INTO cours (id, module_id, titre)
+       VALUES ((SELECT COALESCE(MAX(id), 0) + 1 FROM cours), $1, $2)`,
       [moduleId, titre]
     );
 

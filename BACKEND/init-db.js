@@ -1,7 +1,8 @@
 // 1. On importe la bibliothèque 'pg' (client PostgreSQL)
 const { Pool } = require('pg');
 const fs = require('fs');
-require('dotenv').config();
+const path = require('path');
+require('dotenv').config({ path: path.resolve(__dirname, '.env') });
 
 // 2. On crée une connexion vers la base Neon (PostgreSQL)
 const pool = new Pool({
