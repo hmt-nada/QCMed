@@ -73,13 +73,16 @@
      
 <div class="ajust">
 
-<div class="toutselect2 ">
-     <p class="facoptions">Tout Sélectionner</p>
-<label class="container2">
-   
-  <input class="checkb" id="selectall"  type="checkbox" >
-  <div class="checkmark"></div>
-</label>
+<div class="toutselect2" style="cursor:pointer;" onclick="
+  const cb = document.getElementById('selectall');
+  cb.checked = !cb.checked;
+  cb.dispatchEvent(new Event('change', { bubbles: true }));
+" >
+  <p class="facoptions">Tout Sélectionner</p>
+  <label class="container2" onclick="event.stopPropagation()">
+    <input class="checkb" id="selectall" type="checkbox">
+    <div class="checkmark"></div>
+  </label>
 </div>
 
  <div id="facultes-list"></div>

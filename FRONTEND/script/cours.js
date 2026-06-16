@@ -62,17 +62,28 @@ function afficherCours() {
             const div = document.createElement("div");
             div.className = `cours${index + 1} cours`;
 
-            div.innerHTML = `
-              <p class="facoptions">
-                ${c.titre}
-                <span class="cours-questions">(${nbQuestions} questions)</span>
-              </p>
-              <label class="container2">
-                <input class="checkb" type="checkbox" value="${c.id}">
-                <div class="checkmark"></div>
-              </label>
-            `;
-            container.appendChild(div);
+            // Après
+const checkId = `cours-${c.id}`;
+div.innerHTML = `
+  <p class="facoptions">
+    ${c.titre}
+    <span class="cours-questions">(${nbQuestions} questions)</span>
+  </p>
+  <label class="container2" for="${checkId}">
+    <input class="checkb" id="${checkId}" type="checkbox" value="${c.id}">
+    <div class="checkmark"></div>
+  </label>
+`;
+
+div.style.cursor = 'pointer';
+div.addEventListener('click', function(e) {
+  if (e.target.classList.contains('checkb') || e.target.classList.contains('checkmark') || e.target.closest('label')) return;
+  const cb = div.querySelector('.checkb');
+  cb.checked = !cb.checked;
+  cb.dispatchEvent(new Event('change', { bubbles: true }));
+});
+
+container.appendChild(div);
           });
 
           attachCheckboxLogic();

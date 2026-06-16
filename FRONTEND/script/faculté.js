@@ -62,14 +62,28 @@ function chargerFacultes() {
         const div = document.createElement('div');
         div.className = 'option1'; // garde ton style existant
 
-        div.innerHTML = `
-          <p class="facoptions">${f.nom.toUpperCase()}</p>
-          <label class="container2">
-            <input class="checkb" type="checkbox" value="${f.id}">
-            <div class="checkmark"></div>
-          </label>
-        `;
-        container.appendChild(div);
+        // Après
+const checkId = `fac-${f.id}`;
+div.innerHTML = `
+  <p class="facoptions">${f.nom.toUpperCase()}</p>
+  <label class="container2" for="${checkId}">
+    <input class="checkb" id="${checkId}" type="checkbox" value="${f.id}">
+    <div class="checkmark"></div>
+  </label>
+`;
+
+// Rendre toute la barre cliquable
+div.style.cursor = 'pointer';
+div.addEventListener('click', function(e) {
+  // Éviter le double-toggle si on clique directement sur le checkbox ou label
+  if (e.target.classList.contains('checkb') || e.target.classList.contains('checkmark') || e.target.closest('label')) return;
+  const cb = div.querySelector('.checkb');
+  cb.checked = !cb.checked;
+  cb.dispatchEvent(new Event('change', { bubbles: true }));
+});
+
+container.appendChild(div);
+
       });
 
       // ✅ Rebrancher les listeners APRÈS que les checkboxes sont dans le DOM
