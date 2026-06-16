@@ -4,13 +4,8 @@ const moduleNom = localStorage.getItem("selectedModuleNom"); // même clé que p
 if (moduleNom) {
   espacemodule.textContent = moduleNom;
 }
-
 //-----------------------
-
-const titre= document.getElementById('inscrivez');
-
-  
-
+  const titre= document.getElementById('inscrivez');
   const button = document.querySelector('.c-button--gooey');
   button.addEventListener('click', () => {
     button.classList.add('clicked');
@@ -33,7 +28,7 @@ for (let i = 0; i < rempli.length; i++) {
     });
 }
 
-  const selectnumber = document.getElementById("number");
+const selectnumber = document.getElementById("number");
 const champAutre = document.getElementById("autrenumber");
 const fleche = document.getElementById("fleche");
 const btnRetourSelect = document.getElementById("btnRetourSelect");

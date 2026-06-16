@@ -95,21 +95,28 @@
 <div class="ajust4">
 
 
-<div class="option01">
-<p class="caroptions" >TOUT OU RIEN</p>
-<label class="container2">
-  <input class="checkb"  type="checkbox" value="ToutOuRien" name="correctionMode">
-  <div class="checkmark2"></div>
-</label>
-
+<div class="option01" style="cursor:pointer;" onclick="
+  const cb = this.querySelector('.checkb');
+  cb.checked = !cb.checked;
+  cb.dispatchEvent(new Event('change', { bubbles: true }));
+">
+  <p class="caroptions">TOUT OU RIEN</p>
+  <label class="container2" onclick="event.stopPropagation()">
+    <input class="checkb" type="checkbox" value="ToutOuRien" name="correctionMode">
+    <div class="checkmark2"></div>
+  </label>
 </div>
-<div class="option02">
-<p class="caroptions">PARTIEL</p>
-<label class="container2">
-  <input class="checkb"  type="checkbox" value="partiel"name="correctionMode">
-  <div class="checkmark2"></div>
-</label>
 
+<div class="option02" style="cursor:pointer;" onclick="
+  const cb = this.querySelector('.checkb');
+  cb.checked = !cb.checked;
+  cb.dispatchEvent(new Event('change', { bubbles: true }));
+">
+  <p class="caroptions">PARTIEL</p>
+  <label class="container2" onclick="event.stopPropagation()">
+    <input class="checkb" type="checkbox" value="partiel" name="correctionMode">
+    <div class="checkmark2"></div>
+  </label>
 </div>
 
 </div>
