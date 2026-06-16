@@ -499,6 +499,22 @@
   <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.746 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.753 0-3.332.477-4.5 1.253"/></svg>
   Ajouter un cours
 </div>
+
+<div class="nav-item" onclick="showPage('gerer-cours')">
+  <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+      d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+  </svg>
+  Gérer les cours
+</div>
+<div class="nav-item" onclick="showPage('gerer-modules')">
+  <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+      d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
+  </svg>
+  Gérer les modules
+</div>
+
   </nav>
   <div class="sidebar-footer">
     <div class="admin-badge">
@@ -936,7 +952,200 @@ function showPage(name) {
   if (name === 'dashboard') chargerStats();
   if (name === 'liste') initialiserFiltresListe();
   if (name === 'gerer-cours') chargerModulesPourGestionCours();
-  if (name === 'gerer-modules') chargerModulesGestion();
+}
+
+// ── GÉRER COURS : cascade année → modules ─────────────────────────
+async function chargerModulesPourGestionCours() {
+  const annee  = document.getElementById('gerer-cours-annee').value;
+  const selMod = document.getElementById('gerer-cours-module');
+  const wrap   = document.getElementById('table-cours-gerer-wrap');
+
+  selMod.innerHTML = '<option value="">Sélectionnez une année</option>';
+  selMod.disabled  = true;
+  wrap.innerHTML   = '<div class="loading">Sélectionnez un module</div>';
+
+  if (!annee) return;
+
+  try {
+    const res = await apiFetch(`/api/admin/modules?annee=${annee}`);
+    if (!res) return;
+    const data = await res.json();
+    data.forEach(m => {
+      const opt = document.createElement('option');
+      opt.value = m.id;
+      opt.textContent = m.nom;
+      selMod.appendChild(opt);
+    });
+    selMod.disabled = data.length === 0;
+    if (data.length === 0) {
+      wrap.innerHTML = '<div class="empty-state"><div>Aucun module pour cette année</div></div>';
+    }
+  } catch { showToast('Erreur chargement modules', 'error'); }
+}
+
+// ── GÉRER COURS : charger la liste des cours d'un module ──────────
+async function chargerCoursGestion() {
+  const moduleId = document.getElementById('gerer-cours-module').value;
+  const wrap     = document.getElementById('table-cours-gerer-wrap');
+
+  wrap.innerHTML = '<div class="loading">Chargement...</div>';
+  if (!moduleId) {
+    wrap.innerHTML = '<div class="loading">Sélectionnez un module</div>';
+    return;
+  }
+
+  try {
+    // Charger les cours avec le nombre de questions pour chacun
+    const resCours = await apiFetch(`/api/admin/cours?module_id=${moduleId}`);
+    if (!resCours) return;
+    const cours = await resCours.json();
+
+    if (!cours.length) {
+      wrap.innerHTML = `<div class="empty-state">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586
+               a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+        </svg>
+        <div>Aucun cours dans ce module</div>
+      </div>`;
+      return;
+    }
+
+    // Charger le nombre de questions par cours
+    const resQ = await apiFetch(`/api/admin/questions?module_id=${moduleId}`);
+    if (!resQ) return;
+    const questions = await resQ.json();
+
+    // Compter les questions par cours_id
+    const countParCours = {};
+    questions.forEach(q => {
+      countParCours[q.cours_id] = (countParCours[q.cours_id] || 0) + 1;
+    });
+
+    const rows = cours.map(c => `
+      <tr>
+        <td>${c.titre}</td>
+        <td>
+          <span class="badge badge-blue">${countParCours[c.id] || 0} question${(countParCours[c.id] || 0) !== 1 ? 's' : ''}</span>
+        </td>
+        <td>
+          <button class="btn-del" data-id="${c.id}" data-titre="${c.titre.replace(/"/g, '&quot;')}" onclick="supprimerCours(this.dataset.id, this.dataset.titre)">
+            🗑 Supprimer
+          </button>
+        </td>
+      </tr>
+    `).join('');
+
+    wrap.innerHTML = `
+      <table>
+        <thead><tr>
+          <th>Titre du cours</th>
+          <th>Questions</th>
+          <th>Action</th>
+        </tr></thead>
+        <tbody>${rows}</tbody>
+      </table>
+    `;
+  } catch { wrap.innerHTML = '<div class="loading">Erreur de chargement</div>'; }
+}
+
+// ── SUPPRIMER UN COURS ────────────────────────────────────────────
+async function supprimerCours(id, titre) {
+  if (!confirm(
+    `Supprimer le cours "${titre}" ?\n\n⚠️ Toutes les questions de ce cours seront également supprimées définitivement.`
+  )) return;
+
+  try {
+    const res = await apiFetch(`/api/admin/cours/${id}`, { method: 'DELETE' });
+    if (!res) return;
+    const data = await res.json();
+    if (data.success) {
+      showToast(`✓ Cours supprimé (${data.deletedQuestions} question(s) supprimée(s))`);
+      chargerCoursGestion();
+      chargerStats();
+    } else {
+      showToast(data.message || 'Erreur suppression', 'error');
+    }
+  } catch { showToast('Erreur réseau', 'error'); }
+}
+
+// ── GÉRER MODULES : charger la liste des modules ──────────────────
+async function chargerModulesGestion() {
+  const annee = document.getElementById('gerer-modules-annee').value;
+  const wrap  = document.getElementById('table-modules-gerer-wrap');
+
+  if (!annee) {                                          // ← ajouter
+    wrap.innerHTML = '<div class="loading">Sélectionnez une année</div>';
+    return;
+  }
+
+  wrap.innerHTML = '<div class="loading">Chargement...</div>';
+
+  try {
+    const url = annee
+      ? `/api/admin/modules?annee=${annee}`
+      : `/api/admin/modules`;
+    const res = await apiFetch(url);
+    if (!res) return;
+    const modules = await res.json();
+
+    if (!modules.length) {
+      wrap.innerHTML = `<div class="empty-state">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6
+               a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5
+               a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
+        </svg>
+        <div>Aucun module trouvé</div>
+      </div>`;
+      return;
+    }
+
+    const rows = modules.map(m => `
+      <tr>
+        <td><strong>${m.nom}</strong></td>
+        <td><span class="badge badge-blue">Année ${m.annee}</span></td>
+        <td>
+          <button class="btn-del" data-id="${m.id}" data-nom="${m.nom.replace(/"/g, '&quot;')}" onclick="supprimerModule(this.dataset.id, this.dataset.nom)">
+            🗑 Supprimer
+          </button>
+        </td>
+      </tr>
+    `).join('');
+
+    wrap.innerHTML = `
+      <table>
+        <thead><tr>
+          <th>Nom du module</th>
+          <th>Année</th>
+          <th>Action</th>
+        </tr></thead>
+        <tbody>${rows}</tbody>
+      </table>
+    `;
+  } catch { wrap.innerHTML = '<div class="loading">Erreur de chargement</div>'; }
+}
+
+// ── SUPPRIMER UN MODULE ───────────────────────────────────────────
+async function supprimerModule(id, nom) {
+  if (!confirm(
+    `Supprimer le module "${nom}" ?\n\n⚠️ ATTENTION : Tous les cours et toutes les questions de ce module seront supprimés définitivement. Cette action est irréversible.`
+  )) return;
+
+  try {
+    const res = await apiFetch(`/api/admin/modules/${id}`, { method: 'DELETE' });
+    if (!res) return;
+    const data = await res.json();
+    if (data.success) {
+      showToast(`✓ Module supprimé (${data.deletedCours} cours, ${data.deletedQuestions} question(s))`);
+      chargerModulesGestion();
+      chargerStats();
+    } else {
+      showToast(data.message || 'Erreur suppression', 'error');
+    }
+  } catch { showToast('Erreur réseau', 'error'); }
 }
 
 function initialiserFiltresListe() {
@@ -1345,7 +1554,7 @@ function renderTableau(questions) {
 
   const rows = questions.map(q => `
     <tr>
-      <td class="td-enonce" title="${q.enonce}">${q.enonce}</td>
+      <td class="td-enonce" title="${(q.enonce||'').replace(/"/g,'&quot;')}">${q.enonce}</td>
       <td><span class="badge badge-green">${q.bonne_reponse}</span></td>
       <td><span class="badge badge-blue">${q.cours_titre || '—'}</span></td>
       <td>${q.faculte_nom || '—'}</td>

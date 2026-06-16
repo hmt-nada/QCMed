@@ -29,7 +29,7 @@ const sendAdminError = (res, err, context, req) => {
 };
 
 // Debug endpoint for diagnosing session/body/database issues.
-router.get('/debug-session', (req, res) => {
+router.get('/debug-session', isAdmin, (req, res) => {
   console.log('[admin][debug-session] session=', req.session);
   console.log('[admin][debug-session] body=', req.body);
   console.log('[admin][debug-session] headers=', req.headers);
@@ -129,10 +129,9 @@ router.post('/modules', isAdmin, async (req, res) => {
     }
 
     await db.query(
-      `INSERT INTO modules (id, annee, nom, img)
-       VALUES ((SELECT COALESCE(MAX(id), 0) + 1 FROM modules), $1, $2, $3)`,
-      [annee, nom, img]
-    );
+  'INSERT INTO modules (annee, nom, img) VALUES ($1, $2, $3)',
+  [annee, nom, img]
+);
 
     return res.json({ success: true });
   } catch (err) {
@@ -164,10 +163,9 @@ router.post('/cours', isAdmin, async (req, res) => {
     }
 
     await db.query(
-      `INSERT INTO cours (id, module_id, titre)
-       VALUES ((SELECT COALESCE(MAX(id), 0) + 1 FROM cours), $1, $2)`,
-      [moduleId, titre]
-    );
+  'INSERT INTO cours (module_id, titre) VALUES ($1, $2)',
+  [moduleId, titre]
+);
 
     return res.json({ success: true });
   } catch (err) {
