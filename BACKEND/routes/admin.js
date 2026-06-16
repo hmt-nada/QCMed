@@ -64,30 +64,6 @@ router.get('/cours', isAuthenticated, async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
-
-// Ajouter une question
-router.get('/questions', isAdmin, async (req, res) => {
-  try {
-    const { faculte_id, cours_id, module_id, annee } = req.query;
-    const r = await db.query(
-      `SELECT q.*, c.titre AS cours_titre, f.nom AS faculte_nom
-       FROM questions q
-       LEFT JOIN cours    c ON c.id = q.cours_id
-       LEFT JOIN modules  m ON m.id = c.module_id
-       LEFT JOIN facultes f ON f.id = q.faculte_id
-       WHERE ($1::int IS NULL OR q.faculte_id = $1)
-         AND ($2::int IS NULL OR q.cours_id   = $2)
-         AND ($3::int IS NULL OR c.module_id  = $3)
-         AND ($4::int IS NULL OR m.annee      = $4)  -- ← ajouté
-       ORDER BY q.id DESC`,
-      [faculte_id || null, cours_id || null, module_id || null, annee || null]
-    );
-    res.json(r.rows);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
 // Ajouter un module
 router.post('/modules', isAdmin, async (req, res) => {
   try {
