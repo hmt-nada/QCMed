@@ -802,6 +802,7 @@ async function chargerFacultes() {
 }
 
 // ── MODULES (cascade ajout) ───────────────────────────────────────
+// Faculté change → rien à charger, juste activer Année
 async function chargerModules() {
   const faculteId = document.getElementById('sel-faculte').value;
   const selAnnee  = document.getElementById('sel-annee');
@@ -815,19 +816,38 @@ async function chargerModules() {
 
   if (!faculteId) return;
 
-  try {
-    const res  = await fetch(`/api/admin/modules?faculte_id=${faculteId}`);
-    tousModules = await res.json();
+  // Années fixes 1 à 7
+  for (let a = 1; a <= 7; a++) {
+    const opt = document.createElement('option');
+    opt.value = a;
+    opt.textContent = `${a}ère/ème année`;
+    selAnnee.appendChild(opt);
+  }
+  selAnnee.disabled = false;
+}
 
-    // Extraire les années uniques
-    const annees = [...new Set(tousModules.map(m => m.annee))].sort((a,b) => a-b);
-    annees.forEach(a => {
+// Année change → fetch les modules de cette année
+async function filtrerModules() {
+  const annee    = document.getElementById('sel-annee').value;
+  const selMod   = document.getElementById('sel-module');
+  const selCours = document.getElementById('sel-cours');
+
+  selMod.innerHTML   = '<option value="">— Sélectionner —</option>';
+  selCours.innerHTML = '<option value="">— Sélectionner —</option>';
+  selMod.disabled = selCours.disabled = true;
+
+  if (!annee) return;
+
+  try {
+    const res  = await fetch(`/api/admin/modules?annee=${annee}`); // ✅ corrigé
+    const data = await res.json();
+    data.forEach(m => {
       const opt = document.createElement('option');
-      opt.value = a;
-      opt.textContent = `${a}ère/ème année`;
-      selAnnee.appendChild(opt);
+      opt.value = m.id;
+      opt.textContent = m.nom;
+      selMod.appendChild(opt);
     });
-    selAnnee.disabled = false;
+    selMod.disabled = false;
   } catch { showToast('Erreur chargement modules', 'error'); }
 }
 
