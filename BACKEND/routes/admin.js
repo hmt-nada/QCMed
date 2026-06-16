@@ -66,30 +66,51 @@ router.get('/cours', isAuthenticated, async (req, res) => {
 });
 
 // Ajouter une question
-router.post('/questions', isAdmin, async (req, res) => {
+router.get('/questions', isAdmin, async (req, res) => {
   try {
-    const {
-      cours_id, faculte_id, enonce,
-      choix_a, choix_b, choix_c,
-      choix_d, choix_e, choix_f,
-      bonne_reponse, explication, image_url
-    } = req.body;
+    const { faculte_id, cours_id, module_id, annee } = req.query;
+    const r = await db.query(
+      `SELECT q.*, c.titre AS cours_titre, f.nom AS faculte_nom
+       FROM questions q
+       LEFT JOIN cours    c ON c.id = q.cours_id
+       LEFT JOIN modules  m ON m.id = c.module_id
+       LEFT JOIN facultes f ON f.id = q.faculte_id
+       WHERE ($1::int IS NULL OR q.faculte_id = $1)
+         AND ($2::int IS NULL OR q.cours_id   = $2)
+         AND ($3::int IS NULL OR c.module_id  = $3)
+         AND ($4::int IS NULL OR m.annee      = $4)  -- ← ajouté
+       ORDER BY q.id DESC`,
+      [faculte_id || null, cours_id || null, module_id || null, annee || null]
+    );
+    res.json(r.rows);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
 
-    if (!cours_id || !faculte_id || !enonce || !choix_a || !choix_b || !bonne_reponse) {
-      return res.status(400).json({ success: false, message: 'Champs obligatoires manquants' });
-    }
-
+// Ajouter un module
+router.post('/modules', isAdmin, async (req, res) => {
+  try {
+    const { annee, nom, img } = req.body;
+    if (!annee || !nom) return res.status(400).json({ success: false, message: 'annee et nom obligatoires' });
     await db.query(
-      `INSERT INTO questions
-         (cours_id, faculte_id, enonce, choix_a, choix_b, choix_c,
-          choix_d, choix_e, choix_f, bonne_reponse, explication, image_url)
-       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12)`,
-      [
-        cours_id, faculte_id, enonce,
-        choix_a, choix_b, choix_c,
-        choix_d || null, choix_e || null, choix_f || null,
-        bonne_reponse, explication || null, image_url || null
-      ]
+      'INSERT INTO modules (annee, nom, img) VALUES ($1, $2, $3)',
+      [annee, nom, img || null]
+    );
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
+// Ajouter un cours
+router.post('/cours', isAdmin, async (req, res) => {
+  try {
+    const { module_id, titre } = req.body;
+    if (!module_id || !titre) return res.status(400).json({ success: false, message: 'module_id et titre obligatoires' });
+    await db.query(
+      'INSERT INTO cours (module_id, titre) VALUES ($1, $2)',
+      [module_id, titre]
     );
     res.json({ success: true });
   } catch (err) {
