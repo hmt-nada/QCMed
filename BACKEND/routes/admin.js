@@ -75,7 +75,7 @@ router.post('/questions', isAdmin, async (req, res) => {
       bonne_reponse, explication, image_url
     } = req.body;
 
-    if (!cours_id || !faculte_id || !enonce || !choix_a || !choix_b || !choix_c || !bonne_reponse) {
+    if (!cours_id || !faculte_id || !enonce || !choix_a || !choix_b || !bonne_reponse) {
       return res.status(400).json({ success: false, message: 'Champs obligatoires manquants' });
     }
 
