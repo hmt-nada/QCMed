@@ -13,20 +13,44 @@ const ADMIN_EMAILS = (process.env.ADMIN_EMAILS || '')
   .filter(Boolean);
 
 const isAdmin = (req, res, next) => {
-  const user = req.session?.user;
-  if (!user) {
-    if (isApiRequest(req)) return res.status(401).json({ success: false, message: 'Non authentifié.' });
-    return res.redirect('/connexion.html');
+  try {
+    const user = req.session?.user;
+
+    if (!user) {
+      if (isApiRequest(req)) {
+        return res.status(401).json({
+          success: false,
+          message: 'Non authentifié.',
+          details: 'La session utilisateur est absente ou expirée.'
+        });
+      }
+      return res.redirect('/connexion.html');
+    }
+
+    const isAdminUser = user.isAdmin === true;
+    const email = (user.email || '').trim().toLowerCase();
+
+    if (isAdminUser || ADMIN_EMAILS.includes(email)) {
+      return next();
+    }
+
+    if (isApiRequest(req)) {
+      return res.status(403).json({
+        success: false,
+        message: 'Accès refusé.',
+        details: 'L’utilisateur n’est pas administrateur.'
+      });
+    }
+
+    return res.redirect('/accueil.html');
+  } catch (err) {
+    console.error('[isAdmin] unexpected error:', err);
+    return res.status(500).json({
+      success: false,
+      message: 'Erreur middleware d’authentification.',
+      details: err.message,
+    });
   }
-
-  const isAdminUser = user.isAdmin === true;
-  const email = (user.email || '').trim().toLowerCase();
-
-  if (isAdminUser || ADMIN_EMAILS.includes(email)) {
-    return next();
-  }
-
-  if (isApiRequest(req)) return res.status(403).json({ success: false, message: 'Accès refusé.' });
-  return res.redirect('/accueil.html');
 };
+
 module.exports = isAdmin;

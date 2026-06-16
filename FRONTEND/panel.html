@@ -805,14 +805,30 @@
 <script>
 
   async function apiFetch(url, options = {}) {
-  const res = await fetch(url, options);
-  if (!res) return; 
-  if (res.status === 401) {
-    window.location.href = 'connxion.html';
-    return null;
+    const finalOptions = {
+      credentials: 'include',
+      ...options,
+      headers: {
+        ...(options.headers || {}),
+      }
+    };
+
+    const res = await fetch(url, finalOptions);
+    if (!res) return;
+    if (res.status === 401) {
+      window.location.href = 'connxion.html';
+      return null;
+    }
+    return res;
   }
-  return res;
-}
+
+  async function parseApiResponse(res) {
+    try {
+      return await res.json();
+    } catch {
+      return { success: false, message: 'Réponse invalide du serveur.' };
+    }
+  }
 
 // ── VÉRIFICATION SESSION ADMIN ────────────────────────────────────
 async function verifierAdmin() {
@@ -1004,15 +1020,15 @@ async function soumettreQuestion() {
         image_url:    image_url   || null
       })
     });
-    if (!res) return; 
+    if (!res) return;
 
-    const data = await res.json();
+    const data = await parseApiResponse(res);
     if (data.success) {
       showToast('✓ Question ajoutée avec succès !');
       resetFormulaire();
       chargerStats();
     } else {
-      showToast(data.message || 'Erreur lors de l\'ajout', 'error');
+      showToast(data.details || data.message || 'Erreur lors de l\'ajout', 'error');
     }
   } catch { showToast('Erreur réseau', 'error'); }
 }
@@ -1027,19 +1043,19 @@ async function soumettreModule() {
   if (!nom)   return showToast('Le nom du module est obligatoire', 'error');
 
   try {
-    const res  = await apiFetch('/api/admin/modules', {
+    const res = await apiFetch('/api/admin/modules', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ annee: parseInt(annee), nom, img: img || null })
     });
-    if (!res) return; 
-    const data = await res.json();
+    if (!res) return;
+    const data = await parseApiResponse(res);
     if (data.success) {
       showToast('✓ Module ajouté avec succès !');
       resetModule();
       chargerStats();
     } else {
-      showToast(data.message || 'Erreur', 'error');
+      showToast(data.details || data.message || 'Erreur', 'error');
     }
   } catch { showToast('Erreur réseau', 'error'); }
 }
@@ -1080,19 +1096,19 @@ async function soumettreCours() {
   if (!titre)    return showToast('Le titre du cours est obligatoire', 'error');
 
   try {
-    const res  = await apiFetch('/api/admin/cours', {
+    const res = await apiFetch('/api/admin/cours', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ module_id: parseInt(moduleId), titre })
     });
-    if (!res) return; 
-    const data = await res.json();
+    if (!res) return;
+    const data = await parseApiResponse(res);
     if (data.success) {
       showToast('✓ Cours ajouté avec succès !');
       resetCours();
       chargerStats();
     } else {
-      showToast(data.message || 'Erreur', 'error');
+      showToast(data.details || data.message || 'Erreur', 'error');
     }
   } catch { showToast('Erreur réseau', 'error'); }
 }

@@ -4,6 +4,44 @@ const db = require('../config/db');
 const isAdmin = require('../middleware/isAdmin');
 const isAuthenticated = require('../middleware/isAuthenticated');
 
+const logAdminError = (context, err, req) => {
+  console.error(`[admin][${context}]`, {
+    message: err.message,
+    code: err.code,
+    detail: err.detail,
+    hint: err.hint,
+    stack: err.stack,
+    method: req.method,
+    path: req.originalUrl || req.path,
+    body: req.body,
+    sessionUser: req.session?.user || null,
+  });
+};
+
+const sendAdminError = (res, err, context, req) => {
+  logAdminError(context, err, req);
+  return res.status(500).json({
+    success: false,
+    message: 'Erreur serveur lors de la modification des données.',
+    details: err.message,
+    code: err.code || null,
+  });
+};
+
+// Debug endpoint for diagnosing session/body/database issues.
+router.get('/debug-session', (req, res) => {
+  console.log('[admin][debug-session] session=', req.session);
+  console.log('[admin][debug-session] body=', req.body);
+  console.log('[admin][debug-session] headers=', req.headers);
+
+  return res.json({
+    success: true,
+    session: req.session || null,
+    body: req.body || null,
+    headers: req.headers || null,
+  });
+});
+
 // Stats
 router.get('/stats', isAdmin, async (req, res) => {
   try {
@@ -17,10 +55,10 @@ router.get('/stats', isAdmin, async (req, res) => {
       questions: q.rows[0].count,
       cours:     c.rows[0].count,
       modules:   m.rows[0].count,
-      users:     u.rows[0].count
+      users:     u.rows[0].count,
     });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    sendAdminError(res, err, 'GET /stats', req);
   }
 });
 
@@ -30,11 +68,11 @@ router.get('/facultes', isAuthenticated, async (req, res) => {
     const r = await db.query('SELECT * FROM facultes ORDER BY nom');
     res.json(r.rows);
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    sendAdminError(res, err, 'GET /facultes', req);
   }
 });
 
-// Modules filtrés par année (plus de lien avec faculte_id)
+// Modules filtrés par année
 router.get('/modules', isAuthenticated, async (req, res) => {
   try {
     const { annee } = req.query;
@@ -46,7 +84,7 @@ router.get('/modules', isAuthenticated, async (req, res) => {
     );
     res.json(r.rows);
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    sendAdminError(res, err, 'GET /modules', req);
   }
 });
 
@@ -61,41 +99,81 @@ router.get('/cours', isAuthenticated, async (req, res) => {
     );
     res.json(r.rows);
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    sendAdminError(res, err, 'GET /cours', req);
   }
 });
+
 // Ajouter un module
 router.post('/modules', isAdmin, async (req, res) => {
   try {
-    const { annee, nom, img } = req.body;
-    if (!annee || !nom) return res.status(400).json({ success: false, message: 'annee et nom obligatoires' });
+    const rawAnnee = req.body?.annee;
+    const rawNom = req.body?.nom;
+    const rawImg = req.body?.img;
+
+    const annee = Number(rawAnnee);
+    const nom = typeof rawNom === 'string' ? rawNom.trim() : '';
+    const img = typeof rawImg === 'string' && rawImg.trim() ? rawImg.trim() : null;
+
+    if (!Number.isInteger(annee) || annee < 1 || annee > 7) {
+      return res.status(400).json({
+        success: false,
+        message: 'Année invalide. Veuillez choisir une année entre 1 et 7.',
+      });
+    }
+
+    if (!nom) {
+      return res.status(400).json({
+        success: false,
+        message: 'Le nom du module est obligatoire.',
+      });
+    }
+
     await db.query(
       'INSERT INTO modules (annee, nom, img) VALUES ($1, $2, $3)',
-      [annee, nom, img || null]
+      [annee, nom, img]
     );
-    res.json({ success: true });
+
+    return res.json({ success: true });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    return sendAdminError(res, err, 'POST /modules', req);
   }
 });
 
 // Ajouter un cours
 router.post('/cours', isAdmin, async (req, res) => {
   try {
-    const { module_id, titre } = req.body;
-    if (!module_id || !titre) return res.status(400).json({ success: false, message: 'module_id et titre obligatoires' });
+    const rawModuleId = req.body?.module_id;
+    const rawTitre = req.body?.titre;
+
+    const moduleId = Number(rawModuleId);
+    const titre = typeof rawTitre === 'string' ? rawTitre.trim() : '';
+
+    if (!Number.isInteger(moduleId) || moduleId <= 0) {
+      return res.status(400).json({
+        success: false,
+        message: 'module_id invalide.',
+      });
+    }
+
+    if (!titre) {
+      return res.status(400).json({
+        success: false,
+        message: 'Le titre du cours est obligatoire.',
+      });
+    }
+
     await db.query(
       'INSERT INTO cours (module_id, titre) VALUES ($1, $2)',
-      [module_id, titre]
+      [moduleId, titre]
     );
-    res.json({ success: true });
+
+    return res.json({ success: true });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    return sendAdminError(res, err, 'POST /cours', req);
   }
 });
 
 // Lister questions avec jointures
-// Filtres : faculte_id, cours_id, module_id (via join cours→modules)
 router.get('/questions', isAdmin, async (req, res) => {
   try {
     const { faculte_id, cours_id, module_id, annee } = req.query;
@@ -114,7 +192,7 @@ router.get('/questions', isAdmin, async (req, res) => {
     );
     res.json(r.rows);
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    sendAdminError(res, err, 'GET /questions', req);
   }
 });
 
@@ -125,7 +203,7 @@ router.delete('/questions/:id', isAdmin, async (req, res) => {
     await db.query('DELETE FROM questions WHERE id = $1', [id]);
     res.json({ success: true });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    sendAdminError(res, err, `DELETE /questions/${req.params.id}`, req);
   }
 });
 
