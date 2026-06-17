@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -11,7 +12,7 @@
   <title>Panel Admin</title>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap');
-
+ 
     :root {
       --bg:        #0f1117;
       --surface:   #181c27;
@@ -24,21 +25,78 @@
       --muted:     #7c8299;
       --radius:    12px;
       --shadow:    0 4px 24px rgba(0,0,0,0.4);
+      --sidebar-w: 240px;
+      --topbar-h:  58px;
     }
-
+ 
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
+ 
+    html { -webkit-text-size-adjust: 100%; }
+ 
     body {
       font-family: 'Inter', sans-serif;
       background: var(--bg);
       color: var(--text);
       min-height: 100vh;
       display: flex;
+      overflow-x: hidden;
     }
-
+ 
+    /* ── TOPBAR (mobile only) ── */
+    .topbar {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      height: var(--topbar-h);
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      align-items: center;
+      gap: 14px;
+      padding: 0 16px;
+      z-index: 60;
+    }
+ 
+    .topbar-title {
+      font-family: 'Space Grotesk', sans-serif;
+      font-weight: 700;
+      font-size: 1.05rem;
+      color: var(--accent);
+    }
+    .topbar-title span { color: var(--accent2); }
+ 
+    .burger-btn {
+      background: transparent;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      width: 38px;
+      height: 38px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text);
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+    .burger-btn svg { width: 20px; height: 20px; }
+ 
+    /* ── SIDEBAR OVERLAY (mobile) ── */
+    .sidebar-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.55);
+      z-index: 70;
+      opacity: 0;
+      transition: opacity 0.25s ease;
+    }
+    .sidebar-overlay.show {
+      display: block;
+      opacity: 1;
+    }
+ 
     /* ── SIDEBAR ── */
     .sidebar {
-      width: 240px;
+      width: var(--sidebar-w);
       min-height: 100vh;
       background: var(--surface);
       border-right: 1px solid var(--border);
@@ -47,8 +105,27 @@
       padding: 28px 0;
       position: fixed;
       top: 0; left: 0; bottom: 0;
+      z-index: 80;
+      transition: transform 0.25s ease;
     }
-
+ 
+    .sidebar-close-btn {
+      display: none;
+      position: absolute;
+      top: 18px;
+      right: 16px;
+      background: transparent;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      width: 32px;
+      height: 32px;
+      align-items: center;
+      justify-content: center;
+      color: var(--muted);
+      cursor: pointer;
+    }
+    .sidebar-close-btn svg { width: 18px; height: 18px; }
+ 
     .sidebar-logo {
       font-family: 'Space Grotesk', sans-serif;
       font-size: 1.2rem;
@@ -58,14 +135,15 @@
       border-bottom: 1px solid var(--border);
       letter-spacing: -0.3px;
     }
-
+ 
     .sidebar-logo span { color: var(--accent2); }
-
+ 
     .sidebar-nav {
       margin-top: 20px;
       flex: 1;
+      overflow-y: auto;
     }
-
+ 
     .nav-item {
       display: flex;
       align-items: center;
@@ -78,36 +156,37 @@
       border-left: 3px solid transparent;
       transition: all 0.2s;
     }
-
+ 
     .nav-item:hover { color: var(--text); background: rgba(79,142,247,0.07); }
     .nav-item.active { color: var(--accent); border-left-color: var(--accent); background: rgba(79,142,247,0.1); }
-
+ 
     .nav-item svg { width: 18px; height: 18px; flex-shrink: 0; }
-
+ 
     .sidebar-footer {
       padding: 20px 24px 0;
       border-top: 1px solid var(--border);
     }
-
+ 
     .admin-badge {
       display: flex;
       align-items: center;
       gap: 10px;
       padding: 10px 0;
     }
-
+ 
     .avatar-circle {
       width: 34px; height: 34px;
       border-radius: 50%;
       background: linear-gradient(135deg, var(--accent), var(--accent2));
       display: flex; align-items: center; justify-content: center;
       font-size: 0.8rem; font-weight: 700; color: #fff;
+      flex-shrink: 0;
     }
-
-    .admin-info { font-size: 0.8rem; }
-    .admin-name { font-weight: 600; color: var(--text); }
+ 
+    .admin-info { font-size: 0.8rem; min-width: 0; }
+    .admin-name { font-weight: 600; color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     .admin-role { color: var(--muted); font-size: 0.72rem; margin-top: 1px; }
-
+ 
     .btn-logout {
       margin-top: 12px;
       width: 100%;
@@ -121,22 +200,24 @@
       transition: all 0.2s;
     }
     .btn-logout:hover { border-color: var(--danger); color: var(--danger); }
-
+ 
     /* ── MAIN ── */
     .main {
-      margin-left: 240px;
+      margin-left: var(--sidebar-w);
       flex: 1;
       padding: 36px 40px;
-      max-width: calc(100% - 240px);
+      max-width: calc(100% - var(--sidebar-w));
+      min-width: 0;
+      transition: margin-left 0.25s ease;
     }
-
+ 
     .page { display: none; }
     .page.active { display: block; }
-
+ 
     .page-header {
       margin-bottom: 32px;
     }
-
+ 
     .page-title {
       font-family: 'Space Grotesk', sans-serif;
       font-size: 1.6rem;
@@ -144,13 +225,13 @@
       color: var(--text);
       letter-spacing: -0.5px;
     }
-
+ 
     .page-sub {
       color: var(--muted);
       font-size: 0.88rem;
       margin-top: 5px;
     }
-
+ 
     /* ── STATS ── */
     .stats-grid {
       display: grid;
@@ -158,19 +239,20 @@
       gap: 16px;
       margin-bottom: 32px;
     }
-
+ 
     .stat-card {
       background: var(--card);
       border: 1px solid var(--border);
       border-radius: var(--radius);
       padding: 20px 22px;
+      min-width: 0;
     }
-
+ 
     .stat-label { font-size: 0.78rem; color: var(--muted); font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px; }
     .stat-value { font-family: 'Space Grotesk', sans-serif; font-size: 2rem; font-weight: 700; margin-top: 6px; color: var(--text); }
     .stat-value.accent  { color: var(--accent); }
     .stat-value.accent2 { color: var(--accent2); }
-
+ 
     /* ── FORM CARD ── */
     .form-card {
       background: var(--card);
@@ -179,8 +261,9 @@
       padding: 28px 30px;
       margin-bottom: 28px;
       box-shadow: var(--shadow);
+      min-width: 0;
     }
-
+ 
     .form-card-title {
       font-family: 'Space Grotesk', sans-serif;
       font-size: 1rem;
@@ -192,13 +275,14 @@
       align-items: center;
       gap: 8px;
     }
-
+ 
     .form-card-title .dot {
       width: 8px; height: 8px;
       border-radius: 50%;
       background: var(--accent);
+      flex-shrink: 0;
     }
-
+ 
     /* Cascade selects */
     .cascade {
       display: grid;
@@ -206,9 +290,9 @@
       gap: 14px;
       margin-bottom: 22px;
     }
-
-    .field { display: flex; flex-direction: column; gap: 6px; }
-
+ 
+    .field { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+ 
     label {
       font-size: 0.78rem;
       font-weight: 600;
@@ -216,7 +300,7 @@
       text-transform: uppercase;
       letter-spacing: 0.4px;
     }
-
+ 
     select, input[type="text"], input[type="url"], textarea {
       background: var(--surface);
       border: 1px solid var(--border);
@@ -228,36 +312,38 @@
       transition: border-color 0.2s, box-shadow 0.2s;
       outline: none;
       width: 100%;
+      max-width: 100%;
     }
-
+ 
     select:focus, input:focus, textarea:focus {
       border-color: var(--accent);
       box-shadow: 0 0 0 3px rgba(79,142,247,0.15);
     }
-
+ 
     select:disabled { opacity: 0.45; cursor: not-allowed; }
-
+ 
     textarea { resize: vertical; min-height: 90px; }
-
+ 
     .choices-grid {
       display: grid;
       grid-template-columns: 1fr 1fr 1fr;
       gap: 12px;
       margin-bottom: 16px;
     }
-
+ 
     .choice-field {
       display: flex;
       flex-direction: column;
       gap: 6px;
+      min-width: 0;
     }
-
+ 
     .choice-label-row {
       display: flex;
       align-items: center;
       gap: 6px;
     }
-
+ 
     .choice-badge {
       width: 22px; height: 22px;
       border-radius: 50%;
@@ -268,12 +354,12 @@
       color: var(--muted);
       flex-shrink: 0;
     }
-
+ 
     .choice-badge.correct { background: rgba(110,231,183,0.2); color: var(--accent2); }
-
+ 
     .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 16px; }
-    .form-full { margin-bottom: 16px; }
-
+    .form-full { margin-bottom: 16px; min-width: 0; }
+ 
     .bonne-reponse-wrap {
       display: flex;
       align-items: center;
@@ -284,19 +370,19 @@
       border: 1px solid var(--border);
       border-radius: 8px;
     }
-
+ 
     .bonne-reponse-wrap span { font-size: 0.8rem; color: var(--muted); }
-
+ 
     .radio-choice {
       display: flex; align-items: center; gap: 5px;
       cursor: pointer;
     }
-
+ 
     .radio-choice input[type="radio"] {
       width: auto;
       accent-color: var(--accent2);
     }
-
+ 
     .radio-choice label {
       font-size: 0.82rem;
       color: var(--text);
@@ -304,7 +390,7 @@
       letter-spacing: 0;
       cursor: pointer;
     }
-
+ 
     .btn-submit {
       background: linear-gradient(135deg, var(--accent), #6b8ef0);
       color: #fff;
@@ -317,10 +403,10 @@
       transition: opacity 0.2s, transform 0.15s;
       font-family: 'Inter', sans-serif;
     }
-
+ 
     .btn-submit:hover { opacity: 0.9; transform: translateY(-1px); }
     .btn-submit:active { transform: translateY(0); }
-
+ 
     .btn-reset {
       background: transparent;
       border: 1px solid var(--border);
@@ -333,11 +419,11 @@
       transition: all 0.2s;
       margin-left: 10px;
     }
-
+ 
     .btn-reset:hover { border-color: var(--muted); color: var(--text); }
-
-    .form-actions { display: flex; align-items: center; margin-top: 20px; }
-
+ 
+    .form-actions { display: flex; align-items: center; margin-top: 20px; flex-wrap: wrap; gap: 10px 0; }
+ 
     /* ── TOAST ── */
     .toast {
       position: fixed;
@@ -351,12 +437,13 @@
       transform: translateY(10px);
       transition: all 0.3s;
       pointer-events: none;
+      max-width: calc(100vw - 40px);
     }
-
+ 
     .toast.show { opacity: 1; transform: translateY(0); }
     .toast.success { background: rgba(110,231,183,0.15); border: 1px solid var(--accent2); color: var(--accent2); }
     .toast.error   { background: rgba(248,113,113,0.15); border: 1px solid var(--danger);  color: var(--danger); }
-
+ 
     /* ── TABLE QUESTIONS ── */
     .table-wrap {
       background: var(--card);
@@ -364,21 +451,23 @@
       border-radius: var(--radius);
       overflow: hidden;
     }
-
+ 
     .table-header {
       padding: 18px 24px;
       border-bottom: 1px solid var(--border);
       display: flex;
       align-items: center;
       justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
     }
-
+ 
     .table-title {
       font-family: 'Space Grotesk', sans-serif;
       font-size: 0.95rem;
       font-weight: 600;
     }
-
+ 
     .search-input {
       padding: 8px 14px;
       background: var(--surface);
@@ -387,10 +476,16 @@
       color: var(--text);
       font-size: 0.84rem;
       width: 220px;
+      max-width: 100%;
     }
-
-    table { width: 100%; border-collapse: collapse; }
-
+ 
+    .table-scroll {
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+ 
+    table { width: 100%; border-collapse: collapse; min-width: 560px; }
+ 
     thead th {
       padding: 12px 16px;
       text-align: left;
@@ -401,41 +496,43 @@
       letter-spacing: 0.5px;
       background: var(--surface);
       border-bottom: 1px solid var(--border);
+      white-space: nowrap;
     }
-
+ 
     tbody tr {
       border-bottom: 1px solid var(--border);
       transition: background 0.15s;
     }
-
+ 
     tbody tr:last-child { border-bottom: none; }
     tbody tr:hover { background: rgba(79,142,247,0.04); }
-
+ 
     tbody td {
       padding: 13px 16px;
       font-size: 0.85rem;
       color: var(--text);
       vertical-align: middle;
     }
-
+ 
     .td-enonce {
       max-width: 320px;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
     }
-
+ 
     .badge {
       display: inline-block;
       padding: 3px 10px;
       border-radius: 20px;
       font-size: 0.72rem;
       font-weight: 600;
+      white-space: nowrap;
     }
-
+ 
     .badge-blue { background: rgba(79,142,247,0.15); color: var(--accent); }
     .badge-green { background: rgba(110,231,183,0.15); color: var(--accent2); }
-
+ 
     .btn-del {
       background: transparent;
       border: 1px solid var(--border);
@@ -445,43 +542,120 @@
       font-size: 0.78rem;
       cursor: pointer;
       transition: all 0.2s;
+      white-space: nowrap;
     }
-
+ 
     .btn-del:hover { border-color: var(--danger); color: var(--danger); }
-
+ 
     .empty-state {
       text-align: center;
-      padding: 48px;
+      padding: 48px 20px;
       color: var(--muted);
       font-size: 0.88rem;
     }
-
+ 
     .empty-state svg { width: 40px; height: 40px; margin-bottom: 12px; opacity: 0.4; }
-
+ 
     .loading { text-align: center; padding: 30px; color: var(--muted); font-size: 0.85rem; }
-
+ 
     /* ── FILTER ROW ── */
     .filter-row {
       display: flex;
       gap: 12px;
       margin-bottom: 20px;
       align-items: flex-end;
+      flex-wrap: wrap;
     }
-
-    .filter-row .field { flex: 1; }
-
+ 
+    .filter-row .field { flex: 1; min-width: 160px; }
+ 
     /* ── RESPONSIVE ── */
+ 
+    /* Tablette : sidebar plus étroit, grilles à 2 colonnes */
     @media (max-width: 1100px) {
       .stats-grid { grid-template-columns: repeat(2, 1fr); }
       .cascade { grid-template-columns: repeat(2, 1fr); }
       .choices-grid { grid-template-columns: 1fr 1fr; }
     }
+ 
+    /* Mobile / petite tablette : sidebar off-canvas, topbar visible */
+    @media (max-width: 880px) {
+      :root { --sidebar-w: 270px; }
+ 
+      body { padding-top: var(--topbar-h); }
+ 
+      .topbar { display: flex; }
+ 
+      .sidebar {
+        transform: translateX(-100%);
+        box-shadow: 0 0 30px rgba(0,0,0,0.5);
+      }
+ 
+      .sidebar.open { transform: translateX(0); }
+ 
+      .sidebar-close-btn { display: flex; }
+ 
+      .main {
+        margin-left: 0;
+        max-width: 100%;
+        padding: 22px 16px 90px;
+      }
+ 
+      .page-title { font-size: 1.35rem; }
+ 
+      .stats-grid { grid-template-columns: 1fr 1fr; gap: 12px; }
+      .stat-card { padding: 16px 16px; }
+      .stat-value { font-size: 1.6rem; }
+ 
+      .cascade { grid-template-columns: 1fr; gap: 12px; }
+      .choices-grid { grid-template-columns: 1fr 1fr; gap: 10px; }
+ 
+      .form-card { padding: 20px 18px; }
+ 
+      .form-row { grid-template-columns: 1fr; }
+ 
+      .bonne-reponse-wrap { gap: 12px; }
+ 
+      .filter-row { flex-direction: column; align-items: stretch; gap: 10px; }
+      .filter-row .field { min-width: 0; width: 100%; }
+ 
+      .table-header { padding: 14px 16px; }
+      .search-input { width: 100%; }
+ 
+      .form-actions { flex-direction: column; align-items: stretch; }
+      .btn-submit, .btn-reset { width: 100%; text-align: center; }
+      .btn-reset { margin-left: 0; }
+ 
+      .toast { left: 16px; right: 16px; bottom: 16px; text-align: center; }
+    }
+ 
+    @media (max-width: 480px) {
+      .choices-grid { grid-template-columns: 1fr; }
+      .stats-grid { grid-template-columns: 1fr; }
+      :root { --sidebar-w: 86vw; }
+    }
+ 
+    body.sidebar-locked { overflow: hidden; }
   </style>
 </head>
 <body>
-
+ 
+<!-- TOPBAR MOBILE -->
+<div class="topbar">
+  <button class="burger-btn" onclick="ouvrirSidebar()" aria-label="Ouvrir le menu">
+    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+  </button>
+  <div class="topbar-title">QCM<span>ed</span> Admin</div>
+</div>
+ 
+<!-- OVERLAY -->
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="fermerSidebar()"></div>
+ 
 <!-- SIDEBAR -->
-<aside class="sidebar">
+<aside class="sidebar" id="sidebar">
+  <button class="sidebar-close-btn" onclick="fermerSidebar()" aria-label="Fermer le menu">
+    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+  </button>
   <div class="sidebar-logo">QCM<span>ed</span> Admin</div>
   <nav class="sidebar-nav">
     <div class="nav-item active" onclick="showPage('dashboard')">
@@ -504,7 +678,7 @@
   <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.746 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.753 0-3.332.477-4.5 1.253"/></svg>
   Ajouter un cours
 </div>
-
+ 
 <div class="nav-item" onclick="showPage('gerer-cours')">
   <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -519,7 +693,7 @@
   </svg>
   Gérer les modules
 </div>
-
+ 
   </nav>
   <div class="sidebar-footer">
     <div class="admin-badge">
@@ -532,10 +706,10 @@
     <button class="btn-logout" onclick="seDeconnecter()">Se déconnecter</button>
   </div>
 </aside>
-
+ 
 <!-- MAIN -->
 <main class="main">
-
+ 
   <!-- PAGE : DASHBOARD -->
   <div class="page active" id="page-dashboard">
     <div class="page-header">
@@ -560,7 +734,7 @@
         <div class="stat-value accent2" id="stat-users">—</div>
       </div>
     </div>
-
+ 
     <div class="form-card">
       <div class="form-card-title"><span class="dot"></span> Raccourci rapide</div>
       <p style="color:var(--muted); font-size:0.88rem; margin-bottom:18px;">
@@ -569,14 +743,14 @@
       <button class="btn-submit" onclick="showPage('ajouter')">➕ &nbsp;Ajouter une question</button>
     </div>
   </div>
-
+ 
   <!-- PAGE : AJOUTER -->
   <div class="page" id="page-ajouter">
     <div class="page-header">
       <div class="page-title">Ajouter une question</div>
       <div class="page-sub">Sélectionnez le contexte puis remplissez le formulaire</div>
     </div>
-
+ 
     <div class="form-card">
       <div class="form-card-title"><span class="dot"></span> Contexte de la question</div>
       <div class="cascade">
@@ -606,24 +780,24 @@
         </div>
       </div>
     </div>
-
+ 
     <div class="form-card">
       <div class="form-card-title"><span class="dot"></span> Contenu de la question</div>
-
+ 
       <div class="form-full">
         <label>Énoncé de la question *</label>
         <textarea id="enonce" placeholder="Écrivez l'énoncé de la question ici..."></textarea>
       </div>
-
+ 
       <div class="form-full">
         <label>Image (URL — optionnel)</label>
         <input type="url" id="image_url" placeholder="https://exemple.com/image.png" />
       </div>
-
+ 
       <div class="form-card-title" style="margin-top:8px; margin-bottom:14px; border-top:1px solid var(--border); padding-top:18px;">
         <span class="dot" style="background:var(--accent2)"></span> Choix de réponses
       </div>
-
+ 
       <div class="choices-grid">
         <div class="choice-field">
           <div class="choice-label-row">
@@ -668,7 +842,7 @@
           <input type="text" id="choix_f" placeholder="Réponse F (optionnel)..." />
         </div>
       </div>
-
+ 
       <div class="form-full">
         <label>Bonne réponse *</label>
         <div class="bonne-reponse-wrap">
@@ -681,26 +855,26 @@
           <label class="radio-choice"><input type="radio" name="bonne_rep" value="F" /> <label>F</label></label>
         </div>
       </div>
-
+ 
       <div class="form-full" style="margin-top:16px;">
         <label>Explication / Correction (optionnel)</label>
         <textarea id="explication" placeholder="Explication de la bonne réponse..." style="min-height:80px;"></textarea>
       </div>
-
+ 
       <div class="form-actions">
         <button class="btn-submit" onclick="soumettreQuestion()">✓ &nbsp;Enregistrer la question</button>
         <button class="btn-reset" onclick="resetFormulaire()">Réinitialiser</button>
       </div>
     </div>
   </div>
-
+ 
   <!-- PAGE : LISTE -->
   <div class="page" id="page-liste">
     <div class="page-header">
       <div class="page-title">Liste des questions</div>
       <div class="page-sub">Consultez et gérez toutes les questions</div>
     </div>
-
+ 
     <div class="filter-row">
       <div class="field">
         <label>Filtrer par faculté</label>
@@ -727,7 +901,7 @@
         </select>
       </div>
     </div>
-
+ 
     <div class="table-wrap">
       <div class="table-header">
         <div class="table-title">Questions</div>
@@ -745,7 +919,7 @@
   </div>
   <div class="form-card">
     <div class="form-card-title"><span class="dot"></span> Informations du module</div>
-
+ 
     <div class="form-full">
       <label>Année *</label>
       <select id="module-annee">
@@ -759,24 +933,24 @@
         <option value="7">7</option>
       </select>
     </div>
-
+ 
     <div class="form-full">
       <label>Nom du module *</label>
       <input type="text" id="module-nom" placeholder="Ex: Anatomie, Biochimie..." />
     </div>
-
+ 
     <div class="form-full">
       <label>Image (URL — optionnel)</label>
       <input type="url" id="module-img" placeholder="https://exemple.com/image.png" />
     </div>
-
+ 
     <div class="form-actions">
       <button class="btn-submit" onclick="soumettreModule()">✓ &nbsp;Enregistrer le module</button>
       <button class="btn-reset" onclick="resetModule()">Réinitialiser</button>
     </div>
   </div>
 </div>
-
+ 
 <div class="page" id="page-ajouter-cours">
   <div class="page-header">
     <div class="page-title">Ajouter un cours</div>
@@ -784,7 +958,7 @@
   </div>
   <div class="form-card">
     <div class="form-card-title"><span class="dot"></span> Informations du cours</div>
-
+ 
     <div class="form-full">
       <label>Année *</label>
       <select id="cours-annee" onchange="chargerModulesPourCours()">
@@ -798,26 +972,26 @@
         <option value="7">7</option>
       </select>
     </div>
-
+ 
     <div class="form-full">
       <label>Module *</label>
       <select id="cours-module" disabled>
         <option value="">— Sélectionner une année d'abord —</option>
       </select>
     </div>
-
+ 
     <div class="form-full">
       <label>Titre du cours *</label>
       <input type="text" id="cours-titre" placeholder="Ex: Introduction à l'anatomie..." />
     </div>
-
+ 
     <div class="form-actions">
       <button class="btn-submit" onclick="soumettreCours()">✓ &nbsp;Enregistrer le cours</button>
       <button class="btn-reset" onclick="resetCours()">Réinitialiser</button>
     </div>
   </div>
 </div>
-
+ 
 <div class="page" id="page-gerer-cours">
   <div class="page-header">
     <div class="page-title">Gérer les cours</div>
@@ -855,7 +1029,7 @@
     </div>
   </div>
 </div>
-
+ 
 <div class="page" id="page-gerer-modules">
   <div class="page-header">
     <div class="page-title">Gérer les modules</div>
@@ -885,12 +1059,11 @@
     </div>
   </div>
 </div>
-
+ 
 </main>
-
+ 
 <!-- TOAST -->
 <div class="toast" id="toast"></div>
-
 <script>
 
   async function apiFetch(url, options = {}) {

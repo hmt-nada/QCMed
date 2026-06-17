@@ -681,13 +681,12 @@ const btnFaute = document.getElementById("btnfaute");
   const extraMsg = document.getElementById("extraMsg");
 
   // Ouvrir le modal
-   btnFaute.onclick = () => {
+  btnFaute.onclick = () => {
   modal.style.display = "flex";
   modal.style.justifyContent = "center";
   modal.style.alignItems = "center";
 };
-    
-   
+      
   // Fermer le modal (croix)
   closeModal.onclick = () => closeReportModal();
 
