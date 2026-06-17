@@ -845,14 +845,14 @@
       <div class="form-full">
         <label>Bonne réponse *</label>
         <div class="bonne-reponse-wrap">
-          <span>Sélectionner :</span>
-          <label class="radio-choice"><input type="radio" name="bonne_rep" value="A" /> <label>A</label></label>
-          <label class="radio-choice"><input type="radio" name="bonne_rep" value="B" /> <label>B</label></label>
-          <label class="radio-choice"><input type="radio" name="bonne_rep" value="C" /> <label>C</label></label>
-          <label class="radio-choice"><input type="radio" name="bonne_rep" value="D" /> <label>D</label></label>
-          <label class="radio-choice"><input type="radio" name="bonne_rep" value="E" /> <label>E</label></label>
-          <label class="radio-choice"><input type="radio" name="bonne_rep" value="F" /> <label>F</label></label>
-        </div>
+  <span>Sélectionner :</span>
+  <label class="radio-choice"><input type="checkbox" name="bonne_rep" value="A" /> <label>A</label></label>
+  <label class="radio-choice"><input type="checkbox" name="bonne_rep" value="B" /> <label>B</label></label>
+  <label class="radio-choice"><input type="checkbox" name="bonne_rep" value="C" /> <label>C</label></label>
+  <label class="radio-choice"><input type="checkbox" name="bonne_rep" value="D" /> <label>D</label></label>
+  <label class="radio-choice"><input type="checkbox" name="bonne_rep" value="E" /> <label>E</label></label>
+  <label class="radio-choice"><input type="checkbox" name="bonne_rep" value="F" /> <label>F</label></label>
+</div>
       </div>
 
       <div class="form-full" style="margin-top:16px;">
@@ -1490,12 +1490,12 @@ async function soumettreQuestion() {
   const choix_f     = document.getElementById('choix_f').value.trim();
   const image_url   = document.getElementById('image_url').value.trim();
   const explication = document.getElementById('explication').value.trim();
-  const bonneRep    = document.querySelector('input[name="bonne_rep"]:checked')?.value;
+  const bonneReps = [...document.querySelectorAll('input[name="bonne_rep"]:checked')].map(cb => cb.value);
 
   if (!faculteId || !coursId) return showToast('Sélectionnez une faculté et un cours', 'error');
   if (!enonce)   return showToast('L\'énoncé est obligatoire', 'error');
   if (!choix_a || !choix_b || !choix_c) return showToast('Les choix A, B et C sont obligatoires', 'error');
-  if (!bonneRep) return showToast('Sélectionnez la bonne réponse', 'error');
+  if (bonneReps.length === 0) return showToast('Sélectionnez au moins une bonne réponse', 'error');
 
   try {
     const res = await apiFetch('/api/admin/questions', {
@@ -1509,7 +1509,7 @@ async function soumettreQuestion() {
         choix_d: choix_d || null,
         choix_e: choix_e || null,
         choix_f: choix_f || null,
-        bonne_reponse: bonneRep,
+        bonne_reponse: bonneReps.join(','),
         explication:  explication || null,
         image_url:    image_url   || null
       })
