@@ -75,8 +75,38 @@ autreFaculte.addEventListener('input', () => {
   setFieldError(autreFaculte, false);
 });
 
+// ─── Année (synchronisation avec /api/config/years) ─────────
+if (annee && annee.value) {
+  annee.classList.add('valide');
+}
+
+fetch('/api/config/years')
+  .then(res => res.json())
+  .then(data => {
+    if (data.success && Array.isArray(data.availableYears) && data.availableYears.length > 0) {
+      const currentValue = annee.value;
+      annee.innerHTML = '';
+      data.availableYears.forEach(y => {
+        const opt = document.createElement('option');
+        opt.value = String(y.value);
+        opt.textContent = y.label;
+        if (String(y.value) === String(data.defaultYear || currentValue || '1')) {
+          opt.selected = true;
+        }
+        annee.appendChild(opt);
+      });
+      annee.classList.add('valide');
+      setFieldError(annee, false);
+    }
+  })
+  .catch(err => {
+    // En cas d'indisponibilité réseau, l'option statique du HTML prend le relais
+    console.warn('Config années inaccessible, conservation des options HTML :', err);
+  });
+
 annee.addEventListener('change', () => {
   setFieldError(annee, false);
+  if (annee.value) annee.classList.add('valide');
 });
 
 // ─── Email ────────────────────────────────────────────

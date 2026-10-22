@@ -124,10 +124,17 @@
           </div>
           <div class="field-float field-float--select">
             <select class="field" id="annee" name="annee">
-              <option value="" disabled selected hidden></option>
-              <option value="1">1ère Année</option>
+              <!-- Actuellement, seule la 1ère année est disponible (configurée dans BACKEND/config/academicYears.js) -->
+              <!-- Pour réactiver les autres années plus tard : décommenter les options ci-dessous ou laisser l'API /api/config/years les charger -->
+              <option value="1" selected>1ère Année</option>
+              <!--
               <option value="2">2ème Année</option>
               <option value="3">3ème Année</option>
+              <option value="4">4ème Année</option>
+              <option value="5">5ème Année</option>
+              <option value="6">6ème Année</option>
+              <option value="7">7ème Année</option>
+              -->
             </select>
             <label class="float-label float-label--select" for="annee">Année <span class="req">*</span></label>
             <svg class="select-arrow" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24">

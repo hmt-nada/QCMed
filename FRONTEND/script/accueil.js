@@ -100,6 +100,13 @@ const titre= document.getElementById('inscrivez');
 
   function onUtilisateurCharge(user) {
   document.getElementById("pseudo2").textContent = user.pseudo;
+
+  // Affichage de la bannière si l'utilisateur est inscrit en 2ème année ou plus
+  const fallbackBanner = document.getElementById("annee-fallback-banner");
+  if (fallbackBanner && (user.isFallbackYear || (user.annee && String(user.annee) !== '1'))) {
+    fallbackBanner.style.display = "flex";
+  }
+
   afficherModules();
   const mobUsername = document.getElementById("mobUsername");
 if (mobUsername) mobUsername.textContent = user.pseudo;

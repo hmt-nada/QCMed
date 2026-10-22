@@ -11,5 +11,6 @@ router.post('/recover-password', auth.recoverPassword);
 router.post  ('/deconnexion', auth.deconnexion);
 router.delete('/suppression', auth.suppression);
 router.get('/utilisateur', auth.utilisateur);
+router.get('/config/years', auth.getAvailableYears);
 
 module.exports = router;

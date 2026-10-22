@@ -1,5 +1,12 @@
 const db = require('../config/db');
 const bcrypt = require('bcrypt');
+const {
+  AVAILABLE_YEARS,
+  DEFAULT_YEAR,
+  YEAR_LABELS,
+  getEffectiveYear,
+  isYearAvailable,
+} = require('../config/academicYears');
 
 const ADMIN_EMAILS = (process.env.ADMIN_EMAILS || '')
   .split(',')
@@ -22,6 +29,13 @@ exports.inscription = async (req, res) => {
 
   if (!nom || !prenom || !faculte || !email || !password || !anneeValue) {
     return res.status(400).json({ success: false, message: 'Tous les champs sont requis.' });
+  }
+
+  if (!isYearAvailable(anneeValue)) {
+    return res.status(400).json({
+      success: false,
+      message: 'Seule la 1ère année est disponible pour le moment.'
+    });
   }
 
   try {
@@ -304,13 +318,31 @@ exports.utilisateur = (req, res) => {
   }
 
   const u = req.session.user;
+  const effectiveAnnee = getEffectiveYear(u);
+  const rawNum = parseInt(u.annee, 10);
+  const isFallbackYear = Boolean(u.annee && !AVAILABLE_YEARS.includes(rawNum));
+
   return res.json({
     success: true,
     utilisateur: {
-      pseudo:  u.pseudo,
-      avatar:  u.avatar,
-      annee:   u.annee,
-      faculte: u.faculte
+      pseudo:         u.pseudo,
+      avatar:         u.avatar,
+      annee:          u.annee,
+      effectiveAnnee: effectiveAnnee,
+      isFallbackYear: isFallbackYear,
+      faculte:        u.faculte
     }
+  });
+};
+
+// ─── Configuration des années disponibles ─────────────────────────
+exports.getAvailableYears = (req, res) => {
+  return res.json({
+    success: true,
+    availableYears: AVAILABLE_YEARS.map(y => ({
+      value: String(y),
+      label: YEAR_LABELS[y] || `${y}ème Année`
+    })),
+    defaultYear: String(DEFAULT_YEAR)
   });
 };

@@ -1,4 +1,5 @@
 const db = require('../config/db');
+const { getEffectiveYear } = require('../config/academicYears');
 
 function normalizeImageUrl(imageUrl) {
   if (!imageUrl || imageUrl === 'null') return null;
@@ -10,17 +11,18 @@ function normalizeImageUrl(imageUrl) {
 
 // ─── Modules selon l'année de l'utilisateur ───────────────────────
 exports.getModules = async (req, res) => {
-  const annee = req.session?.user?.annee;
-  if (!annee) {
+  if (!req.session?.user) {
     return res.status(401).json({ success: false, message: 'Non authentifié.' });
   }
+
+  const annee = getEffectiveYear(req.session.user);
 
   try {
     const result = await db.query(
       'SELECT id, nom, img FROM modules WHERE annee = $1 ORDER BY nom',
       [annee]
     );
-    return res.json({ success: true, modules: result.rows });
+    return res.json({ success: true, modules: result.rows, effectiveAnnee: annee });
 
   } catch (err) {
     console.error('❌ Erreur get-modules :', err.message);
@@ -63,10 +65,11 @@ function melanger(array) {
 }
 // ─── Stats : nombre de cours par module ───────────────────────────
 exports.coursParModule = async (req, res) => {
-  const annee = req.session?.user?.annee;
-  if (!annee) {
+  if (!req.session?.user) {
     return res.status(401).json({ success: false, message: 'Non authentifié.' });
   }
+
+  const annee = getEffectiveYear(req.session.user);
 
   try {
     const result = await db.query(

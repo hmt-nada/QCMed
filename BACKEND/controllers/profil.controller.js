@@ -1,5 +1,6 @@
 const db     = require('../config/db');
 const bcrypt = require('bcrypt');
+const { isYearAvailable } = require('../config/academicYears');
 
 // ─── Changement d'email ───────────────────────────────────────────
 exports.changeMail = async (req, res) => {
@@ -132,7 +133,11 @@ exports.update = async (req, res) => {
     return res.status(401).json({ success: false, message: 'Non authentifié.' });
   }
 
-  const { nom, prenom, pseudo, faculte, avatar } = req.body;
+  const { nom, prenom, pseudo, faculte, avatar, annee } = req.body;
+
+  if (annee !== undefined && !isYearAvailable(annee)) {
+    return res.status(400).json({ success: false, error: 'Seule la 1ère année est disponible pour le moment.' });
+  }
 
   try {
     const result = await db.query(
