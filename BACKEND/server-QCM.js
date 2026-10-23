@@ -1,12 +1,16 @@
+const path = require('path');
+require('dotenv').config({ path: path.resolve(__dirname, '.env') });
+
 const express = require("express");
 const cors = require("cors");
 const session = require("express-session");
 const db = require("./config/db");
-const bcrypt = require("bcrypt");
-const cron = require("node-cron");
-const crypto = require("crypto");
-const path = require('path');
-require('dotenv').config({ path: path.resolve(__dirname, '.env') });
+
+// ─── VALIDATION DE L'ENVIRONNEMENT ───────────────────────────────────────────
+if (!process.env.SESSION_SECRET) {
+  console.error("❌ ERREUR FATALE : La variable d'environnement SESSION_SECRET est obligatoire.");
+  process.exit(1);
+}
 
 // ─── CRÉATION DE L'APP (doit être avant tout app.use) ────────────────────────
 const app = express();
@@ -14,11 +18,11 @@ app.set("trust proxy", 1);
 
 // ─── MIDDLEWARES ──────────────────────────────────────────────────────────────
 app.use(session({
-  secret: process.env.SESSION_SECRET || "hamitouchenada",
+  secret: process.env.SESSION_SECRET,
   resave: false,
   saveUninitialized: false,
   cookie: {
-    secure: false,
+    secure: process.env.NODE_ENV === "production",
     httpOnly: true,
     sameSite: "lax",
     maxAge: 24 * 60 * 60 * 1000,
@@ -50,14 +54,6 @@ app.use('/api', favoriRoutes);
 
 const adminRoutes = require('./routes/admin');
 app.use('/api/admin', adminRoutes);
-
-// ─── EMAIL ────────────────────────────────────────────────────────────────────
-const {
-  envoyerEmailsignalemet,
-  envoyerEmailMerciUtilisateur,
-  envoyerEmailValidation,
-  envoyermailcontact
-} = require("./email");
 
 // Dans app.js — version améliorée (optionnel)
 const isAuthenticated = require('./middleware/isAuthenticated');

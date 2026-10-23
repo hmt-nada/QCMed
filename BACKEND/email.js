@@ -1,7 +1,7 @@
-const nodemailer = require("nodemailer");
 const sgMail = require('@sendgrid/mail');
-// Remplace par ta clé API
-sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+if (process.env.SENDGRID_API_KEY) {
+  sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+}
 async function envoyerEmailConfirmation(email, lien) {
 
   const msg = {
@@ -143,11 +143,10 @@ async function envoyerEmailMerciUtilisateur(emailUser) {
 }
 
 async function envoyerEmailsignalemet(emailUser, question, reponses, reponsesCorrectes, typeErreur, commentaire) {
+  const adminEmail = process.env.REPORT_EMAIL || (process.env.ADMIN_EMAILS ? process.env.ADMIN_EMAILS.split(',')[0].trim() : 'qcmed.2025@gmail.com');
   const msg ={
     from: 'QCMed <qcmed.2025@gmail.com>',
-
-    to: 'on_hamitouche@esi.dz' ,//email hamzi 
-
+    to: adminEmail,
     subject: 'Un signalement pour une faute dans une question ',
     html: `
       <div style="font-family: Arial, sans-serif; background-color: #f4f6f8; padding: 20px;">
